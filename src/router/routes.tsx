@@ -41,6 +41,11 @@ const Viewannouncements = lazy(() => import('../pages/announcements/view'));
 const CreateListing = lazy(() => import('../pages/listing/createListing'));
 const Statuses = lazy(() => import('../pages/statuses/create'));
 
+const Kpi = lazy(() => import('../pages/kpi/create'));
+const KPIDashboard = lazy(() => import('../pages/kpi/kpidashboard'));
+
+
+
 const routes = [
     {
         path: '/',
@@ -173,6 +178,19 @@ const routes = [
         layout: 'default',
     }, 
 
+    {
+        path: 'pages/kpi/create',
+        type: 'protected',
+        element: <Kpi />, 
+        layout: 'default',
+    },
+
+    {
+        path: 'pages/kpi/kpi_dashboard',
+        type: 'protected',
+        element: <KPIDashboard />, 
+        layout: 'default',
+    },
 
     {
         path: '/analytics',

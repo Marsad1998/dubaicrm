@@ -105,22 +105,21 @@ const NavBar = () => {
             </li>
             {(permissions.includes('create activities') || role === 'super admin') && (
                 <li className="menu nav-item relative">
-                        <button type="button" className="nav-link">
-                            <div className="flex items-center">
-                                <IconMenuDatatables className="shrink-0" />
-                                <span className="px-1">{t('Agent Diary')}</span>
-                            </div>
-                            <div className="right_arrow">
-                                <IconCaretDown />
-                            </div>
-                        </button>
-                        <ul className="sub-menu">
-                            <li> <NavLink to="/pages/activities/activities">{t('Meeting Request')}</NavLink> </li>
-                             <li> <NavLink to="/pages/activities/activities_request">{t('Check Requests')}</NavLink> </li>
-                        </ul>
+                    <button type="button" className="nav-link">
+                        <div className="flex items-center">
+                            <IconMenuDatatables className="shrink-0" />
+                            <span className="px-1">{t('Agent Diary')}</span>
+                        </div>
+                        <div className="right_arrow"><IconCaretDown /></div>
+                    </button>
+                    <ul className="sub-menu">
+                        <li><NavLink to="/pages/activities/activities">{t('Meeting Request')}</NavLink></li>
+                        <li> <NavLink to="/pages/activities/activities_request">{t('Check Requests')}</NavLink></li>
+                    </ul>
                 </li>   
             )}
-            {(permissions.includes('create subscriber') || role === 'super admin') && (
+
+            {/* {(permissions.includes('create subscriber') || role === 'super admin') && (
             <li className="menu nav-item relative">
                     <button type="button" className="nav-link">
                         <div className="flex items-center">
@@ -140,7 +139,8 @@ const NavBar = () => {
                         </li>
                     </ul>
             </li>
-            )}
+            )} */}
+
             {(permissions.includes('create subscriber') || role === 'super admin') && (
                 <li className="menu nav-item relative">
                         <button type="button" className="nav-link">
@@ -178,6 +178,7 @@ const NavBar = () => {
                 <li> <NavLink to="/pages/announcements/view"> <span>{t('View Announcements')}</span> </NavLink> </li>
                 </ul>
             </li>
+
             {(permissions.includes('create stages') || role === 'super admin') && (
                 <li className="menu nav-item relative">
                     <button type="button" className="nav-link">
@@ -190,7 +191,19 @@ const NavBar = () => {
                     </ul>
                 </li>
             )} 
-
+            {(permissions.includes('create stages') || role === 'super admin') && (
+                <li className="menu nav-item relative">
+                    <button type="button" className="nav-link">
+                    <div className="flex items-center">
+                        <IconMenuElements className="shrink-0" /> <span className="px-1">{t(`kpi'S`)}</span></div>
+                    <div className="right_arrow"> <IconCaretDown /> </div>
+                    </button>
+                    <ul className="sub-menu">
+                        <li> <NavLink to="/pages/kpi/create"> <span>{t(`kpi'S Task`)}</span> </NavLink> </li>
+                        <li> <NavLink to="/pages/kpi/kpi_dashboard"> <span>{t(`kpi'S Dashboard`)}</span> </NavLink> </li>
+                    </ul>
+                </li>
+            )} 
         </>
     );
 };

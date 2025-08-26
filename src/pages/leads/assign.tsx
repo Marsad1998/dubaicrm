@@ -168,9 +168,7 @@ const Assign = () => {
                     toast.success('Lead removed successfully');
                     setSelectedRecords([]);
                     setDisable(true);
-                } else {
-                    toast.error('Failed to remove leads. Please try again.');
-                }
+                } else { toast.error('Failed to remove leads. Please try again.'); }
             } catch (error) {
                 toast.error('An error occurred while removing leads.');
             }

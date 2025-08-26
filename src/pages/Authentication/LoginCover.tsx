@@ -354,34 +354,22 @@ const LoginCover = () => {
                             </div>
                         </div>
                     </div>
-                    
-                    {/* Right side - Login form */}
                     <div className="relative flex w-full flex-col items-center justify-center gap-6 px-4 pb-16 pt-6 sm:px-6 lg:max-w-[667px]">
                         <div className="flex w-full max-w-[440px] items-center gap-2 lg:absolute lg:end-6 lg:top-6 lg:max-w-full">
                             <Link to="/" className="w-8 block lg:hidden">
                                 <img src="/assets/images/logo.svg" alt="Logo" className="mx-auto w-10" />
                             </Link>
                         </div>
-                        
                         <div className="w-full max-w-[440px] lg:mt-16">
                             <div className="mb-10">
                                 <h1 className="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">Sign in</h1>
                                 <p className="text-base font-bold leading-normal text-white-dark">Enter your email and password to login</p>
                             </div>
-                            
-                            {/* Login form */}
                             <form encType="multipart/form-data" className="space-y-5 dark:text-white" onSubmit={submitForm} ref={formRef}>
-                                {/* Email field */}
                                 <div>
                                     <label htmlFor="Email">Email</label>
                                     <div className="relative text-white-dark">
-                                        <input 
-                                            id="Email" 
-                                            type="email" 
-                                            name="client_user_email" 
-                                            placeholder="Enter Email" 
-                                            className="form-input ps-10 placeholder:text-white-dark"
-                                            required
+                                        <input id="Email" type="email" name="client_user_email" placeholder="Enter Email" className="form-input ps-10 placeholder:text-white-dark"required
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2">
                                             <IconMail fill={true} />
