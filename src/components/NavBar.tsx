@@ -191,19 +191,33 @@ const NavBar = () => {
                     </ul>
                 </li>
             )} 
-            {(permissions.includes('create stages') || role === 'super admin') && (
-                <li className="menu nav-item relative">
-                    <button type="button" className="nav-link">
+            
+            
+            <li className="menu nav-item relative">
+                <button type="button" className="nav-link">
                     <div className="flex items-center">
-                        <IconMenuElements className="shrink-0" /> <span className="px-1">{t(`kpi'S`)}</span></div>
+                    <IconMenuElements className="shrink-0" /> 
+                    <span className="px-1">{t(`kpi'S`)}</span>
+                    </div>
                     <div className="right_arrow"> <IconCaretDown /> </div>
-                    </button>
-                    <ul className="sub-menu">
-                        <li> <NavLink to="/pages/kpi/create"> <span>{t(`kpi'S Task`)}</span> </NavLink> </li>
-                        <li> <NavLink to="/pages/kpi/kpi_dashboard"> <span>{t(`kpi'S Dashboard`)}</span> </NavLink> </li>
-                    </ul>
-                </li>
-            )} 
+                </button>
+                <ul className="sub-menu">
+                    {(permissions.includes('kpi create') || role === 'super admin') && (
+                    <li> 
+                        <NavLink to="/pages/kpi/create"> 
+                        <span>{t(`kpi'S Task`)}</span> 
+                        </NavLink> 
+                    </li>
+                    )}
+                    {(permissions.includes('kpi dashboard') || role === 'super admin') && (
+                    <li> 
+                        <NavLink to="/pages/kpi/kpi_dashboard"> 
+                        <span>{t(`kpi'S Dashboard`)}</span> 
+                        </NavLink> 
+                    </li>
+                    )}
+                </ul>
+            </li>
         </>
     );
 };

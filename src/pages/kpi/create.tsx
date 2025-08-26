@@ -33,6 +33,7 @@ const Create = () => {
     const [totalRecords, setTotalRecords] = useState(0);
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
     const [agents, setAgents] = useState<any[]>([]);
+    const [agent_id, setAgentId] = useState<any | null>(null);
 
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -57,7 +58,13 @@ const Create = () => {
             if (response.data) {
                 setUsers(response.data.data || []); 
                 setTotalRecords(response.data.total || 0);
-                 setAgents(response.data.agents || []);
+
+                const agents = response.data.agents || [];
+                const headOptions = agents.map((head: any) => ({
+                    value: head.client_user_id,
+                    label: ( <> {head.client_user_name}{' '}<span className='badge bg-success rounded-full text-white ml-2'>{head.client_user_designation}</span></>)
+                }));
+                setAgents(headOptions);
             }
         } catch (error: any) {
             if (error.response?.status === 403) {
@@ -65,6 +72,10 @@ const Create = () => {
             }
             showServerError();
         }
+    };
+
+    const handleTeamHeadChange = (selectedOption: any) => {
+        setAgentId(selectedOption);
     };
 
     const formatOptionLabel = ({ label, customLabel }: any) => {
@@ -122,24 +133,29 @@ const Create = () => {
                 title: 'Server Error',
             });
     };
-    const handleEdit = async (statuses: any) => {
+    const handleEdit = async (data: any) => {
+        console.log(data);
+        
         if (combinedRef.current.userformRef) {
             const form = combinedRef.current.userformRef;
-            form.id.value = statuses.id || '';
-            form.name.value = statuses.name || '';
-            form.type.value = statuses.type || '';
-            form.status_old_id.value = statuses.status_old_id || '';
-            form.sort_order.value = statuses.sort_order || '';
-            form.color.value = statuses.color || '';
-            
-            
-            // setIconState(statuses.icon !== null ? Number(statuses.icon) : null);
-            setTimeout(() => {
-                const colorInput = form.querySelector('input[type="color"]');
-                if (colorInput) {
-                    colorInput.click(); 
-                }
-            }, 100);
+            form.id.value = data.id || '';
+            form.title.value = data.title || '';
+            form.title.value = data.title || '';
+            let headOptions = [];
+            let userteam = data.agent;
+            if (userteam) {
+                headOptions = [{
+                    value: userteam.client_user_id,
+                    label: userteam.client_user_name + ' (' + userteam.client_user_designation + ')',
+                }];
+            } else {
+                headOptions = [{ value: null, label: 'No Team Head', }];
+            }
+            setAgentId(headOptions); 
+
+            form.start_date.value = data.start_date || '';
+            form.end_date.value = data.end_date || '';
+            form.description.value = data.description || '';
         }
     };
 
@@ -302,18 +318,12 @@ const Create = () => {
                                 </div>
                                 <div className="form-group sm:col-span-2">
                                     <label htmlFor="">Send to</label>
-                                    <Select
-                                            placeholder="Select an option"
-                                            name="client_user_id"
-                                            className="cursor-pointer custom-multiselect z-10"
-                                            formatOptionLabel={formatOptionLabel}
-                                            getOptionLabel={(option) => option.label}
-                                            getOptionValue={(option) => option.value}
-                                            options={agents.map(agent => ({
-                                                value: agent.client_user_id,
-                                                label: agent.client_user_name
-                                            }))}
-                                    />
+                                    <Select name="client_user_id" placeholder="Select an Team" options={agents || []} value={agent_id} onChange={handleTeamHeadChange} isClearable={true}/>
+                                    {errors.client_user_id && (
+                                        <span className="text-red-500 text-sm">
+                                            {errors.client_user_id}
+                                        </span>
+                                    )}
                                 </div>
                                  <div className="form-group sm:col-span-2">
                                     <label htmlFor="name">Start Date</label>
