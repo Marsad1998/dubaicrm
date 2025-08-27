@@ -159,7 +159,7 @@ const Create = () => {
         }
     };
 
-    const handleDelete = async (status: any) => {
+    const handleDelete = async (item: any) => {
         const result = await Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
@@ -170,7 +170,7 @@ const Create = () => {
         });
         if (result.isConfirmed) {
             try {
-                const response = await apiClient.delete(endpoints.destoryApi + `/${status.id}`);
+                const response = await apiClient.delete(endpoints.destoryApi + `/${item.id}`);
                 if (response.status === 200 || response.status === 201) {
                     showSuccessToast('User deleted successfully');
                     fetchKpiLists(); 
@@ -290,11 +290,11 @@ const Create = () => {
             key: 'actions-column', 
             render: (item: any) => (
                 <div className="flex space-x-2">
-                    <button type="button" onClick={() => handleEdit(item)} className="btn px-1 py-0.5 rounded text-white bg-info" key={`edit-${item.client_user_id}`} 
+                    <button type="button" onClick={() => handleEdit(item)} className="btn px-1 py-0.5 rounded text-white bg-info" key={`edit-${item.id}`} 
                     >
                     <IconPencil />
                     </button>
-                    <button type="button" onClick={() => handleDelete(item)} className="btn px-1 py-0.5 rounded text-white bg-red-600" key={`delete-${item.client_user_id}`} 
+                    <button type="button" onClick={() => handleDelete(item)} className="btn px-1 py-0.5 rounded text-white bg-red-600" key={`delete-${item.id}`} 
                     >
                         <IconTrashLines />
                     </button>
@@ -351,7 +351,7 @@ const Create = () => {
                         <Table
                             columns={columns}
                             rows={users}
-                            title="All Leads Stages"
+                            title="All Kpi's"
                             idAccessor="id"
                             totalRecords={totalRecords}
                             currentPage={page}
