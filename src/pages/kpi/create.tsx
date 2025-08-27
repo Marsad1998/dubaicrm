@@ -21,7 +21,7 @@ const endpoints = {
     createApi: `${getBaseUrl()}/kpi/create`,
     listApi: `${getBaseUrl()}/kpi/show`,
     destoryApi: `${getBaseUrl()}/kpi/delete`,
-    updateStatusApi: `${getBaseUrl()}/kpi/update_kpi`,
+    updateStatusApi: `${getBaseUrl()}/kpi/update`,
 };
 
 const Create = () => {
@@ -38,6 +38,7 @@ const Create = () => {
     const [agents, setAgents] = useState<any[]>([]);
     const [agent_id, setAgentId] = useState<any | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [kpiId, kpiIdQuery] = useState('');
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedKpi, setSelectedKpi] = useState<any>(null);
@@ -462,8 +463,8 @@ const Create = () => {
                                                 className="form-select w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                             >
                                                 <option value="">Select action...</option>
-                                                <option value="approve">Approve</option>
-                                                <option value="reject">Reject</option>
+                                                <option value="3">Approve</option>
+                                                <option value="4">Reject</option>
                                             </select>
                                             {modalErrors.action && (
                                                 <span className="text-red-500 text-sm">{modalErrors.action}</span>
@@ -506,7 +507,7 @@ const Create = () => {
                         </div>
                     </div>
                 </Dialog>
-                 </Transition>
+                </Transition>
 
             </div>
         </form>
