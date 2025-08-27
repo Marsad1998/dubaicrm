@@ -225,14 +225,14 @@ const Create = () => {
         if (!action) newErrors.action = 'Action is required';
         if (!response) newErrors.response = 'Response is required';
         if (Object.keys(newErrors).length > 0) { setModalErrors(newErrors); return; }
-
         try { 
             const formData = new FormData();
             formData.append('action', action);
-            // formData.append('response', response);
-            const response = await apiClient.post(`${endpoints.updateStatusApi}/${selectedKpi.id}`, formData);
-            if (response.status === 200 || response.status === 201) {
-                showSuccessToast(response.data.message);
+            formData.append('aprove_reject_note', response);
+            formData.append('client_user_id', selectedKpi?.agent?.client_user_id || '');
+            const result = await apiClient.post(`${endpoints.updateStatusApi}/${selectedKpi.id}`, formData);
+            if (result.status === 200 || result.status === 201) {
+                showSuccessToast(result.data.message);
                 closeModal();
                 fetchKpiLists(); 
             }
@@ -340,7 +340,7 @@ const Create = () => {
                     >
                         <IconTrashLines />
                     </button>
-                    {item.status === 2 && ( // Only show if status is "KPI Task Done (User)"
+                    {item.status === 2 && (
                         <>
                             <button 
                                 type="button" 
@@ -457,11 +457,7 @@ const Create = () => {
                                     <div className="mt-6 space-y-5">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Action</label>
-                                            <select 
-                                                value={action} 
-                                                onChange={(e) => setAction(e.target.value)}
-                                                className="form-select w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            >
+                                            <select  value={action} onChange={(e) => setAction(e.target.value)} className="form-select w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                 <option value="">Select action...</option>
                                                 <option value="3">Approve</option>
                                                 <option value="4">Reject</option>

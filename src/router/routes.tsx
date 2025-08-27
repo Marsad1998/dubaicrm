@@ -40,11 +40,8 @@ const Viewannouncements = lazy(() => import('../pages/announcements/view'));
 // listing
 const CreateListing = lazy(() => import('../pages/listing/createListing'));
 const Statuses = lazy(() => import('../pages/statuses/create'));
-
 const Kpi = lazy(() => import('../pages/kpi/create'));
 const KPIDashboard = lazy(() => import('../pages/kpi/kpidashboard'));
-
-
 
 const routes = [
     {

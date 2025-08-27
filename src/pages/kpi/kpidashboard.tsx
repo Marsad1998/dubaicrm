@@ -18,9 +18,8 @@ import Toast from '../../services/toast';
 
 const endpoints = {
     listApi   : `${getBaseUrl()}/kpi/show`,
-    aprovalActivitesApi: `${getBaseUrl()}/kpi/update`,
+    markDoneApi: `${getBaseUrl()}/kpi/mark_done`,
 };
-
 
 const KPIDashboard = () => {
     const dispatch = useDispatch();
@@ -34,8 +33,7 @@ const KPIDashboard = () => {
     const toast = Toast();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedDescription, setSelectedDescription] = useState("");
-
-
+    
     useEffect(() => {
         if(!useReff.current){
             dispatch(setPageTitle('KPI Request'));
@@ -81,8 +79,10 @@ const KPIDashboard = () => {
         toast.fire({ icon: type, title: msg, padding: '10px 20px', });
     };
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
-    const Approve = async (activites:any) => {
-        const response = await apiClient.post(endpoints.aprovalActivitesApi, activites);
+
+
+    const MarkDone = async (kpis:any) => {
+        const response = await apiClient.post(endpoints.markDoneApi + `/${kpis.id}`);
         if (response.status === 200 || response.status === 201) {
             fetchKpis(selectedTab);
             setErrors({});
@@ -248,17 +248,19 @@ const KPIDashboard = () => {
                                                             {activity.start_date} - {activity.end_date}
                                                         </span>
                                                     </div>
-                                                    <div className="flex justify-end">
+                                                    <div className="flex justify-end items-center space-x-2">
                                                         {activity.status === 1 && (
-                                                            <button 
-                                                                onClick={() => Approve(activity)} 
-                                                                className="btn btn-success btn-sm flex items-center space-x-1"
-                                                            >
+                                                            <>
+                                                            <span className="text-[12px] text-gray-500">
+                                                                Mark done after Complate task.
+                                                            </span>
+                                                            <button onClick={() => MarkDone(activity)} className="btn btn-info btn-sm flex items-center space-x-1">
                                                                 <IconStar className="w-4 h-4" />
-                                                                <span>Mark Approved</span>
+                                                                <span>Mark Done</span>
                                                             </button>
+                                                            </>
                                                         )}
-                                                    </div>
+                                                        </div>
                                                 </div>
                                             </div>
                                         </div>
