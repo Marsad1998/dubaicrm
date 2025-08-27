@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../slices/themeConfigSlice';
 import Swal from 'sweetalert2';
@@ -13,6 +13,9 @@ import IconPencil from '../../components/Icon/IconPencil';
 import Table from '../../components/Table';
 import { AppDispatch, IRootState } from '../../store';
 import '../dashboard/dashboard.css'; 
+import { Dialog, Transition } from '@headlessui/react';
+import IconChecks from '../../components/Icon/IconChecks';
+import IconChatDot from '../../components/Icon/IconChatDot';
 
 const endpoints = {
     createApi: `${getBaseUrl()}/kpi/create`,
@@ -34,8 +37,14 @@ const Create = () => {
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
     const [agents, setAgents] = useState<any[]>([]);
     const [agent_id, setAgentId] = useState<any | null>(null);
-
     const [searchQuery, setSearchQuery] = useState('');
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedKpi, setSelectedKpi] = useState<any>(null);
+    const [action, setAction] = useState<string>('');
+    const [response, setResponse] = useState<string>('');
+    const [modalErrors, setModalErrors] = useState<Record<string, string>>({});
+
 
     useEffect(() => {
         if (!requestMade.current) { dispatch(setPageTitle('Create User')); requestMade.current = true; }
@@ -58,7 +67,6 @@ const Create = () => {
             if (response.data) {
                 setUsers(response.data.data || []); 
                 setTotalRecords(response.data.total || 0);
-
                 const agents = response.data.agents || [];
                 const headOptions = agents.map((head: any) => ({
                     value: head.client_user_id,
@@ -89,10 +97,6 @@ const Create = () => {
                 const formData = new FormData(combinedRef.current.userformRef);
                 const kpiId = formData.get('id');
                 const response = kpiId ? await apiClient.post(`${endpoints.createApi}/${kpiId}`, formData) : await apiClient.post(endpoints.createApi, formData);
-
-                console.log(response, 'response');
-
-
                 if (response.status === 200 || response.status === 201) {
                     showSuccessToast(response.data.message);
                     fetchKpiLists();
@@ -133,9 +137,7 @@ const Create = () => {
                 title: 'Server Error',
             });
     };
-    const handleEdit = async (data: any) => {
-        console.log(data);
-        
+    const handleEdit = async (data: any) => {   
         if (combinedRef.current.userformRef) {
             const form = combinedRef.current.userformRef;
             form.id.value = data.id || '';
@@ -172,7 +174,7 @@ const Create = () => {
             try {
                 const response = await apiClient.delete(endpoints.destoryApi + `/${item.id}`);
                 if (response.status === 200 || response.status === 201) {
-                    showSuccessToast('User deleted successfully');
+                    showSuccessToast('Kpi deleted successfully');
                     fetchKpiLists(); 
                 }
             } catch (error: any) {
@@ -183,10 +185,7 @@ const Create = () => {
             }
         }
     };
-    
-    const handleRoleChange = (selectedOption: any) => {
-        // setSelectedRole(selectedOption); 
-    };
+
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
@@ -201,6 +200,52 @@ const Create = () => {
         setPageSize(size);
         setPage(1);
     };
+
+     const openActionModal = (kpi: any) => {
+        setSelectedKpi(kpi);
+        setAction('');
+        setResponse('');
+        setModalErrors({});
+        setIsModalOpen(true);
+    };
+
+
+     const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedKpi(null);
+        setAction('');
+        setResponse('');
+        setModalErrors({});
+    };
+    
+    
+    const handleActionSubmit = async () => {
+        const newErrors: Record<string, string> = {};
+        if (!action) newErrors.action = 'Action is required';
+        if (!response) newErrors.response = 'Response is required';
+        if (Object.keys(newErrors).length > 0) { setModalErrors(newErrors); return; }
+
+        try { 
+            const formData = new FormData();
+            formData.append('action', action);
+            // formData.append('response', response);
+            const response = await apiClient.post(`${endpoints.updateStatusApi}/${selectedKpi.id}`, formData);
+            if (response.status === 200 || response.status === 201) {
+                showSuccessToast(response.data.message);
+                closeModal();
+                fetchKpiLists(); 
+            }
+        } catch (error: any) {
+            if (error.response?.data?.errors) {
+                setModalErrors(error.response.data.errors);
+            } else if (error.response?.status === 403) {
+                window.location.href = '/error';
+            } else {
+                showServerError();
+            }
+        }
+    };
+
 
     const columns = [
         { 
@@ -220,11 +265,6 @@ const Create = () => {
             sortable: true, 
         },
         { 
-            accessor: 'end_date', 
-            title: 'End Date', 
-            sortable: true, 
-        },
-        { 
             accessor: 'agent', 
             title: 'Responsible', 
             sortable: true, 
@@ -238,26 +278,26 @@ const Create = () => {
                 let progressWidth = '0%';
                 let bgColor = 'bg-gray-300';
                 let label = '';
-                switch(item.status) {
+                switch (item.status) {
                     case 1: 
                         progressWidth = '25%';
                         bgColor = 'bg-blue-500';
-                        label = 'Kpi Task Assigned';
+                        label = 'KPI Task In Progress (User)';
                         break;
                     case 2: 
-                        progressWidth = '50%';
+                        progressWidth = '75%';
                         bgColor = 'bg-yellow-400';
-                        label = 'Kpi Task In Progress';
+                        label = 'KPI Task Done (User)';
                         break;
                     case 3: 
                         progressWidth = '100%';
                         bgColor = 'bg-green-500';
-                        label = 'Kpi Task Completed';
+                        label = 'KPI Task Approved (Admin)';
                         break;
                     case 4: 
                         progressWidth = '100%';
                         bgColor = 'bg-red-500';
-                        label = 'Kpi Task is Cancelled';
+                        label = 'KPI Task Rejected (Admin)';
                         break;
                     default:
                         progressWidth = '0%';
@@ -283,6 +323,7 @@ const Create = () => {
                 );
             },
         },
+
         {
             accessor: 'actions',
             title: 'Actions',
@@ -298,6 +339,19 @@ const Create = () => {
                     >
                         <IconTrashLines />
                     </button>
+                    {item.status === 2 && ( // Only show if status is "KPI Task Done (User)"
+                        <>
+                            <button 
+                                type="button" 
+                                onClick={() => openActionModal(item)} 
+                                className="btn px-1 py-0.5 rounded text-white bg-green-600" 
+                                key={`approve-${item.id}`}
+                            >
+                                <IconChatDot />
+                            </button>
+                        </>
+                    )}
+
                 </div>
             ),
         },
@@ -368,6 +422,92 @@ const Create = () => {
                         />
                     </div>
                 </div> 
+
+
+
+                <Transition appear show={isModalOpen} as={Fragment}>
+                <Dialog as="div" open={isModalOpen} onClose={closeModal} className="relative z-50">
+                    <Transition.Child 
+                        as={Fragment} 
+                        enter="ease-out duration-300" 
+                        enterFrom="opacity-0" 
+                        enterTo="opacity-100" 
+                        leave="ease-in duration-200" 
+                        leaveFrom="opacity-100" 
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" />
+                    </Transition.Child>
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <Transition.Child 
+                                as={Fragment} 
+                                enter="ease-out duration-300" 
+                                enterFrom="opacity-0 scale-95" 
+                                enterTo="opacity-100 scale-100" 
+                                leave="ease-in duration-200" 
+                                leaveFrom="opacity-100 scale-100" 
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                                    <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                                        Aprove / Reject KPI
+                                    </Dialog.Title>
+                                    <div className="mt-6 space-y-5">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Action</label>
+                                            <select 
+                                                value={action} 
+                                                onChange={(e) => setAction(e.target.value)}
+                                                className="form-select w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            >
+                                                <option value="">Select action...</option>
+                                                <option value="approve">Approve</option>
+                                                <option value="reject">Reject</option>
+                                            </select>
+                                            {modalErrors.action && (
+                                                <span className="text-red-500 text-sm">{modalErrors.action}</span>
+                                            )}
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Response</label>
+                                            <textarea 
+                                                className="form-input w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                                                value={response} 
+                                                onChange={(e) => setResponse(e.target.value)}
+                                                rows={3}
+                                                placeholder="Enter your feedback here..."
+                                            />
+                                            {modalErrors.response && (
+                                                <span className="text-red-500 text-sm">{modalErrors.response}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-8 flex justify-end space-x-3">
+                                        <button 
+                                            type="button" 
+                                            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
+                                            onClick={closeModal}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
+                                            onClick={handleActionSubmit}
+                                        >
+                                            Submit
+                                        </button>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+                 </Transition>
+
             </div>
         </form>
     );

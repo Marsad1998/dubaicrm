@@ -4,25 +4,15 @@ import { Fragment, useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState } from '../../store';
-import Dropdown from '../../components/Dropdown';
 import { setPageTitle } from '../../slices/themeConfigSlice';
 import IconNotes from '../../components/Icon/IconNotes';
 import IconNotesEdit from '../../components/Icon/IconNotesEdit';
 import IconStar from '../../components/Icon/IconStar';
 import IconSquareRotated from '../../components/Icon/IconSquareRotated';
-import IconPlus from '../../components/Icon/IconPlus';
 import IconMenu from '../../components/Icon/IconMenu';
-import IconUser from '../../components/Icon/IconUser';
-import IconHorizontalDots from '../../components/Icon/IconHorizontalDots';
-import IconInfoCircle from '../../components/Icon/IconInfoCircle';
-import IconTrashLines from '../../components/Icon/IconTrashLines';
-import IconEye from '../../components/Icon/IconEye';
-import IconX from '../../components/Icon/IconX';
 import { getBaseUrl } from '../../components/BaseUrl';
 import apiClient from '../../utils/apiClient';
 import IconCalendar from '../../components/Icon/IconCalendar';
-import ApprovalLeaveModal from '../../components/ApprovalModal';
-import ApprovalModal from '../../components/ApprovalModal';
 import { useNavigate } from 'react-router-dom';
 import Toast from '../../services/toast';
 
@@ -31,52 +21,21 @@ const endpoints = {
     aprovalActivitesApi: `${getBaseUrl()}/kpi/update`,
 };
 
-interface Activity {
-    id: number;
-    client_user_id: number;
-    title: string;
-    description: string;
-    start_date: string;
-    end_date: string;
-    status: number;
-    added_by: number;
-    created_at: string;
-    updated_at: string;
-    agent: any;
-}
-
-interface Agent {
-    client_user_id: number;
-    client_user_name: string;
-    client_user_designation: string;
-}
-
-interface ApiResponse {
-    status: string;
-    message: string;
-    data: Activity[];
-    total: number;
-    agents: Agent[];
-}
 
 const KPIDashboard = () => {
     const dispatch = useDispatch();
-    const [activitiesList, setActivitiesList] = useState<Activity[]>([]);
-    const [agentsList, setAgentsList] = useState<Agent[]>([]);
+    const [kpiList, setkpiList] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const useReff = useRef(false);
-    const [isDeleteNoteModal, setIsDeleteNoteModal] = useState<any>(false);
     const [isShowNoteMenu, setIsShowNoteMenu] = useState<any>(false);
-    const [isViewNoteModal, setIsViewNoteModal] = useState<any>(false);
     const [selectedTab, setSelectedTab] = useState<any>('all');
-    const [selectedActivies, setSelectedActivies] = useState<any>(null);
-    const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
-    const [selectedActivites, setselectedActivites] = useState<any>(null);
-    const loginuser = useSelector((state: IRootState) => state.auth.user || {});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const navigate = useNavigate();
     const toast = Toast();
-    
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedDescription, setSelectedDescription] = useState("");
+
+
     useEffect(() => {
         if(!useReff.current){
             dispatch(setPageTitle('KPI Request'));
@@ -94,39 +53,23 @@ const KPIDashboard = () => {
     const fetchKpis = async (filter = 'all') => {
         setIsLoading(true);
         try {
-            const response = await apiClient.get<ApiResponse>(endpoints.listApi, {
-                params: { filter }
-            });
-            
+            const response = await apiClient.get(endpoints.listApi, { params: { filter } });
             if(response.status === 200 || response.status === 201){  
                 const data = response.data;
-                console.log('API Response:', data);
-
-                // Set activities and agents separately
-                setActivitiesList(data.data || []);
-                setAgentsList(data.agents || []);
+                setkpiList(data.data || []);
             }
         } catch (error) {
             console.error('Error fetching activities:', error);
             toast.error('Failed to fetch activities');
-            setActivitiesList([]);
-            setAgentsList([]);
+            setkpiList([]);
         } finally {
             setIsLoading(false);
         }
     }
-
-    // Helper function to get agents for an activity
-    const getAgentsForActivity = (activity: Activity) => {
-        // If the activity has a single agent (from the agent object)
-        if (activity.agent) {
-            return [activity.agent];
-        }
-        // If you need to handle multiple agents, you might need to adjust this
-        // based on your actual data structure
+    const getAgentsForActivity = (activity: any) => {
+        if (activity.agent) { return [activity.agent]; }
         return [];
     };
-
     const showMessage = (msg = '', type = 'success') => {
         const toast: any = Swal.mixin({ 
             toast: true, 
@@ -137,24 +80,27 @@ const KPIDashboard = () => {
         });
         toast.fire({ icon: type, title: msg, padding: '10px 20px', });
     };
-
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
-
     const Approve = async (activites:any) => {
-        console.log(activites);
-
         const response = await apiClient.post(endpoints.aprovalActivitesApi, activites);
         if (response.status === 200 || response.status === 201) {
             fetchKpis(selectedTab);
             setErrors({});
             Swal.fire('Success!', response.data.message, 'success');
-            setIsApprovalModalOpen(false); 
+            
         }
     }
+    const handleTabChange = (tab: string) => { setSelectedTab(tab); }
 
-    const handleTabChange = (tab: string) => {
-        setSelectedTab(tab);
-    }
+    const truncateText = (text: string, wordLimit = 20) => {
+        const words = text.split(" ");
+        return words.length > wordLimit ? words.slice(0, wordLimit).join(" ") + "..." : text;
+    };
+
+    const openModal = (description: string) => {
+        setSelectedDescription(description);
+        setModalOpen(true);
+    };
 
     return (
         <div>
@@ -256,28 +202,18 @@ const KPIDashboard = () => {
                         <div className="flex justify-center items-center sm:min-h-[300px] min-h-[400px]">
                              <span className="animate-[spin_2s_linear_infinite] border-4 border-[#f1f2f3] border-l-primary border-r-primary rounded-full w-10 h-10 inline-block align-middle m-auto mb-10"></span>
                         </div>
-                    ) : activitiesList && activitiesList.length > 0 ? (
+                    ) : kpiList && kpiList.length > 0 ? (
                         <div className="sm:min-h-[300px] min-h-[400px]">
                             <div className="grid 2xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5">
-                                {activitiesList.map((activity: Activity) => {
+                                {kpiList.map((activity: any) => {
+                                    const shortDescription = truncateText(activity.description, 20);
                                     const activityAgents = getAgentsForActivity(activity);
-                                    
                                     return (
                                         <div className={`panel pb-5 ${'dark:shadow-dark'}`} key={activity.id}>
                                             <div className="flex flex-col h-full">
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div className="flex items-center space-x-3">
-                                                        {activity.agent ? (
-                                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white font-semibold shadow-sm">
-                                                                {activity.agent.client_user_name?.charAt(0) || 'U'}
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">
-                                                                <IconUser className="w-5 h-5" />
-                                                            </div>
-                                                        )}
                                                         <div>
-                                                            <h3 className="font-semibold text-gray-800 dark:text-gray-100">{activity.title}</h3>
                                                             <div className="flex flex-wrap gap-2 mt-1">
                                                                 {activityAgents.length === 1 ? (
                                                                     <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
@@ -292,47 +228,26 @@ const KPIDashboard = () => {
                                                                 )}
                                                             </div>
                                                         </div>
+                                                    </div>                                                  
+                                                </div>
+                                                 <div className="flex-grow mb-6">
+                                                        <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">{activity.title}</h4>
+                                                        <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                                                            {shortDescription}
+                                                            {activity.description.split(" ").length > 20 && (
+                                                                <button onClick={() => openModal(activity.description)} className="text-info ml-2">
+                                                                    Read more
+                                                                </button>
+                                                            )}
+                                                        </p>
                                                     </div>
-                                                    
-                                                    {/* Status Badge - Always visible */}
-                                                    <span
-                                                        className={`text-xs font-medium px-2.5 py-1 rounded ${
-                                                            activity.status === 1
-                                                                ? 'bg-secondary text-white'
-                                                                : activity.status === 2
-                                                                ? 'bg-success text-white'
-                                                                : activity.status === 3
-                                                                ? 'bg-danger text-white'
-                                                                : 'bg-gray-500 text-white'
-                                                        }`}
-                                                    >
-                                                        {activity.status === 1
-                                                            ? 'Pending'
-                                                            : activity.status === 2
-                                                            ? 'Approved'
-                                                            : activity.status === 3
-                                                            ? 'Rejected'
-                                                            : 'Unknown'}
-                                                    </span>
-                                                </div>
-                                                
-                                                <div className="flex-grow mb-6">
-                                                    <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">{activity.title}</h4>
-                                                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                                                        {activity.description}
-                                                    </p>
-                                                </div>
-                                                
-                                                <div className="flex flex-col gap-3 mt-auto pt-3 border-t">
-                                                    {/* Dates div */}
+                                                    <div className="flex flex-col gap-3 mt-auto pt-3 border-t">
                                                     <div className="flex items-center text-sm">
                                                         <IconCalendar className="w-4 h-4 text-primary" />
                                                         <span className='text-primary ml-2'>
                                                             {activity.start_date} - {activity.end_date}
                                                         </span>
                                                     </div>
-                                                    
-                                                    {/* Button div */}
                                                     <div className="flex justify-end">
                                                         {activity.status === 1 && (
                                                             <button 
@@ -345,20 +260,6 @@ const KPIDashboard = () => {
                                                         )}
                                                     </div>
                                                 </div>
-                                                
-                                                {/* Additional info for approved/rejected requests */}
-                                                {activity.status !== 1 && (
-                                                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                                                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                                                            <IconInfoCircle className="w-4 h-4 mr-2" />
-                                                            <span>
-                                                                {activity.status === 2 
-                                                                    ? 'This request has been approved' 
-                                                                    : 'This request has been rejected'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
                                     );
@@ -374,6 +275,28 @@ const KPIDashboard = () => {
                     )}
                 </div>
             </div>
+            <Transition appear show={modalOpen} as={Fragment}>
+                <Dialog as="div" open={modalOpen} onClose={() => setModalOpen(false)}>
+                        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+                        <div className="fixed inset-0" />
+                        </Transition.Child>
+                        <div className="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto">
+                            <div className="flex items-start justify-center min-h-screen px-4">
+                                <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
+                                    <Dialog.Panel as="div" className="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg text-black dark:text-white-dark">
+                                        <div className="p-5">
+                                            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line"> {selectedDescription} </p>
+                                            <div className="flex justify-end items-center">
+                                                <button type="button" className="btn btn-outline-danger" onClick={() => setModalOpen(false)}> Close </button>
+                                            </div>
+                                        </div>
+                                    </Dialog.Panel>
+                                </Transition.Child>
+                            </div>
+                        </div>
+                </Dialog>
+            </Transition>
+
         </div>
     );
 };
