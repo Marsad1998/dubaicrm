@@ -45,6 +45,7 @@ const Create = () => {
     const [action, setAction] = useState<string>('');
     const [response, setResponse] = useState<string>('');
     const [modalErrors, setModalErrors] = useState<Record<string, string>>({});
+    const [statusFilter, setStatusFilter] = useState('');
 
 
     useEffect(() => {
@@ -55,14 +56,15 @@ const Create = () => {
         fetchKpiLists();
     }, [page, pageSize, sortStatus, searchQuery]);
 
-    const fetchKpiLists = async () => {
+    const fetchKpiLists = async (agent_id = null) => {
         try {
             const params = {
                 page,
                 per_page: pageSize,
                 sort_field: sortStatus.columnAccessor,
                 sort_order: sortStatus.direction,
-                search: searchQuery
+                search: searchQuery,
+                agent_id: agent_id
             };
             const response = await apiClient.get(endpoints.listApi, { params });
             if (response.data) {
@@ -189,6 +191,8 @@ const Create = () => {
 
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log(e.target.value);
+        
         setSearchQuery(e.target.value);
         setPage(1); 
     };
@@ -218,6 +222,11 @@ const Create = () => {
         setResponse('');
         setModalErrors({});
     };
+
+    const filterAgent = (agent_id: any) => {
+        setAgentId(agent_id);
+        fetchKpiLists(agent_id)
+    }
     
     
     const handleActionSubmit = async () => {
@@ -420,6 +429,12 @@ const Create = () => {
                             minHeight={200}
                             noRecordsText="No Stage found"
                             searchValue={searchQuery}
+                            selectFilter={{
+                                value: agent_id,
+                                onChange: (value) => filterAgent(value || null),
+                                options: agents,
+                                placeholder: 'Filter by agent'
+                            }}
                         />
                     </div>
                 </div> 
