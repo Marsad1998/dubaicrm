@@ -191,7 +191,6 @@ const KPIDashboard = () => {
                         </PerfectScrollbar>
                     </div>
                 </div>
-
                 <div className="panel flex-1 overflow-auto h-full">
                     <div className="pb-5">
                         <button type="button" className="xl:hidden hover:text-primary" onClick={() => setIsShowNoteMenu(!isShowNoteMenu)}>
