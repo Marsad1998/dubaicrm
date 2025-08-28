@@ -209,61 +209,85 @@ const KPIDashboard = () => {
                                     const shortDescription = truncateText(activity.description, 20);
                                     const activityAgents = getAgentsForActivity(activity);
                                     return (
-                                        <div className={`panel pb-5 ${'dark:shadow-dark'}`} key={activity.id}>
+                                        <div className={`panel pb-5 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 dark:shadow-dark transition hover:shadow-md`}
+                                            key={activity.id}
+                                            >
                                             <div className="flex flex-col h-full">
                                                 <div className="flex justify-between items-start mb-4">
-                                                    <div className="flex items-center space-x-3">
-                                                        <div>
-                                                            <div className="flex flex-wrap gap-2 mt-1">
-                                                                {activityAgents.length === 1 ? (
-                                                                    <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                                                        {activityAgents[0]?.client_user_name || 'Unknown Agent'}
-                                                                    </span>
-                                                                ) : (
-                                                                    activityAgents.map((agent: any) => (
-                                                                        <span key={agent.client_user_id} className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                                                            {agent.client_user_name}
-                                                                        </span>
-                                                                    ))
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>                                                  
-                                                </div>
-                                                 <div className="flex-grow mb-6">
-                                                        <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">{activity.title}</h4>
-                                                        <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                                                            {shortDescription}
-                                                            {activity.description.split(" ").length > 20 && (
-                                                                <button onClick={() => openModal(activity.description)} className="text-info ml-2">
-                                                                    Read more
-                                                                </button>
-                                                            )}
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex flex-col gap-3 mt-auto pt-3 border-t">
-                                                    <div className="flex items-center text-sm">
-                                                        <IconCalendar className="w-4 h-4 text-primary" />
-                                                        <span className='text-primary ml-2'>
-                                                            {activity.start_date} - {activity.end_date}
+                                                <div className="flex items-center space-x-3">
+                                                 <div>
+                                                    <div className="flex flex-wrap gap-2 mt-1">
+                                                        {activityAgents.length === 1 ? (
+                                                        <span className="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                                            {activityAgents[0]?.client_user_name || "Unknown Agent"}
                                                         </span>
-                                                    </div>
-                                                    <div className="flex justify-end items-center space-x-2">
-                                                        {activity.status === 1 && (
-                                                            <>
-                                                            <span className="text-[12px] text-gray-500">
-                                                                Mark done after Complate task.
+                                                        ) : (
+                                                        activityAgents.map((agent: any) => (
+                                                            <span
+                                                            key={agent.client_user_id}
+                                                            className="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
+                                                            >
+                                                            {agent.client_user_name}
                                                             </span>
-                                                            <button onClick={() => MarkDone(activity)} className="btn btn-info btn-sm flex items-center space-x-1">
-                                                                <IconStar className="w-4 h-4" />
-                                                                <span>Mark Done</span>
-                                                            </button>
-                                                            </>
+                                                        ))
                                                         )}
-                                                        </div>
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                                {activity.status === 3 && (
+                                                    <span className="px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full shadow-sm">
+                                                    ✅ Approved
+                                                    </span>
+                                                )}
+                                                {activity.status === 4 && (
+                                                    <span className="px-3 py-1 text-xs font-semibold bg-red-100 text-red-600 rounded-full shadow-sm">
+                                                    ❌ Rejected
+                                                    </span>
+                                                )}
+                                                </div>
+                                                <div className="flex-grow mb-6">
+                                                <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-2 text-lg">
+                                                    {activity.title}
+                                                </h4>
+                                                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                                                    {shortDescription}
+                                                    {activity.description.split(" ").length > 20 && (
+                                                    <button onClick={() => openModal(activity.description)} className="text-info ml-2 text-sm font-medium hover:underline"
+                                                    > Read more </button>
+                                                    )}
+                                                </p>
+                                                </div>
+                                                <div className="flex flex-col gap-3 mt-auto pt-3 border-t dark:border-gray-700">
+                                                <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                    <IconCalendar className="w-4 h-4 text-primary" />
+                                                    <span className="text-primary ml-2">
+                                                    {activity.start_date} - {activity.end_date}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between space-x-2">
+                                                    {(activity.status === 1 || activity.status === 4) && (
+                                                    <>
+                                                        <span
+                                                            className={`text-[11px] ${
+                                                                activity.status === 4 ? "text-red-500 font-semibold" : "text-gray-500"
+                                                            }`}
+                                                            >
+                                                            {activity.status === 4 ? "Your KPI was rejected. Try again.":" Mark done after completing task."}
+                                                            </span>
+                                                        <button
+                                                        onClick={() => MarkDone(activity)}
+                                                        className="btn btn-info btn-sm flex items-center space-x-1 shadow-sm hover:shadow-md"
+                                                        >
+                                                        <IconStar className="w-4 h-4" />
+                                                        <span>Mark Done</span>
+                                                        </button>
+                                                    </>
+                                                    )}
+                                                </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                            </div>
+
                                     );
                                 })}
                             </div>
