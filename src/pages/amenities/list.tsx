@@ -13,7 +13,7 @@ import Loader from '../../services/loader';
 import IconPlus from '../../components/Icon/IconPlus';
 import { Dialog, Transition } from '@headlessui/react';
 import IconX from '../../components/Icon/IconX';
-import '../blogs/blogs.css';
+import '../Blogs/blogs.css';
 import { showAmenities, destoryAmenities, storeAmenities, editAmenities } from '../../slices/amenitiesSlice';
 
 
