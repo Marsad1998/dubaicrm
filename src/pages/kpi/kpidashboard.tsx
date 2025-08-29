@@ -144,7 +144,7 @@ const KPIDashboard = () => {
                                     onClick={() => handleTabChange('today')}
                                 >
                                     <IconSquareRotated className="fill-primary shrink-0" />
-                                    <div className="ltr:ml-3 rtl:mr-3">Today Request</div>
+                                    <div className="ltr:ml-3 rtl:mr-3">Today KPI</div>
                                 </button>
                                 <button 
                                     type="button"

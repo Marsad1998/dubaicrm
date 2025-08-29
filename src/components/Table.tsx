@@ -1,5 +1,6 @@
 import React from 'react';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
+import Select from 'react-select';
 
 interface Column {
   accessor: string;
@@ -8,6 +9,13 @@ interface Column {
   sortable?: boolean;
   render?: (record: any) => JSX.Element;
   width?: string | number;
+}
+
+interface SelectFilter {
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+  placeholder?: string;
 }
 
 interface TableProps {
@@ -28,6 +36,7 @@ interface TableProps {
   searchValue?: string;
   noRecordsText :string
   idAccessor?: string;
+  selectFilter?: SelectFilter;
 }
 
 const Table: React.FC<TableProps> = ({ 
@@ -47,16 +56,40 @@ const Table: React.FC<TableProps> = ({
   minHeight = 200,
   noRecordsText = 'No records found',
   searchValue = '',
-  idAccessor
+  idAccessor,
+  selectFilter // New select filter prop
 }) => {
   const PAGE_SIZES = [10, 20, 30, 50, 100];
 
   return (
-    <div className="panel">
+    <div className="panel overflow-visible">
       <div className="flex md:items-center md:flex-row flex-col mb-5 gap-5">
         <h5 className="font-semibold text-lg dark:text-white-light">
           {title}
         </h5>
+        {/* Select input container - positioned in the middle */}
+        {selectFilter && (
+          <div className="flex-1 flex justify-center items-center gap-2 z-50">
+            <Select
+              name="client_user_status"
+              placeholder="Select Agent to Filter"
+              options={selectFilter.options}
+              value={selectFilter.options.find(option => option.value === selectFilter.value)}
+              onChange={(selected) => {
+                // Handle the case where selected might be null
+                if (selected) {
+                  selectFilter.onChange(selected.value);
+                } else {
+                  // Pass an empty string or whatever default your filter expects
+                  selectFilter.onChange(""); 
+                }
+              }}
+              isClearable
+              isSearchable
+              className="w-64"
+            />
+          </div>
+        )}
         {onSearchChange && (
           <div className="ltr:ml-auto rtl:mr-auto">
             <input 
@@ -69,7 +102,7 @@ const Table: React.FC<TableProps> = ({
           </div>
         )}
       </div>
-      <div className="datatables">
+      <div className="datatablesz-10">
         <DataTable 
           className="whitespace-nowrap table-hover" 
           records={rows} 
