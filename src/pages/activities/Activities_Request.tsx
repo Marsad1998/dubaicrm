@@ -4,24 +4,19 @@ import { Fragment, useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState } from '../../store';
-import Dropdown from '../../components/Dropdown';
 import { setPageTitle } from '../../slices/themeConfigSlice';
 import IconNotes from '../../components/Icon/IconNotes';
 import IconNotesEdit from '../../components/Icon/IconNotesEdit';
-import IconStar from '../../components/Icon/IconStar';
 import IconSquareRotated from '../../components/Icon/IconSquareRotated';
 import IconPlus from '../../components/Icon/IconPlus';
 import IconMenu from '../../components/Icon/IconMenu';
 import IconUser from '../../components/Icon/IconUser';
 import IconHorizontalDots from '../../components/Icon/IconHorizontalDots';
-import IconPencil from '../../components/Icon/IconPencil';
 import IconTrashLines from '../../components/Icon/IconTrashLines';
-import IconEye from '../../components/Icon/IconEye';
 import IconX from '../../components/Icon/IconX';
 import { getBaseUrl } from '../../components/BaseUrl';
 import apiClient from '../../utils/apiClient';
 import IconCalendar from '../../components/Icon/IconCalendar';
-import ApprovalLeaveModal from '../../components/ApprovalModal';
 import ApprovalModal from '../../components/ApprovalModal';
 import { useNavigate } from 'react-router-dom';
 import Toast from '../../services/toast';
@@ -56,8 +51,6 @@ const ActivitiesRequest = () => {
         }
         useReff.current = true
     }, []);
-
-    // Add useEffect to watch for selectedTab changes
     useEffect(() => {
         if (useReff.current) {
             fetchActivities(selectedTab);
