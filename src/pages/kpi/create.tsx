@@ -391,12 +391,12 @@ const Create = () => {
                                 </div>
                                  <div className="form-group sm:col-span-2">
                                     <label htmlFor="name">Start Date</label>
-                                    <input name="start_date" type="date" placeholder="Date" className="form-input" />
+                                    <input name="start_date" type="datetime-local" placeholder="Date" className="form-input" />
                                     {errors.start_date && (  <span className="text-red-500 text-sm"> {errors.start_date} </span>  )}
                                 </div>
                                 <div className="form-group sm:col-span-2">
                                     <label htmlFor="name">Start Date</label>
-                                    <input name="end_date" type="date" placeholder="Date" className="form-input" />
+                                    <input name="end_date" type="datetime-local" placeholder="Date" className="form-input" />
                                     {errors.end_date && (  <span className="text-red-500 text-sm"> {errors.end_date} </span>  )}
                                 </div>
                                 <div className="form-group sm:col-span-2">
