@@ -110,7 +110,7 @@ import { IconOption } from '../../components/Icon';
 
     const LeadsTabs = async (status: number) => {
         combinedRef.current.ishideshow = true;
-        const response = await dispatch(DashboardLeadslist({ page_number : 1 , lead_status : status, type: dashboardType || 'all'  }) as any);
+        const response = await dispatch(DashboardLeadslist({ page_number : meta.current_page , lead_status : status, type: dashboardType || 'all', search: searchText  }) as any);
         if(response.payload.status === 200 || response.payload.status === 201){
              setSelectedTab(status);
         }
@@ -147,8 +147,8 @@ import { IconOption } from '../../components/Icon';
     };
     
     const handlePageChange = async (page_number: number) => {
-        if (page_number >= 1 && page_number <= meta.total) {    
-            await dispatch(DashboardLeadslist({ page_number : page_number, lead_status : currentStatus, type: dashboardType || 'all'  }) as any);
+        if (page_number >= 1 && page_number <= meta.total) {
+            await dispatch(DashboardLeadslist({ page_number : page_number, lead_status : currentStatus, type: dashboardType || 'all', search: searchText  }) as any);
             setSelectedTab(currentStatus);
         }
     };
@@ -218,7 +218,7 @@ import { IconOption } from '../../components/Icon';
         }
         try {
             dispatch(setLoading(true));
-            const response = await dispatch(DashboardLeadslist({ page_number: 1,  lead_status: selectedTab,  type: 'csv' }) as any);
+            const response = await dispatch(DashboardLeadslist({ page_number: meta.current_page,  lead_status: selectedTab,  type: 'csv' }) as any);
             if (response.payload?.leadsdata?.data) {
                 const link = document.createElement('a');
                 link.href = response.payload.leadsdata.data;

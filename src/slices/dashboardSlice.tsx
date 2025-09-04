@@ -49,8 +49,9 @@ import apiClient from '../utils/apiClient';
                     lead_status 
                 } = params;
                 
-                const effectivePage = search ? 1 : page_number;
+                const effectivePage = page_number;
                 const url = `${endpoints.listApi}${effectivePage}&lead_status=${lead_status || 0}`;
+                console.log(search);
                 
                 const response = await apiClient.post(url, {
                     search,
