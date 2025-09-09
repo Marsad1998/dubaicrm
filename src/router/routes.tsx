@@ -27,6 +27,7 @@ const ExportLeads = lazy(() => import('../pages/leads/exportpdf'));
 const RoadShow = lazy(() => import('../pages/leads/roadshow'));
 const Reports = lazy(() => import('../pages/leads/reports'));
 const Profile = lazy(() => import('../pages/Users/profile'));
+const SystemConfig = lazy(() => import('../pages/Systems/config'));
 const Error404 = lazy(() => import('../pages/errors/error404'));
 const Activities = lazy(() => import('../pages/activities/activities'));
 const ActivitiesRequest = lazy(() => import('../pages/activities/Activities_Request'));
@@ -288,6 +289,13 @@ const routes = [
         path: 'pages/users/profile',
         type: 'protected',
         element : <Profile/>,
+        layout: 'default',
+    },
+
+    {
+        path: 'pages/system/config',
+        type: 'protected',
+        element : <SystemConfig/>,
         layout: 'default',
     },
 

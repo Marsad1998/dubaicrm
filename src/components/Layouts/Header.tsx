@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import Dropdown from '../Dropdown';
 import IconMenu from '../Icon/IconMenu';
-import IconCalendar from '../Icon/IconCalendar';
+import IconSettings from '../Icon/IconSettings';
 import IconEdit from '../Icon/IconEdit';
 import IconChatNotification from '../Icon/IconChatNotification';
 import IconSearch from '../Icon/IconSearch';
@@ -58,6 +58,13 @@ const Header = () => {
         }
         
     }, [location]);
+
+    const [role, setRoles] = useState<string>();
+    
+    useEffect(() => {
+        const userrole = localStorage.getItem('role') || '';
+        setRoles(userrole);
+    }, []);
 
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
@@ -345,6 +352,12 @@ const Header = () => {
                                             <IconUser className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0" />
                                             Profile
                                         </Link>
+                                        {role === 'super admin' ? (
+                                            <Link to="/pages/system/config" className="dark:hover:text-white">
+                                                <IconSettings className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0" />
+                                                System Setting
+                                            </Link>
+                                        ) : null}
                                     </li>
                                     {/* <li>
                                         <Link to="/apps/mailbox" className="dark:hover:text-white">
