@@ -62,7 +62,6 @@ const Header = () => {
     const [role, setRoles] = useState<string>();
     
     useEffect(() => {
-        const storedPermissions = JSON.parse(localStorage.getItem('permissions') || '[]');
         const userrole = localStorage.getItem('role') || '';
         setRoles(userrole);
     }, []);
@@ -353,12 +352,12 @@ const Header = () => {
                                             <IconUser className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0" />
                                             Profile
                                         </Link>
-                                        {(role === 'super admin') && (
+                                        {role === 'super admin' ? (
                                             <Link to="/pages/system/config" className="dark:hover:text-white">
                                                 <IconSettings className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0" />
                                                 System Setting
                                             </Link>
-                                        )}
+                                        ) : null}
                                     </li>
                                     {/* <li>
                                         <Link to="/apps/mailbox" className="dark:hover:text-white">
