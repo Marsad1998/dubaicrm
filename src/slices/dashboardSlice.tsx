@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 import apiClient from '../utils/apiClient';
     interface FetchLeadsParams {
         page_number?: number;
@@ -33,7 +33,7 @@ import apiClient from '../utils/apiClient';
             return rejectWithValue(error.response?.data || error.message);
         }
     });
-    
+
     export const DashboardLeadslist = createAsyncThunk(
     'DashboardLeadslist',
         async (params: FetchLeadsParams = {}, { rejectWithValue }) => {
@@ -46,13 +46,16 @@ import apiClient from '../utils/apiClient';
                     search, 
                     agent_id, 
                     date_range,
-                    lead_status 
+                    lead_status,
+                     type, 
                 } = params;
                 
                 const effectivePage = page_number;
-                const url = `${endpoints.listApi}${effectivePage}&lead_status=${lead_status || 0}`;
-                console.log(search);
-                
+                let url = `${endpoints.listApi}${effectivePage}&lead_status=${lead_status || 0}`; 
+                 if (type) {
+                    url += `&type=${type}`;
+                }
+
                 const response = await apiClient.post(url, {
                     search,
                     agent_id,
@@ -62,6 +65,8 @@ import apiClient from '../utils/apiClient';
                     sort_field: sortField,
                     sort_order: sortOrder
                 });
+
+                if (type === 'csv') { return { csvUrl: response.data.data, skipStateUpdate: true }; }
 
                 return {
                     leadsdata: response.data.data || [],
@@ -194,6 +199,7 @@ import apiClient from '../utils/apiClient';
                     state.loading = true;
                 })
                 .addCase(DashboardLeadslist.fulfilled, (state, action) => {
+                     if (action.payload?.skipStateUpdate) return;
                     state.loading = false;
                     state.leads = action.payload.leadsdata;
                     state.agents = action.payload.agents;
@@ -206,7 +212,6 @@ import apiClient from '../utils/apiClient';
                     state.current_page = action.payload.current_page;
                     state.per_page = action.payload.per_page;
                     state.lead_status = action.payload.lead_status;
-
                     state.topbarleadstatus  = action.payload.topbarstatuses;
                     state.sidebarstatus     = action.payload.sidebarstatus;
                     state.dropdownstatus    = action.payload.dropdownstatus;

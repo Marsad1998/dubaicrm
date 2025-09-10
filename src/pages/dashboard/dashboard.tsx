@@ -25,7 +25,6 @@ import FileViewerModal from '../../components/FileViewerModal';
 import CustomSideNav from '../../components/CustomSideNav';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.css';
-import IconThumbUp from '../../components/Icon/IconThumbUp';
 import { IconOption } from '../../components/Icon';
 
   const DashboardBox = () => {
@@ -40,40 +39,10 @@ import { IconOption } from '../../components/Icon';
         isCustomizerOpen, setIsCustomizerOpen
     } = useDashboardStates();
 
-    //   useEffect(() => {
-    //     const queryParams = new URLSearchParams(location.search);
-    //     const error = queryParams.get('error');
-    //     const googletoken = queryParams.get('token');
-    //     if(googletoken){
-    //         const googleuserData = queryParams.get('user');
-    //         if (googleuserData) {
-    //         try {
-    //             const decodedString = atob(googleuserData);
-    //             const userObj = JSON.parse(decodedString);
-    //             localStorage.setItem('authToken', googletoken);
-    //             localStorage.setItem('authUser', JSON.stringify(userObj));
-    //             localStorage.setItem('permissions', JSON.stringify(userObj.permissions));
-    //             localStorage.setItem('role', userObj.roles);
-    //             dispatch({
-    //                 type: 'auth/loginSuccess',
-    //                 payload: {
-    //                     token: googletoken,
-    //                     user: userObj, 
-    //                     permissions :  JSON.stringify(userObj.permissions),
-    //                     roles : userObj.roles
-    //                 }
-    //             });
-    //             //  navigate('/', { replace: true });
-    //             return;
-    //         } catch (e) {
-    //             console.error('Failed to decode user data:', e);
-    //         }
-    //      }
-    //     }
-    // }, []);
+    useEffect(() => {    
 
-
-    useEffect(() => {        
+        console.log(dashboardType);
+        
         dispatch(setPageTitle('Dashboard'));
         if (loginuser?.client_user_id && !combinedRef.current.fetched) {
             dispatch(DashboardLeadslist({search: searchText, type: dashboardType || 'all'}));
@@ -210,7 +179,34 @@ import { IconOption } from '../../components/Icon';
             dispatch(setLoading(false));
         }
     };
-    
+
+    // const exportCSV = async () => {
+    //     if (!selectedTab) {
+    //         toast.error('Please select any leads status first, Like Cold,Warm, Hot Lead');
+    //         return;
+    //     }
+    //     try {
+    //         dispatch(setLoading(true));
+    //         const response = await dispatch(DashboardLeadslist({ page_number: meta.current_page,  lead_status: selectedTab,  type: 'csv' }) as any);
+    //         if (response.payload?.leadsdata?.data) {
+    //             const link = document.createElement('a');
+    //             link.href = response.payload.leadsdata.data;
+    //             link.target = '_blank';
+    //             link.click();
+    //             Refresh();
+            
+    //         } else {
+    //             toast.error('Failed to export CSV');
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //         toast.error('Something went wrong while exporting CSV');
+    //     } finally {
+    //         dispatch(setLoading(false));
+    //     }
+    // };
+
+
     const exportCSV = async () => {
         if (!selectedTab) {
             toast.error('Please select any leads status first, Like Cold,Warm, Hot Lead');
@@ -218,16 +214,19 @@ import { IconOption } from '../../components/Icon';
         }
         try {
             dispatch(setLoading(true));
-            const response = await dispatch(DashboardLeadslist({ page_number: meta.current_page,  lead_status: selectedTab,  type: 'csv' }) as any);
-            if (response.payload?.leadsdata?.data) {
-                const link = document.createElement('a');
-                link.href = response.payload.leadsdata.data;
-                link.target = '_blank';
-                link.click();
-                Refresh();
-                // dispatch(DashboardLeadslist({search: searchText, type: dashboardType || 'all'}));
+            const response = await dispatch(
+            DashboardLeadslist({
+                page_number: meta.current_page,
+                lead_status: selectedTab,
+                type: 'csv',   // backend gives URL
+            }) as any
+            );
+
+            const csvUrl = response.payload?.csvUrl || response.payload?.data;
+            if (csvUrl) {
+            window.open(csvUrl, '_blank'); // 👈 just open the URL
             } else {
-                toast.error('Failed to export CSV');
+            toast.error('Failed to export CSV');
             }
         } catch (error) {
             console.error(error);
@@ -235,7 +234,8 @@ import { IconOption } from '../../components/Icon';
         } finally {
             dispatch(setLoading(false));
         }
-    };
+        };
+
 
     const AssignToAgent = async (leadId: any) => {
         try {
@@ -382,11 +382,11 @@ import { IconOption } from '../../components/Icon';
                             <div className="h-px border-b border-white-light dark:border-[#1b2e4b]"></div>
                                 {loading ? (
                                     <Loader3 />
-                                ) : Array.isArray(AllLeadList) && AllLeadList.length ? (
+                                ) : Array.isArray(AllLeadList) && AllLeadList?.length ? (
                                     <div className="table-responsive grow overflow-y-auto sm:min-h-[300px] min-h-[400px]">
                                         <table className="table-hover">
                                             <tbody>
-                                              { AllLeadList.map((lead: any) => {
+                                              { AllLeadList?.map((lead: any) => {
                                                     return (
                                                         <tr key={lead.lead_id} className="cursor-pointer" onClick={() => setSelectedLead(lead)}>
                                                             <td>

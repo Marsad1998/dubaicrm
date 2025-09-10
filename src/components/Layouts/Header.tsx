@@ -61,6 +61,7 @@ const Header = () => {
 
     const [role, setRoles] = useState<string>();
     
+    
     useEffect(() => {
         const userrole = localStorage.getItem('role') || '';
         setRoles(userrole);
@@ -68,6 +69,7 @@ const Header = () => {
 
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
+     const { menu } = useSelector((state: IRootState) => state.themeConfig);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     function createMarkup(messages: any) {
@@ -383,9 +385,8 @@ const Header = () => {
                     </div>
                 </div>  
                 {/* horizontal menu */}
-                <ul className="horizontal-menu hidden py-1.5 font-semibold px-6 lg:space-x-1.5 xl:space-x-8 rtl:space-x-reverse bg-white border-t border-[#ebedf2] dark:border-[#191e3a] dark:bg-black text-black dark:text-white-dark">
-                <NavBar></NavBar>
-                </ul>
+                {/* <NavBar/> */}
+                {menu === 'horizontal' && <NavBar />}
             </div>
         </header>
     );

@@ -7,8 +7,6 @@ const endpoints = {
     logoutApi: 'auth/logout',
     googleAuthUrl: '/google/auth-url',
     googleLogin: '/google/callback',
-
-   
 };
 
 export const loginUser = createAsyncThunk('auth/cover-login', async ({ formData }: { formData: FormData; }, { rejectWithValue }) => {

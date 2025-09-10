@@ -51,14 +51,14 @@ const routes = [
         element: <Dashboardanalysis key="default" />, 
     },
     
-    {
-        path: 'pages/leads/dashboard',
-        type: 'protected',
-        element: <DashboardBox key="dashboard" />,
-    },
+    // {
+    //     path: 'pages/leads/dashboard',
+    //     type: 'protected',
+    //     element: <DashboardBox key="dashboard" />,
+    // },
 
     {
-        path: '/dashboard/:dashboardType',
+        path: 'pages/leads/:dashboardType',
         type: 'protected',
         element: <DashboardBox key="dashboard" />,
     },
@@ -176,12 +176,20 @@ const routes = [
         layout: 'default',
     }, 
 
-    {
+     {
         path: 'pages/kpi/create',
         type: 'protected',
-        element: <Kpi />, 
+        element: <Kpi />,
         layout: 'default',
     },
+
+    {
+        path: 'pages/kpi/create/:id',
+        type: 'protected',
+        element: <Kpi />,
+        layout: 'default',
+    },
+
 
     {
         path: 'pages/kpi/kpi_dashboard',

@@ -16,6 +16,7 @@ import '../dashboard/dashboard.css';
 import { Dialog, Transition } from '@headlessui/react';
 import IconChecks from '../../components/Icon/IconChecks';
 import IconChatDot from '../../components/Icon/IconChatDot';
+import { useParams, useLocation } from "react-router-dom";
 
 const endpoints = {
     createApi: `${getBaseUrl()}/kpi/create`,
@@ -25,6 +26,12 @@ const endpoints = {
 };
 
 const Create = () => {
+
+    const { id } = useParams();
+    const { state } = useLocation();
+    const isEdit = Boolean(id);
+    const passedKpi = state?.kpi || null;
+
     const dispatch = useDispatch<AppDispatch>();
     const loader = Loader();
     const combinedRef = useRef<any>({ userformRef: null });
@@ -46,6 +53,14 @@ const Create = () => {
     const [response, setResponse] = useState<string>('');
     const [modalErrors, setModalErrors] = useState<Record<string, string>>({});
     const [statusFilter, setStatusFilter] = useState('');
+
+    useEffect(() => {
+        if (isEdit && passedKpi) {
+            handleEdit(passedKpi); 
+        }else{
+            combinedRef.current.userformRef.reset();
+        }
+    }, [isEdit, passedKpi]);
 
 
     useEffect(() => {
@@ -404,7 +419,8 @@ const Create = () => {
                                     <textarea name="description" id="description" className="form-input" style={{ height: '316px' }} placeholder='Add Here Task list'/>
                                 </div>
                                 <div className="sm:col-span-2">
-                                    <button type="submit" className="btn btn-primary w-full">Submit</button>
+                                    <button type="submit" className="btn btn-primary w-full"> {isEdit ? "Update" : "Submit"} </button>
+                                    {/* <button type="submit" className="btn btn-primary w-full">Submit</button> */}
                                 </div>
                             </div>
                         </div>

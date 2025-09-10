@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { setPageTitle } from '../../slices/themeConfigSlice';
+import { setPageTitle, toggleMenu } from '../../slices/themeConfigSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import IconSettings from '../../components/Icon/IconSettings';
 import IconMail from '../../components/Icon/IconMail';
@@ -10,7 +10,6 @@ import IconServer from '../../components/Icon/IconServer';
 import apiClient from '../../utils/apiClient';
 import { getBaseUrl } from '../../components/BaseUrl';
 import Toast from '../../services/toast';
-import { debounce } from "lodash";
 
 const endpoints = {
     getConfig: `${getBaseUrl()}/config`,
@@ -24,6 +23,11 @@ const ConfigSettings = () => {
     const requestMade = useRef(false);
     const [loading, setLoading] = useState(false);
     const [saveLoading, setSaveLoading] = useState(false);
+    
+
+
+    
+
 
     useEffect(() => {
         if (!requestMade.current) {
@@ -38,7 +42,6 @@ const ConfigSettings = () => {
         // Meta User Token
         meta_user_token: '',
         meta_page_token: '',
-        
         // WhatsApp Configuration
         whatsapp_business_id: '',
         whatsapp_phone_number_id: '',
@@ -57,17 +60,18 @@ const ConfigSettings = () => {
         smtp_encryption: 'tls',
         smtp_from_address: '',
         smtp_from_name: '',
-    });
 
+        // Theme Layout
+        theme_layout: 1, 
+
+    });
+    
     const fetchConfigData = async () => {
         setLoading(true);
         try {
             const response = await apiClient.get(endpoints.getConfig);
             if (response.data && response.data.config) {
-                setFormData(prev => ({
-                    ...prev,
-                    ...response.data.config
-                }));
+                setFormData(prev => ({ ...prev, ...response.data.config }));
             }
         } catch (error: any) {
             if (error.response?.status === 403) {
@@ -100,11 +104,14 @@ const ConfigSettings = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaveLoading(true);
-        
         try {
             const response = await apiClient.post(endpoints.updateConfig, formData);
-            
             if (response.status === 200 || response.status === 201) {
+
+                if (formData.theme_layout !== undefined) {
+                    const menuType = formData.theme_layout === 0 ? 'vertical' : 'horizontal';
+                    dispatch(toggleMenu(menuType));
+                }
                 setErrors({});
                 toast.success('Configuration updated successfully');
             }
@@ -177,9 +184,17 @@ const ConfigSettings = () => {
                                         SMTP Settings
                                     </button>
                                 </li>
+                                 <li className="inline-block">
+                                    <button onClick={() => toggleTabs('ThemeLayout')}className={`flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary ${tabs === 'smtp' ? '!border-primary text-primary' : ''}`}
+                                    >
+                                        <IconServer />
+                                        Theme Layout
+                                    </button>
+                                </li>
+
                             </ul>
                         </div>
-                        
+
                         <form onSubmit={handleSubmit} className="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-black">
                             {tabs === 'meta' && (
                                 <div>
@@ -413,19 +428,65 @@ const ConfigSettings = () => {
                                     </div>
                                 </div>
                             )}
+                            {tabs === "ThemeLayout" && (
+                                <div>
+                                    <h6 className="text-lg font-bold mb-5">Theme Layout</h6>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div className="mt-4 flex flex-col sm:flex-row gap-4">
+                                            <label className={`flex items-center gap-3 cursor-pointer rounded-lg border px-5 py-5 transition 
+                                                ${formData.theme_layout === 1 
+                                                ? "border-primary bg-primary/10 text-primary" 
+                                                : "border-gray-300 hover:border-primary/50 dark:border-gray-600"}`}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="theme_layout"
+                                                    value={1}
+                                                    checked={formData.theme_layout === 1}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, theme_layout: Number(e.target.value) }))}
+                                                    className="hidden"
+                                                />
+                                                <span className={`h-4 w-4 rounded-full border flex items-center justify-center
+                                                    ${formData.theme_layout === 1 ? "border-primary bg-primary" : "border-gray-400"}
+                                                    `}>
+                                                    {formData.theme_layout === 1 && <span className="h-2 w-2 rounded-full bg-white" />}
+                                                </span>
+                                                <span className="text-sm font-medium">Main layout</span>
+                                            </label>
+                                            <label
+                                                className={`flex items-center gap-3 cursor-pointer rounded-lg border px-4 py-3 transition 
+                                                ${formData.theme_layout === 0 
+                                                ? "border-primary bg-primary/10 text-primary" 
+                                                : "border-gray-300 hover:border-primary/50 dark:border-gray-600"}`}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="theme_layout"
+                                                    value={0}
+                                                    checked={formData.theme_layout === 0}
+                                                     onChange={(e) => setFormData(prev => ({ ...prev, theme_layout: Number(e.target.value) }))}
+                                                    className="hidden"
+                                                />
+                                                <span className={`h-4 w-4 rounded-full border flex items-center justify-center
+                                                    ${formData.theme_layout === 0 ? "border-primary bg-primary" : "border-gray-400"}
+                                                    `}>
+                                                    {formData.theme_layout === 0 && <span className="h-2 w-2 rounded-full bg-white" />}
+                                                </span>
+                                                <span className="text-sm font-medium">Sidebar layout</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             
-                            <div className="flex justify-end mt-8">
-                                <button 
-                                    type="submit" 
-                                    className="btn btn-primary"
-                                    disabled={saveLoading}
-                                >
+                        <div className="flex justify-end mt-8">
+                                <button type="submit" className="btn btn-secondary btn-sm" disabled={saveLoading}>
                                     {saveLoading ? (
                                         <>
                                             <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-4 h-4 ltr:mr-2 rtl:ml-2 inline-block"></span>
                                             Saving...
                                         </>
-                                    ) : 'Save Changes'}
+                                    ) : 'Save'}
                                 </button> 
                             </div>
                         </form>

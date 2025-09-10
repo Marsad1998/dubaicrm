@@ -38,7 +38,8 @@ const Sidebar = () => {
     const [currentMenu, setCurrentMenu] = useState<string>('');
     const [errorSubMenu, setErrorSubMenu] = useState(false);
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
-    const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
+    const {semidark, menu} = useSelector((state: IRootState) => state.themeConfig);
+    //  const { semidark, menu } = useSelector((state: IRootState) => state.themeConfig);
     const location = useLocation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -50,9 +51,6 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-
-      
-
         const selector = document.querySelector('.sidebar ul a[href="' + window.location.pathname + '"]');
         if (selector) {
             selector.classList.add('active');
@@ -83,8 +81,8 @@ const Sidebar = () => {
                 <div className="bg-white dark:bg-black h-full">
                     <div className="flex justify-between items-center px-4 py-3">
                         <NavLink to="/" className="main-logo flex items-center shrink-0">
-                            <img className="w-8 ml-[5px] flex-none" src="/assets/images/logo.svg" alt="logo" />
-                            <span className="text-2xl ltr:ml-1.5 rtl:mr-1.5 font-semibold align-middle lg:inline dark:text-white-light">{t('Evernest')}</span>
+                            <img className="w-8 ml-[5px] flex-none" src="https://evernest.ae/assets/img/homepage/larger_logo1.png" alt="logo" />
+                            <span className="text-sm ltr:ml-1.5 rtl:mr-1.5 font-semibold align-middle lg:inline dark:text-white-light">{t('Evernest Real Estate')}</span>
                         </NavLink>
                         <button
                             type="button"
@@ -95,9 +93,7 @@ const Sidebar = () => {
                         </button>
                     </div>
                     <PerfectScrollbar className="h-[calc(100vh-80px)]">
-                        <ul className="relative font-semibold space-y-0.5 p-4 py-0">
-                            <NavBar></NavBar>
-                        </ul>
+                        {menu !== 'horizontal' && <NavBar />}
                     </PerfectScrollbar>
                 </div>
             </nav>

@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { IRootState, AppDispatch } from '../store';
 import { topBarStatus, SidebarStatus, MatchColorList, HRDropdownOption, statues, JobDashboard, uniqueDropdown, HrSidebarStatus } from '../services/status';
 import Toast from '../services/toast';
 import Loader2 from '../services/loader2';
+import { DashboardLeadslist } from '../slices/dashboardSlice';
 
 
 export const useDashboardStates = () => {
@@ -46,7 +47,7 @@ export const useDashboardStates = () => {
     const [files, setFiles]                   = useState([]);
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
     const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
-
+    
     return {
         dispatch,
         navigate,
@@ -89,3 +90,5 @@ export const useDashboardStates = () => {
         isCustomizerOpen, setIsCustomizerOpen,
     };
 };
+
+

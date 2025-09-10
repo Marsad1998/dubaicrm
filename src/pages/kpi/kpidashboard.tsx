@@ -33,7 +33,8 @@ const KPIDashboard = () => {
     const toast = Toast();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedDescription, setSelectedDescription] = useState("");
-    
+    const loginuser       = useSelector((state: IRootState) => state.auth.user || {});
+
     useEffect(() => {
         if(!useReff.current){
             dispatch(setPageTitle('KPI Request'));
@@ -125,6 +126,15 @@ const KPIDashboard = () => {
                                 </button>
                                 <div className="h-px w-full border-b border-white-light dark:border-[#1b2e4b]"></div>
                                 <div className="px-1 py-3 text-white-dark">Filters</div>
+
+                                {loginuser?.roles[0].name === 'super admin' && (
+                                <button type="button" className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-info ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${selectedTab === 'ongoingtaskthisweek' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'}`}
+                                    onClick={() => handleTabChange('ongoingtaskthisweek')}>
+                                    <IconSquareRotated className="fill-info shrink-0" />
+                                    <div className="ltr:ml-3 rtl:mr-3">Ongoing Task This Week</div>
+                                </button>
+                                )}
+
                                 <button type="button" className={`w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium text-info ltr:hover:pl-3 rtl:hover:pr-3 duration-300 ${selectedTab === 'nextweek' && 'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]'}`}
                                     onClick={() => handleTabChange('nextweek')}>
                                     <IconSquareRotated className="fill-info shrink-0" />
@@ -264,29 +274,25 @@ const KPIDashboard = () => {
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between space-x-2">
-                                                    {(activity.status === 1 || activity.status === 4) && (
-                                                    <>
-                                                        <span
-                                                            className={`text-[11px] ${
-                                                                activity.status === 4 ? "text-red-500 font-semibold" : "text-gray-500"
-                                                            }`}
-                                                            >
-                                                            {activity.status === 4 ? "Your KPI was rejected. Try again.":" Mark done after completing task."}
-                                                            </span>
-                                                        <button
-                                                        onClick={() => MarkDone(activity)}
-                                                        className="btn btn-info btn-sm flex items-center space-x-1 shadow-sm hover:shadow-md"
-                                                        >
-                                                        <IconStar className="w-4 h-4" />
-                                                        <span>Mark Done</span>
-                                                        </button>
-                                                    </>
+                                                    {loginuser?.roles[0].name === "super admin" && selectedTab === "ongoingtaskthisweek" && (
+                                                        <button onClick={() => navigate(`/pages/kpi/create/${activity.id}`, { state: { kpi: activity } })} className="btn btn-secondary btn-sm flex items-center space-x-1 shadow-sm hover:shadow-md"> 
+                                                        <IconNotesEdit className="w-4 h-4" /> <span>Edit</span> </button>
                                                     )}
-                                                </div>
-                                                </div>
+                                                    {selectedTab !== "ongoingtaskthisweek" && (activity.status === 1 || activity.status === 4) && (
+                                                        <>
+                                                            <span className={`text-[11px] ${ activity.status === 4 ? "text-red-500 font-semibold" : "text-gray-500" }`}>
+                                                                {activity.status === 4 ? "Your KPI was rejected. Try again." : "Mark done after completing task."}
+                                                            </span>
+                                                            <button onClick={() => MarkDone(activity)} className="btn btn-info btn-sm flex items-center space-x-1 shadow-sm hover:shadow-md">
+                                                                <IconStar className="w-4 h-4" />
+                                                                <span>Mark Done</span>
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                 </div>
+                                              </div>
                                             </div>
-                                            </div>
-
+                                        </div>
                                     );
                                 })}
                             </div>
