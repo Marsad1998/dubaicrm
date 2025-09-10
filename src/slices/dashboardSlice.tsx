@@ -9,7 +9,7 @@ import apiClient from '../utils/apiClient';
         agent_id?: number;
         date_range?: string;
         lead_status?: number | string;
-        type ?: string;
+        dashboardType ?: string;
     }
 
     const endpoints = {
@@ -23,7 +23,7 @@ import apiClient from '../utils/apiClient';
         deletefiles  : '/leads/delete_files',
         exportCsv    : '/leads/export_csv',
     };
-    
+
     export const createLeads = createAsyncThunk('createlead', async ({ formData, id }: { formData: FormData; id?: number }, { rejectWithValue }) => {
         try {
             const url = id ? `${endpoints.createApi}/${id}` : endpoints.createApi;
@@ -33,7 +33,6 @@ import apiClient from '../utils/apiClient';
             return rejectWithValue(error.response?.data || error.message);
         }
     });
-
     export const DashboardLeadslist = createAsyncThunk(
     'DashboardLeadslist',
         async (params: FetchLeadsParams = {}, { rejectWithValue }) => {
@@ -47,15 +46,11 @@ import apiClient from '../utils/apiClient';
                     agent_id, 
                     date_range,
                     lead_status,
-                     type, 
+                    dashboardType, 
                 } = params;
                 
                 const effectivePage = page_number;
-                let url = `${endpoints.listApi}${effectivePage}&lead_status=${lead_status || 0}`; 
-                 if (type) {
-                    url += `&type=${type}`;
-                }
-
+                const url = `${endpoints.listApi}${effectivePage}&lead_status=${lead_status || 0}`; 
                 const response = await apiClient.post(url, {
                     search,
                     agent_id,
@@ -63,10 +58,11 @@ import apiClient from '../utils/apiClient';
                     lead_status,
                     per_page,
                     sort_field: sortField,
-                    sort_order: sortOrder
+                    sort_order: sortOrder,
+                    dashboardType:dashboardType
                 });
 
-                if (type === 'csv') { return { csvUrl: response.data.data, skipStateUpdate: true }; }
+                
 
                 return {
                     leadsdata: response.data.data || [],
@@ -85,7 +81,8 @@ import apiClient from '../utils/apiClient';
                     dropdownstatus: response.data.dropdown || [],
                     hrtopbar: response.data.hrtopbar || [], 
                     hrsidebar: response.data.hrsidebar || [], 
-                    hrdropdown: response.data.hrdropdown || []
+                    hrdropdown: response.data.hrdropdown || [],
+                    dashboardType : dashboardType
 
                 };
             } catch (error: any) {
@@ -174,6 +171,7 @@ import apiClient from '../utils/apiClient';
         hrtopbar :  [],
         hrsidebar : [],
         hrdropdown : [],
+        dashboardType :  '',
     };
     
     const DashboardSlice = createSlice({
@@ -199,7 +197,6 @@ import apiClient from '../utils/apiClient';
                     state.loading = true;
                 })
                 .addCase(DashboardLeadslist.fulfilled, (state, action) => {
-                     if (action.payload?.skipStateUpdate) return;
                     state.loading = false;
                     state.leads = action.payload.leadsdata;
                     state.agents = action.payload.agents;
@@ -218,7 +215,7 @@ import apiClient from '../utils/apiClient';
                     state.hrtopbar   = action.payload.hrtopbar;
                     state.hrsidebar  = action.payload.hrsidebar;
                     state.hrdropdown = action.payload.hrdropdown;
-
+                    state.dashboardType = action.payload.dashboardType ?? '';
                     state.success = true;
                 })
                 .addCase(DashboardLeadslist.rejected, (state) => {

@@ -297,7 +297,8 @@ const NavBar = () => {
               <IconCaretDown />
             </div>
           </button>
-          {renderSubMenu('leads',
+          {renderSubMenu(
+            'leads',
             <>
               <li><NavLink to="/pages/leads/dashboard">{t('Lead-Dashboard')}</NavLink></li>
               {role === 'super admin' && <li><NavLink to="/pages/leads/hr">{t('HR Dashboard')}</NavLink></li>}

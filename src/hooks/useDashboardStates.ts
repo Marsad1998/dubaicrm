@@ -11,7 +11,6 @@ import { DashboardLeadslist } from '../slices/dashboardSlice';
 export const useDashboardStates = () => {
     const dispatch           = useDispatch<AppDispatch>();
     const navigate           = useNavigate();
-    const { dashboardType }  = useParams();
     const Statues            = statues();
     const loader2            = Loader2();
     const colorsarray        = MatchColorList();
@@ -51,7 +50,6 @@ export const useDashboardStates = () => {
     return {
         dispatch,
         navigate,
-        dashboardType,
         TopbarStatuses,
         HrTopBarStatus,
         uniqueDropdownList,

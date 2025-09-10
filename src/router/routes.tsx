@@ -50,12 +50,6 @@ const routes = [
         type: 'protected',
         element: <Dashboardanalysis key="default" />, 
     },
-    
-    // {
-    //     path: 'pages/leads/dashboard',
-    //     type: 'protected',
-    //     element: <DashboardBox key="dashboard" />,
-    // },
 
     {
         path: 'pages/leads/:dashboardType',
