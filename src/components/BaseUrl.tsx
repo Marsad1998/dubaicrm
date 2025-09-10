@@ -9,6 +9,8 @@ export const getBaseUrl = () => {
     return 'https://testcrmbackend.leadshub.ae/api';
   } else if (currentUrl.includes('leadshub.ae')) {
     return 'https://backend.leadshub.ae/api';
+  } else if (currentUrl.includes('evernest.online')) {
+      return 'https://backend.leadshub.ae/api';
   } else {
     return 'http://10.99.1.93:8000/api';
   }

@@ -8,7 +8,7 @@ import IconMenu from '../../components/Icon/IconMenu';
 import IconRefresh from '../../components/Icon/IconRefresh';
 import Tippy from '@tippyjs/react';
 import IconVideo from '../../components/Icon/IconVideo';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import IconSearch from '../../components/Icon/IconSearch';
 import Loader3 from '../../services/loader3';
 import IconBookmark from '../../components/Icon/IconBookmark';
@@ -25,12 +25,12 @@ import FileViewerModal from '../../components/FileViewerModal';
 import CustomSideNav from '../../components/CustomSideNav';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.css';
-import IconThumbUp from '../../components/Icon/IconThumbUp';
 import { IconOption } from '../../components/Icon';
 
   const DashboardBox = () => {
+    const { dashboardType } = useParams();
     const {
-        dispatch, navigate, dashboardType, TopbarStatuses, HrTopBarStatus, uniqueDropdownList, hrSidebarStatus,
+        dispatch, navigate, TopbarStatuses, HrTopBarStatus, uniqueDropdownList, hrSidebarStatus,
         Statues, loader2, SidebarStatuses, colorsarray, hrdropdownOption, toast,
         loginuser, leads, currentStatus, loading, meta, counters, isRtl, combinedRef, fileInputRef,
         AllLeadList, setAllLeadList, selectedLead, setSelectedLead, selectedTab, setSelectedTab,
@@ -40,23 +40,24 @@ import { IconOption } from '../../components/Icon';
         isCustomizerOpen, setIsCustomizerOpen
     } = useDashboardStates();
 
-    useEffect(() => {        
+    useEffect(() => {    
+
         dispatch(setPageTitle('Dashboard'));
         if (loginuser?.client_user_id && !combinedRef.current.fetched) {
-            dispatch(DashboardLeadslist({search: searchText, type: dashboardType || 'all'}));
+            dispatch(DashboardLeadslist({search: searchText, dashboardType: dashboardType || 'all'}));
             combinedRef.current.fetched = true;
         }
-    }, [loginuser?.client_user_id, dispatch]);
+    }, [loginuser?.client_user_id, dispatch, dashboardType]);
     
     useEffect(() => {
         if (loginuser?.client_user_id) {
             const delayDebounceFn = setTimeout(() => {
-                dispatch(DashboardLeadslist({search: searchText, type: dashboardType || 'all'}));
+                dispatch(DashboardLeadslist({search: searchText, dashboardType: dashboardType || 'all'}));
             }, 500);
             return () => clearTimeout(delayDebounceFn);
         }
-    }, [searchText, loginuser?.client_user_id]);
-
+    }, [searchText, loginuser?.client_user_id, dashboardType]);
+    
     useEffect(() => {
         if(currentStatus > 0){         
             getLeads(currentStatus);
@@ -77,7 +78,7 @@ import { IconOption } from '../../components/Icon';
 
     const LeadsTabs = async (status: number) => {
         combinedRef.current.ishideshow = true;
-        const response = await dispatch(DashboardLeadslist({ page_number : 1 , lead_status : status, type: dashboardType || 'all'  }) as any);
+        const response = await dispatch(DashboardLeadslist({ page_number : meta.current_page , lead_status : status, dashboardType: dashboardType || 'all', search: searchText  }) as any);
         if(response.payload.status === 200 || response.payload.status === 201){
              setSelectedTab(status);
         }
@@ -114,8 +115,8 @@ import { IconOption } from '../../components/Icon';
     };
     
     const handlePageChange = async (page_number: number) => {
-        if (page_number >= 1 && page_number <= meta.total) {    
-            await dispatch(DashboardLeadslist({ page_number : page_number, lead_status : currentStatus, type: dashboardType || 'all'  }) as any);
+        if (page_number >= 1 && page_number <= meta.total) {
+            await dispatch(DashboardLeadslist({ page_number : page_number, lead_status : currentStatus, dashboardType: dashboardType || 'all', search: searchText  }) as any);
             setSelectedTab(currentStatus);
         }
     };
@@ -177,7 +178,34 @@ import { IconOption } from '../../components/Icon';
             dispatch(setLoading(false));
         }
     };
-    
+
+    // const exportCSV = async () => {
+    //     if (!selectedTab) {
+    //         toast.error('Please select any leads status first, Like Cold,Warm, Hot Lead');
+    //         return;
+    //     }
+    //     try {
+    //         dispatch(setLoading(true));
+    //         const response = await dispatch(DashboardLeadslist({ page_number: meta.current_page,  lead_status: selectedTab,  type: 'csv' }) as any);
+    //         if (response.payload?.leadsdata?.data) {
+    //             const link = document.createElement('a');
+    //             link.href = response.payload.leadsdata.data;
+    //             link.target = '_blank';
+    //             link.click();
+    //             Refresh();
+            
+    //         } else {
+    //             toast.error('Failed to export CSV');
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //         toast.error('Something went wrong while exporting CSV');
+    //     } finally {
+    //         dispatch(setLoading(false));
+    //     }
+    // };
+
+
     const exportCSV = async () => {
         if (!selectedTab) {
             toast.error('Please select any leads status first, Like Cold,Warm, Hot Lead');
@@ -185,16 +213,19 @@ import { IconOption } from '../../components/Icon';
         }
         try {
             dispatch(setLoading(true));
-            const response = await dispatch(DashboardLeadslist({ page_number: 1,  lead_status: selectedTab,  type: 'csv' }) as any);
-            if (response.payload?.leadsdata?.data) {
-                const link = document.createElement('a');
-                link.href = response.payload.leadsdata.data;
-                link.target = '_blank';
-                link.click();
-                Refresh();
-                // dispatch(DashboardLeadslist({search: searchText, type: dashboardType || 'all'}));
+            const response = await dispatch(
+            DashboardLeadslist({
+                page_number: meta.current_page,
+                lead_status: selectedTab,
+                dashboardType: 'csv',   // backend gives URL
+            }) as any
+            );
+
+            const csvUrl = response.payload?.csvUrl || response.payload?.data;
+            if (csvUrl) {
+            window.open(csvUrl, '_blank'); // 👈 just open the URL
             } else {
-                toast.error('Failed to export CSV');
+            toast.error('Failed to export CSV');
             }
         } catch (error) {
             console.error(error);
@@ -202,8 +233,8 @@ import { IconOption } from '../../components/Icon';
         } finally {
             dispatch(setLoading(false));
         }
-    };
-
+        };
+        
     const AssignToAgent = async (leadId: any) => {
         try {
             // dispatch(setLoading(true));
@@ -349,11 +380,11 @@ import { IconOption } from '../../components/Icon';
                             <div className="h-px border-b border-white-light dark:border-[#1b2e4b]"></div>
                                 {loading ? (
                                     <Loader3 />
-                                ) : Array.isArray(AllLeadList) && AllLeadList.length ? (
+                                ) : Array.isArray(AllLeadList) && AllLeadList?.length ? (
                                     <div className="table-responsive grow overflow-y-auto sm:min-h-[300px] min-h-[400px]">
                                         <table className="table-hover">
                                             <tbody>
-                                              { AllLeadList.map((lead: any) => {
+                                              { AllLeadList?.map((lead: any) => {
                                                     return (
                                                         <tr key={lead.lead_id} className="cursor-pointer" onClick={() => setSelectedLead(lead)}>
                                                             <td>
