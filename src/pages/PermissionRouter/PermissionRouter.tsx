@@ -12,7 +12,7 @@ const PermissionRouter = () => {
     setPermissions(userPermissions);
   }, []);
 
-  return permissions.includes('manage marketing') ? <Dashboardanalysis /> : <AnalyticsDashboard />;
+  return permissions.includes('manage marketing') ? <AnalyticsDashboard /> : <Dashboardanalysis />;
 };
 
 export default PermissionRouter;
