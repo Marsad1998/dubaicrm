@@ -461,7 +461,6 @@ const NavBar = () => {
           )}
         </li>
       )}
-
       {/* KPI */}
       <li className="menu nav-item relative">
         <button
