@@ -43,12 +43,13 @@ const CreateListing = lazy(() => import('../pages/listing/createListing'));
 const Statuses = lazy(() => import('../pages/statuses/create'));
 const Kpi = lazy(() => import('../pages/kpi/create'));
 const KPIDashboard = lazy(() => import('../pages/kpi/kpidashboard'));
+const PermissionRouter = lazy(() => import('../pages/PermissionRouter/PermissionRouter'));
 
 const routes = [
     {
         path: '/',
         type: 'protected',
-        element: <Dashboardanalysis key="default" />, 
+        element: <PermissionRouter key="default" />, 
     },
 
     {
