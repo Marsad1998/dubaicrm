@@ -489,7 +489,8 @@ const NavBar = () => {
           </>
         )}
       </li>
-      {(permissions.includes('create subscriber') || role === 'super admin') && (
+
+      {/* {(permissions.includes('create subscriber') || role === 'super admin') && (
           <li className="menu nav-item relative">
           <button
             type="button"
@@ -514,7 +515,8 @@ const NavBar = () => {
             </>
           )}
         </li>
-      )} 
+      )}  */}
+
     </ul>
   );
 };

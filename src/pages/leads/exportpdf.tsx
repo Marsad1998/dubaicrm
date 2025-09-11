@@ -913,8 +913,8 @@ const ExportPdf = () => {
                   <Select placeholder="Select a Status" options={Object.entries(statuses || {}).map(([value, label]) => ({ value: value, label: label }))}
                       classNamePrefix="custom-select"
                       className="custom-multiselect z-10"
-                      onChange={(selectedOption) => {
-                          if (selectedOption?.value !== undefined) SelectStatus(selectedOption);
+                      onChange={(selectedOption) => { 
+                        if (selectedOption?.value !== undefined) SelectStatus(selectedOption);
                       }}
                   />
               </div>
@@ -981,8 +981,6 @@ const ExportPdf = () => {
             </div>
         <LeadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}  />
 
-
-
         {isConfirmModalOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-lg max-w-md">
@@ -998,7 +996,6 @@ const ExportPdf = () => {
                 </div>
             </div>
         )} 
-
     </div>
     )
 }
