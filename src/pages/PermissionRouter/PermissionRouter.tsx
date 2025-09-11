@@ -5,10 +5,10 @@ import AnalyticsDashboard from '../emails/analyticsDashboard';
 
 const PermissionRouter = () => {
   const [permissions, setPermissions] = useState<any>([]);
-  
   useEffect(() => {
     const storedPermissions = JSON.parse(localStorage.getItem('permissions') || '[]');
     setPermissions(storedPermissions);
+    console.log("ererdffd="+storedPermissions)
   }, []);
 
   return permissions.includes('manage marketing') ? <AnalyticsDashboard /> : <Dashboardanalysis />;
