@@ -462,34 +462,36 @@ const NavBar = () => {
         </li>
       )}
       {/* KPI */}
-      <li className="menu nav-item relative">
-        <button
-          type="button"
-          className={`nav-link ${isVertical && currentMenu === 'kpi' ? 'active' : ''}`}
-          onClick={() => isVertical && toggleMenu('kpi')}
-        >
-          <div className="flex items-center">
-            <IconMenuElements className="shrink-0" />
-            <span className="px-1">{t(`kpi'S`)}</span>
-          </div>
-          <div className={`${isVertical && currentMenu !== 'kpi' ? 'rtl:rotate-90 -rotate-90' : ''}`}>
-            <IconCaretDown />
-          </div>
-        </button>
-        {renderSubMenu(
-          'kpi',
-          <>
-            {(permissions.includes('kpi create') || role === 'super admin') && (
-              <li><NavLink to="/pages/kpi/create">{t(`kpi'S Task`)}</NavLink></li>
-            )}
-            {(permissions.includes('kpi dashboard') || role === 'super admin') && (
-              <li><NavLink to="/pages/kpi/kpi_dashboard">{t(`kpi'S Dashboard`)}</NavLink></li>
-            )}
-          </>
-        )}
-      </li>
+      {(permissions.includes('kpi create') || permissions.includes('kpi dashboard') || role === 'super admin') && (
+        <li className="menu nav-item relative">
+          <button
+            type="button"
+            className={`nav-link ${isVertical && currentMenu === 'kpi' ? 'active' : ''}`}
+            onClick={() => isVertical && toggleMenu('kpi')}
+          >
+            <div className="flex items-center">
+              <IconMenuElements className="shrink-0" />
+              <span className="px-1">{t(`kpi'S`)}</span>
+            </div>
+            <div className={`${isVertical && currentMenu !== 'kpi' ? 'rtl:rotate-90 -rotate-90' : ''}`}>
+              <IconCaretDown />
+            </div>
+          </button>
+          {renderSubMenu(
+            'kpi',
+            <>
+              {(permissions.includes('kpi create') || role === 'super admin') && (
+                <li><NavLink to="/pages/kpi/create">{t(`kpi'S Task`)}</NavLink></li>
+              )}
+              {(permissions.includes('kpi dashboard') || role === 'super admin') && (
+                <li><NavLink to="/pages/kpi/kpi_dashboard">{t(`kpi'S Dashboard`)}</NavLink></li>
+              )}
+            </>
+          )}
+        </li>
+      )}
 
-      {/* {(permissions.includes('create subscriber') || role === 'super admin') && (
+      {(permissions.includes('manage marketing')) && (
           <li className="menu nav-item relative">
           <button
             type="button"
@@ -514,7 +516,7 @@ const NavBar = () => {
             </>
           )}
         </li>
-      )}  */}
+      )} 
 
     </ul>
   );
