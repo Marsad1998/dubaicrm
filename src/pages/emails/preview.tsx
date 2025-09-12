@@ -39,13 +39,20 @@ const EmailPreview = () => {
             const formData = new FormData(combinedRef.current.emailform);
             formData.append('body', generatePreview());
             formData.append('schedule_at', date);
-            if (formData.has('send_to_all')) {
-            } else {
-                toast.error('Please select at least one subscriber to send the email.');
-                setErrors({ send_to_all: ['Please select at least one subscriber to send the email.'] });
-                setActive('1');
-                return
-            }
+            const subscriberType = formData.get('subscriber_type');
+                if (!subscriberType) {
+                    toast.error('Please select a subscriber type before sending.');
+                    setErrors({ subscriber_type: ['Please select a subscriber type before sending.'] });
+                    setActive('1');
+                    return;
+                }
+            // if (formData.has('send_to_all')) {
+            // } else {
+            //     toast.error('Please select at least one subscriber to send the email.');
+            //     setErrors({ send_to_all: ['Please select at least one subscriber to send the email.'] });
+            //     setActive('1');
+            //     return
+            // }
             try {
                 const response = await apiClient.post(endpoints.createApi, formData);                
                 toast.success(response.data.message)
@@ -126,7 +133,7 @@ const EmailPreview = () => {
                         <div className="mb-5">
                             <form className="emailform" ref={(el) => (combinedRef.current.emailform = el)} onSubmit={sendEmailCampaign} onKeyUp={handleFormKeyUp}>
                                 <div className="space-y-2 font-semibold">
-                                  <div className={`border rounded ${errors.send_to_all  ? 'border-red-400' : 'border-[#d3d3d3] dark:border-[#1b2e4b]'}`}>
+                                  <div className={`border rounded ${errors.subscriber_type  ? 'border-red-400' : 'border-[#d3d3d3] dark:border-[#1b2e4b]'}`}>
                                     <button type="button" className={`p-4 w-full flex items-center text-white-dark dark:bg-[#1b2e4b] ${active === '1' ? '!text-primary' : ''}`}
                                             onClick={() => togglePara('1')}>
                                             To, Who are you sending this email to?
@@ -138,13 +145,27 @@ const EmailPreview = () => {
                                             <AnimateHeight duration={300} height={active === '1' ? 'auto' : 0}>
                                                 <div className="space-y-2 p-4 text-white-dark text-[13px] border-t border-[#d3d3d3] dark:border-[#1b2e4b]">
                                                     <div className="mb-3">
-                                                        <label className="inline-flex">
-                                                            <input type="checkbox" name="send_to_all" className="form-checkbox text-secondary rounded-full peer" />
-                                                            <span className="peer-checked:text-secondary">Send Email to All Subscribers</span>
-                                                        </label>                                                        
+                                                        <label htmlFor="subscriber_type" className="block mb-2">
+                                                            Select Import Type
+                                                        </label>
+                                                        <select
+                                                            name="subscriber_type"
+                                                            id="subscriber_type"
+                                                            className="form-control w-full p-2 border rounded"
+                                                        >
+                                                            <option value="">-- Select Option --</option>
+                                                            <option value="required">Required (No Import)</option>
+                                                            <option value="1">Hiring Candidate</option>
+                                                            <option value="2">Clients</option>
+                                                            <option value="3">Retargeting Clients</option>
+                                                            <option value="4">Roadshow Clients</option>
+                                                        </select>
+
+                                                          {errors.subscriber_type && <span className="text-red-500 text-sm">{errors.subscriber_type}</span>}
                                                     </div>
                                                 </div>
                                             </AnimateHeight>
+
                                         </div>
                                     </div>
                                     <div className={`border rounded ${errors.name || errors.subject || errors.email ? 'border-red-400' : 'border-[#d3d3d3] dark:border-[#1b2e4b]'}`}>
@@ -168,8 +189,8 @@ const EmailPreview = () => {
                                                         <label htmlFor="from_email">Email </label>
                                                         <select id="from_email" name="from_email" className="form-select" defaultValue="" onChange={handleSelect}>
                                                             <option value="" disabled>Select Email</option>
-                                                            <option value="evernestre@gmail.com">evernestre@gmail.com</option>
-                                                            <option value="info@evernestre.ae">info@evernestre.ae</option>
+                                                            {/* <option value="evernestre@gmail.com">evernestre@gmail.com</option> */}
+                                                            <option value="email@evernest.online">email@evernest.online</option>
                                                         </select>
                                                         {errors.from_email && <span className="text-red-500 text-sm">{errors.from_email}</span>}
                                                     </div>
