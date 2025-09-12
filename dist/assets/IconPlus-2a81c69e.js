@@ -1,5 +1,1 @@
-<<<<<<<< HEAD:dist/assets/IconPlus-3843c653.js
-import{j as r,b as e}from"./index-082ebb0e.js";const i=({className:o,fill:n=!1,duotone:s=!0})=>r("svg",{width:"20",height:"20",viewBox:"0 0 24 24",stroke:"currentColor",strokeWidth:"1.5",fill:"none",strokeLinecap:"round",strokeLinejoin:"round",className:o,children:[e("line",{x1:"12",y1:"5",x2:"12",y2:"19"}),e("line",{x1:"5",y1:"12",x2:"19",y2:"12"})]});export{i as I};
-========
 import{j as r,b as e}from"./index-93313922.js";const i=({className:o,fill:n=!1,duotone:s=!0})=>r("svg",{width:"20",height:"20",viewBox:"0 0 24 24",stroke:"currentColor",strokeWidth:"1.5",fill:"none",strokeLinecap:"round",strokeLinejoin:"round",className:o,children:[e("line",{x1:"12",y1:"5",x2:"12",y2:"19"}),e("line",{x1:"5",y1:"12",x2:"19",y2:"12"})]});export{i as I};
->>>>>>>> 606dd6e (fix the robinround):dist/assets/IconPlus-2a81c69e.js
