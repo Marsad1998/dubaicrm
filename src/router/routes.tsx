@@ -38,7 +38,6 @@ const AnalyticsDashboard = lazy(() => import('../pages/emails/analyticsDashboard
 const EmailReportList = lazy(() => import('../pages/emails/email-report'));
 const Createannouncements = lazy(() => import('../pages/announcements/create'));
 const Viewannouncements = lazy(() => import('../pages/announcements/view'));
-// listing
 const CreateListing = lazy(() => import('../pages/listing/createListing'));
 const Statuses = lazy(() => import('../pages/statuses/create'));
 const Kpi = lazy(() => import('../pages/kpi/create'));
@@ -51,13 +50,11 @@ const routes = [
         type: 'protected',
         element: <PermissionRouter key="default" />, 
     },
-
     {
         path: 'pages/leads/:dashboardType',
         type: 'protected',
         element: <DashboardBox key="dashboard" />,
     },
-
     {
         path: 'pages/leads/assign',
         type: 'protected',
@@ -109,8 +106,7 @@ const routes = [
         element : <ActivitiesRequest/>,
         layout: 'default',
     },
-
-    // Email Template
+    
     {
         path: 'pages/email/template',
         type: 'protected',
