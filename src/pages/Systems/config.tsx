@@ -7,13 +7,17 @@ import IconMail from '../../components/Icon/IconMail';
 import IconBrandWhatsapp from '../../components/Icon/IconMessage';
 import IconBrandGoogle from '../../components/Icon/IconGoogle';
 import IconServer from '../../components/Icon/IconServer';
+// import IconCamp from '../../components/Icon/IconPencilPaper;
 import apiClient from '../../utils/apiClient';
 import { getBaseUrl } from '../../components/BaseUrl';
 import Toast from '../../services/toast';
+import Select from 'react-select';
 
 const endpoints = {
     getConfig: `${getBaseUrl()}/config`,
     updateConfig: `${getBaseUrl()}/config/update`,
+    getAgents: `${getBaseUrl()}/listing/get_users`,
+    saveCampaign: `${getBaseUrl()}/campaigns/save`, 
 };
 
 const ConfigSettings = () => {
@@ -23,18 +27,35 @@ const ConfigSettings = () => {
     const requestMade = useRef(false);
     const [loading, setLoading] = useState(false);
     const [saveLoading, setSaveLoading] = useState(false);
-    
-
-
-    
-
+    const [agents, setAgents] = useState<any[]>([]);
+    const [selectedAgent, setSelectedAgent] = useState(null);
+    const [campaigns, setCampaigns] = useState('');
 
     useEffect(() => {
         if (!requestMade.current) {
             dispatch(setPageTitle("Configuration Settings"));
             fetchConfigData();
             requestMade.current = true;
+            const fetchAgents = async () => {
+                setLoading(true);
+                try {
+                    const res = await apiClient.get(endpoints.getAgents);
+                    if (res.data) {
+                        const formattedAgents = res.data.map((agent: any) => ({
+                            value: agent.client_user_id,
+                            label: agent.client_user_name,
+                        }));
+                        setAgents(formattedAgents);
+                    }
+                } catch (error) {
+                    toast.error('Failed to load agents');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchAgents();
         }
+
     }, [dispatch]);
 
     const [tabs, setTabs] = useState<string>('meta');
@@ -64,6 +85,10 @@ const ConfigSettings = () => {
         // Theme Layout
         theme_layout: 1, 
 
+        // Campaign and Agents
+        campaign_names: [] as string[],
+        agent_ids: [] as number[],
+
     });
     
     const fetchConfigData = async () => {
@@ -71,7 +96,20 @@ const ConfigSettings = () => {
         try {
             const response = await apiClient.get(endpoints.getConfig);
             if (response.data && response.data.config) {
-                setFormData(prev => ({ ...prev, ...response.data.config }));
+                const configData = response.data.config;
+                setFormData(prev => ({ 
+                    ...prev, 
+                    ...configData,
+                    // Ensure arrays are properly initialized
+                    campaign_names: configData.campaign_names || [],
+                    agent_ids: configData.agent_ids || [],
+                }));
+                
+                // Set campaigns and agents for display if they exist
+                if (configData.campaign_names) {
+                    console.log(configData.campaign_names)
+                    setCampaigns(configData.campaign_names.join(', '));
+                }
             }
         } catch (error: any) {
             if (error.response?.status === 403) {
@@ -125,6 +163,44 @@ const ConfigSettings = () => {
             }
         } finally {
             setSaveLoading(false);
+        }
+    };
+
+    // Get selected agents for the multi-select
+    const getSelectedAgents = () => {
+        return agents.filter(agent => 
+            formData.agent_ids.includes(agent.value)
+        );
+    };
+
+    const handleCampaignChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setCampaigns(value);
+        
+        // Convert comma-separated string to array and update formData
+        const campaignArray = value.split(',').map(item => item.trim()).filter(item => item !== '');
+        setFormData(prev => ({ ...prev, campaign_names: campaignArray }));
+        
+        if (errors.campaign_names) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors.campaign_names;
+                return newErrors;
+            });
+        }
+    };
+
+    const handleAgentChange = (selectedOptions: any) => {
+        // Extract just the values from selected options
+        const agentIds = selectedOptions ? selectedOptions.map((option: any) => option.value) : [];
+        setFormData(prev => ({ ...prev, agent_ids: agentIds }));
+        
+        if (errors.agent_ids) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors.agent_ids;
+                return newErrors;
+            });
         }
     };
 
@@ -191,7 +267,13 @@ const ConfigSettings = () => {
                                         Theme Layout
                                     </button>
                                 </li>
-
+                                 <li className="inline-block">
+                                    <button onClick={() => toggleTabs('campaign_agents')}className={`flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary ${tabs === 'smtp' ? '!border-primary text-primary' : ''}`}
+                                    >
+                                        <IconServer />
+                                        Campaign And Agents
+                                    </button>
+                                </li>
                             </ul>
                         </div>
 
@@ -476,6 +558,49 @@ const ConfigSettings = () => {
                                             </label>
                                         </div>
                                     </div>
+                                </div>
+                            )}
+                            {tabs === "campaign_agents" && (
+                                <div>
+                                    <h6 className="text-lg font-bold mb-5">Campaign & Agents</h6>
+                                    {/* Campaign names */}
+                                        <div className="form-group flex flex-col gap-2">
+                                            <label htmlFor="campaign_names">Campaign Names</label>
+                                            <input
+                                                id="campaign_names"
+                                                type="text"
+                                                className="form-input border rounded p-2"
+                                                placeholder="Enter campaign names, comma separated"
+                                                value={campaigns}
+                                                onChange={handleCampaignChange}
+                                            />
+                                            {errors.campaign_names && (
+                                                <span className="text-red-500 text-sm">{errors.campaign_names}</span>
+                                            )}
+                                            <p className="text-xs text-gray-500 mt-1">Enter multiple campaign names separated by commas</p>
+                                        </div>
+
+                                        {/* Agent select */}
+                                        <div className="form-group flex flex-col gap-2">
+                                            <label htmlFor="agent_ids">Assign Agents</label>
+                                            <Select
+                                                id="agent_ids"
+                                                name="agent_ids"
+                                                placeholder={loading ? 'Loading agents...' : 'Select agents'}
+                                                options={agents}
+                                                value={getSelectedAgents()}
+                                                onChange={handleAgentChange}
+                                                isClearable={true}
+                                                isDisabled={loading}
+                                                isMulti={true}
+                                                className="react-select-container"
+                                                classNamePrefix="react-select"
+                                            />
+                                            {errors.agent_ids && (
+                                                <span className="text-red-500 text-sm">{errors.agent_ids}</span>
+                                            )}
+                                            <p className="text-xs text-gray-500 mt-1">Select one or multiple agents</p>
+                                        </div>
                                 </div>
                             )}
                             
