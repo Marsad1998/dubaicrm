@@ -18,6 +18,7 @@ const endpoints = {
     updateConfig: `${getBaseUrl()}/config/update`,
     getAgents: `${getBaseUrl()}/listing/get_users`,
     saveCampaign: `${getBaseUrl()}/campaigns/save`, 
+    deleteCampaignAgent: `${getBaseUrl()}/config/delete`, 
 };
 
 const ConfigSettings = () => {
@@ -30,6 +31,7 @@ const ConfigSettings = () => {
     const [agents, setAgents] = useState<any[]>([]);
     const [selectedAgent, setSelectedAgent] = useState(null);
     const [campaigns, setCampaigns] = useState('');
+    const [campaignAgents, setCampaignAgents] = useState<any[]>([]);
 
     useEffect(() => {
         if (!requestMade.current) {
@@ -97,19 +99,20 @@ const ConfigSettings = () => {
             const response = await apiClient.get(endpoints.getConfig);
             if (response.data && response.data.config) {
                 const configData = response.data.config;
+                setCampaignAgents(response.data.campaign_agents);
                 setFormData(prev => ({ 
                     ...prev, 
                     ...configData,
                     // Ensure arrays are properly initialized
-                    campaign_names: configData.campaign_names || [],
-                    agent_ids: configData.agent_ids || [],
+                    // campaign_names: configData.campaign_names || [],
+                    // agent_ids: configData.agent_ids || [],
                 }));
                 
                 // Set campaigns and agents for display if they exist
-                if (configData.campaign_names) {
-                    console.log(configData.campaign_names)
-                    setCampaigns(configData.campaign_names.join(', '));
-                }
+                // if (configData.campaign_names) {
+                //     console.log(configData.campaign_names)
+                //     setCampaigns(configData.campaign_names.join(', '));
+                // }
             }
         } catch (error: any) {
             if (error.response?.status === 403) {
@@ -150,6 +153,7 @@ const ConfigSettings = () => {
                     const menuType = formData.theme_layout === 0 ? 'vertical' : 'horizontal';
                     dispatch(toggleMenu(menuType));
                 }
+                fetchConfigData();
                 setErrors({});
                 toast.success('Configuration updated successfully');
             }
@@ -201,6 +205,20 @@ const ConfigSettings = () => {
                 delete newErrors.agent_ids;
                 return newErrors;
             });
+        }
+    };
+
+    const handleDeleteAssignment = async (assignmentId: number) => {
+        if (window.confirm('Are you sure you want to delete this assignment?')) {
+            try {
+                await apiClient.post(`${endpoints.deleteCampaignAgent}`, { assignmentId: assignmentId });
+                // setCampaignAgents(prev => prev.filter(item => item.id !== assignmentId));
+                fetchConfigData();
+                toast.success('Assignment deleted successfully');
+            } catch (error) {
+                console.error('Error deleting assignment:', error);
+                toast.error('Failed to delete assignment');
+            }
         }
     };
 
@@ -563,44 +581,91 @@ const ConfigSettings = () => {
                             {tabs === "campaign_agents" && (
                                 <div>
                                     <h6 className="text-lg font-bold mb-5">Campaign & Agents</h6>
-                                    {/* Campaign names */}
-                                        <div className="form-group flex flex-col gap-2">
-                                            <label htmlFor="campaign_names">Campaign Names</label>
-                                            <input
-                                                id="campaign_names"
-                                                type="text"
-                                                className="form-input border rounded p-2"
-                                                placeholder="Enter campaign names, comma separated"
-                                                value={campaigns}
-                                                onChange={handleCampaignChange}
-                                            />
-                                            {errors.campaign_names && (
-                                                <span className="text-red-500 text-sm">{errors.campaign_names}</span>
-                                            )}
-                                            <p className="text-xs text-gray-500 mt-1">Enter multiple campaign names separated by commas</p>
-                                        </div>
+                                    <div className="form-group flex flex-col gap-2">
+                                        <label htmlFor="campaign_names">Campaign Names</label>
+                                        <input
+                                            id="campaign_names"
+                                            type="text"
+                                            className="form-input border rounded p-2"
+                                            placeholder="Enter campaign names, comma separated"
+                                            value={campaigns}
+                                            onChange={handleCampaignChange}
+                                        />
+                                        {errors.campaign_names && (
+                                            <span className="text-red-500 text-sm">{errors.campaign_names}</span>
+                                        )}
+                                        <p className="text-xs text-gray-500 mt-1">Enter multiple campaign names separated by commas</p>
+                                    </div>
 
-                                        {/* Agent select */}
-                                        <div className="form-group flex flex-col gap-2">
-                                            <label htmlFor="agent_ids">Assign Agents</label>
-                                            <Select
-                                                id="agent_ids"
-                                                name="agent_ids"
-                                                placeholder={loading ? 'Loading agents...' : 'Select agents'}
-                                                options={agents}
-                                                value={getSelectedAgents()}
-                                                onChange={handleAgentChange}
-                                                isClearable={true}
-                                                isDisabled={loading}
-                                                isMulti={true}
-                                                className="react-select-container"
-                                                classNamePrefix="react-select"
-                                            />
-                                            {errors.agent_ids && (
-                                                <span className="text-red-500 text-sm">{errors.agent_ids}</span>
+                                    {/* Agent select */}
+                                    <div className="form-group flex flex-col gap-2">
+                                        <label htmlFor="agent_ids">Assign Agents</label>
+                                        <Select
+                                            id="agent_ids"
+                                            name="agent_ids"
+                                            placeholder={loading ? 'Loading agents...' : 'Select agents'}
+                                            options={agents}
+                                            value={getSelectedAgents()}
+                                            onChange={handleAgentChange}
+                                            isClearable={true}
+                                            isDisabled={loading}
+                                            isMulti={true}
+                                            className="react-select-container"
+                                            classNamePrefix="react-select"
+                                        />
+                                        {errors.agent_ids && (
+                                            <span className="text-red-500 text-sm">{errors.agent_ids}</span>
+                                        )}
+                                        <p className="text-xs text-gray-500 mt-1">Select one or multiple agents</p>
+                                    </div>
+
+
+                                    <table className="min-w-full bg-white">
+                                        <thead>
+                                            <tr className="bg-gray-50">
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Campaign Name</th>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Agent Name</th>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Agent Email</th>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {campaignAgents && campaignAgents.length > 0 ? (
+                                                campaignAgents.map((assignment) => (
+                                                    <tr key={assignment.id} className="border-t hover:bg-gray-50">
+                                                        <td className="px-4 py-3 text-sm text-gray-900">
+                                                            {assignment.campaign_name}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900">
+                                                            {assignment.agents?.client_user_name || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900">
+                                                            {assignment.agents?.client_user_email || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDeleteAssignment(assignment.id)}
+                                                                className="text-red-500 hover:text-red-700"
+                                                                title="Delete assignment"
+                                                            >
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="4" className="px-4 py-4 text-center text-sm text-gray-500">
+                                                        No campaign-agent assignments found.
+                                                    </td>
+                                                </tr>
                                             )}
-                                            <p className="text-xs text-gray-500 mt-1">Select one or multiple agents</p>
-                                        </div>
+                                        </tbody>
+                                    </table>
+
                                 </div>
                             )}
                             
