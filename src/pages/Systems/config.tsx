@@ -660,6 +660,7 @@ const ConfigSettings = () => {
                                                         No campaign-agent assignments found.
                                                     </td>
                                                 </tr>
+                                                
                                             )}
                                         </tbody>
                                     </table>
