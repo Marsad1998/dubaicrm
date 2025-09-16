@@ -10,10 +10,7 @@ label{
     padding-left: 4px;
 }
 .calendar-wrapper .fc-button-primary:not(:disabled):hover, .calendar-wrapper .fc-button-primary:not(:disabled).fc-button-active{
-    /* background-color :  rgb(128 93 202) !important; */
-
     background-color: rgb(33 150 243) !important;
-
     border: none !important;
 }
 

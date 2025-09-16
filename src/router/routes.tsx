@@ -43,6 +43,8 @@ const Statuses = lazy(() => import('../pages/statuses/create'));
 const Kpi = lazy(() => import('../pages/kpi/create'));
 const KPIDashboard = lazy(() => import('../pages/kpi/kpidashboard'));
 const PermissionRouter = lazy(() => import('../pages/PermissionRouter/PermissionRouter'));
+const Templates = lazy(() => import('../pages/whatsapp/templates'));
+
 
 const routes = [
     {
@@ -180,14 +182,19 @@ const routes = [
         element: <Kpi />,
         layout: 'default',
     },
-
-
     {
         path: 'pages/kpi/kpi_dashboard',
         type: 'protected',
         element: <KPIDashboard />, 
         layout: 'default',
     },
+    {
+        path: 'pages/whatsapp/templates',
+        type: 'protected',
+        element: <Templates />, 
+        layout: 'default',
+    },
+    
 
     {
         path: '/analytics',

@@ -145,14 +145,9 @@ const EmailPreview = () => {
                                             <AnimateHeight duration={300} height={active === '1' ? 'auto' : 0}>
                                                 <div className="space-y-2 p-4 text-white-dark text-[13px] border-t border-[#d3d3d3] dark:border-[#1b2e4b]">
                                                     <div className="mb-3">
-                                                        <label htmlFor="subscriber_type" className="block mb-2">
-                                                            Select Import Type
+                                                        <label htmlFor="subscriber_type" className="block mb-2"> Select Import Type
                                                         </label>
-                                                        <select
-                                                            name="subscriber_type"
-                                                            id="subscriber_type"
-                                                            className="form-control w-full p-2 border rounded"
-                                                        >
+                                                        <select name="subscriber_type" id="subscriber_type" className="form-control w-full p-2 border rounded">
                                                             <option value="">-- Select Option --</option>
                                                             <option value="required">Required (No Import)</option>
                                                             <option value="1">Hiring Candidate</option>
@@ -160,12 +155,10 @@ const EmailPreview = () => {
                                                             <option value="3">Retargeting Clients</option>
                                                             <option value="4">Roadshow Clients</option>
                                                         </select>
-
                                                           {errors.subscriber_type && <span className="text-red-500 text-sm">{errors.subscriber_type}</span>}
                                                     </div>
                                                 </div>
                                             </AnimateHeight>
-
                                         </div>
                                     </div>
                                     <div className={`border rounded ${errors.name || errors.subject || errors.email ? 'border-red-400' : 'border-[#d3d3d3] dark:border-[#1b2e4b]'}`}>
@@ -189,7 +182,6 @@ const EmailPreview = () => {
                                                         <label htmlFor="from_email">Email </label>
                                                         <select id="from_email" name="from_email" className="form-select" defaultValue="" onChange={handleSelect}>
                                                             <option value="" disabled>Select Email</option>
-                                                            {/* <option value="evernestre@gmail.com">evernestre@gmail.com</option> */}
                                                             <option value="email@evernest.online">email@evernest.online</option>
                                                         </select>
                                                         {errors.from_email && <span className="text-red-500 text-sm">{errors.from_email}</span>}

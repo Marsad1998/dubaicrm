@@ -239,6 +239,7 @@ import IconCaretDown from './Icon/IconCaretDown';
 import IconMenuDashboard from './Icon/Menu/IconMenuDashboard';
 import IconMenuElements from './Icon/Menu/IconMenuElements';
 import IconMenuDatatables from './Icon/Menu/IconMenuDatatables';
+import IconMultipleForwardRight from './Icon/IconMultipleForwardRight';
 
 const NavBar = () => {
   const { t } = useTranslation();
@@ -499,7 +500,7 @@ const NavBar = () => {
             onClick={() => isVertical && toggleMenu('emailtool')}
           >
             <div className="flex items-center">
-              <IconMenuElements className="shrink-0" />
+              <IconMultipleForwardRight className="shrink-0" />
               <span className="px-1">{t(`Email Marketing`)}</span>
             </div>
             <div className={`${isVertical && currentMenu !== 'emailtool' ? 'rtl:rotate-90 -rotate-90' : ''}`}>
@@ -516,7 +517,27 @@ const NavBar = () => {
             </>
           )}
         </li>
-      )} 
+       )} 
+       
+       {(permissions.includes('manage marketing')) && (
+          <li className="menu nav-item relative">
+          <button type="button" className={`nav-link ${isVertical && currentMenu === 'whatsappool' ? 'active' : ''}`} onClick={() => isVertical && toggleMenu('whatsappool')}>
+            <div className="flex items-center">
+              <IconMultipleForwardRight className="shrink-0" />
+              <span className="px-1">{t(`Whatsap Marketing`)}</span>
+            </div>
+            <div className={`${isVertical && currentMenu !== 'whatsappool' ? 'rtl:rotate-90 -rotate-90' : ''}`}> <IconCaretDown /> </div>
+          </button>
+          {renderSubMenu('whatsappool',
+            <>
+                <NavLink to="/pages/whatsapp/templates">{t('Whatsapp Templates')}</NavLink>
+                {/* <NavLink to="/pages/email/template">{t('Create-Campaign')}</NavLink> */}
+                {/* <NavLink to="/pages/email/analyticsDashboard">{t('Tracking Dashboard')}</NavLink> */}
+                {/* <NavLink to="/pages/email/email-report-list">{t('Report List')}</NavLink> */}
+            </>
+          )}
+        </li>
+       )} 
 
     </ul>
   );

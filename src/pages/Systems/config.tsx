@@ -214,7 +214,6 @@ const ConfigSettings = () => {
                     <span>Configuration Settings</span>
                 </li>
             </ul>
-            
             <div className="pt-5">
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
@@ -442,8 +441,7 @@ const ConfigSettings = () => {
                                         </div>
                                         <div>
                                             <label htmlFor="smtp_username">SMTP Username</label>
-                                            <input 
-                                                id="smtp_username" 
+                                            <input  id="smtp_username" 
                                                 name="smtp_username" 
                                                 type="text" 
                                                 placeholder="your@email.com" 
