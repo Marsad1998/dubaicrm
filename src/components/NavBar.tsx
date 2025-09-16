@@ -531,6 +531,8 @@ const NavBar = () => {
           {renderSubMenu('whatsappool',
             <>
                 <NavLink to="/pages/whatsapp/templates">{t('Whatsapp Templates')}</NavLink>
+                <NavLink to="/pages/whatsapp/campaign">{t('Run Campaign')}</NavLink>
+
                 {/* <NavLink to="/pages/email/template">{t('Create-Campaign')}</NavLink> */}
                 {/* <NavLink to="/pages/email/analyticsDashboard">{t('Tracking Dashboard')}</NavLink> */}
                 {/* <NavLink to="/pages/email/email-report-list">{t('Report List')}</NavLink> */}
