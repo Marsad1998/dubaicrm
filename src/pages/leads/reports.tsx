@@ -257,6 +257,7 @@ const Reports = () => {
 
             if (response.status === 'success') {
                 toast.success(response.message || 'Selected leads successfully taken back!');
+                
                 setIsConfirmModalOpen(false);
                 setBulkSelectedIds(new Set());
                 setSelectedRecords([]);
@@ -268,8 +269,8 @@ const Reports = () => {
                     sortField: sortStatus.columnAccessor,
                     sortOrder: sortStatus.direction,
                     search: searchTerm,
-                    agent_id: selectedAgent,
-                    lead_status: selectedStatus || undefined
+                    // agent_id: selectedAgent,
+                    // lead_status: selectedStatus || undefined
                 }));
             } else {
                 toast.error(response.message || 'Failed to take back leads.');
@@ -451,18 +452,11 @@ const Reports = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg max-w-md">
                         <h3 className="text-lg font-bold mb-4">Confirm Take Back</h3>
-                        <p>Are you sure you want to take back {bulkSelectedIds.size} selected leads?</p>
+                        {/* <p>Are you sure you want to take back {bulkSelectedIds.size} selected leads?</p> */}
+                        <p>Are you sure you want to take back {total || 0} selected leads?</p>
                         <div className="flex justify-end mt-4 space-x-2">
-                            <button 
-                                onClick={() => setIsConfirmModalOpen(false)} 
-                                className="btn btn-outline-secondary"
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                onClick={handleTakeBackConfirm} 
-                                className="btn btn-primary"
-                            >
+                            <button onClick={() => setIsConfirmModalOpen(false)}  className="btn btn-outline-secondary"> Cancel </button>
+                            <button  onClick={handleTakeBackConfirm} className="btn btn-primary">
                                 Confirm
                             </button>
                         </div>

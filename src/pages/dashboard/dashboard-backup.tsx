@@ -223,7 +223,7 @@ import { IconOption } from '../../components/Icon';
 
             const csvUrl = response.payload?.csvUrl || response.payload?.data;
             if (csvUrl) {
-            window.open(csvUrl, '_blank'); // 👈 just open the URL
+            window.open(csvUrl, '_blank'); 
             } else {
             toast.error('Failed to export CSV');
             }

@@ -909,7 +909,7 @@ const ExportPdf = () => {
                   <IconBell /> 
               </div>
               <span className="ltr:mr-3 rtl:ml-3"> Details of Your Agents Pdf Reports. </span>
-              <div className='w-[200px] ltr:ml-3 rtl:mr-3'>
+              {/* <div className='w-[200px] ltr:ml-3 rtl:mr-3'>
                   <Select placeholder="Select a Status" options={Object.entries(statuses || {}).map(([value, label]) => ({ value: value, label: label }))}
                       classNamePrefix="custom-select"
                       className="custom-multiselect z-10"
@@ -917,10 +917,10 @@ const ExportPdf = () => {
                         if (selectedOption?.value !== undefined) SelectStatus(selectedOption);
                       }}
                   />
-              </div>
-              <button onClick={() => setIsConfirmModalOpen(true)}  type="button" className="btn btn-secondary btn-sm flex items-center ltr:ml-2 rtl:mr-2">
+              </div> */}
+              {/* <button onClick={() => setIsConfirmModalOpen(true)}  type="button" className="btn btn-secondary btn-sm flex items-center ltr:ml-2 rtl:mr-2">
                   <IconSearch /> &nbsp; Send To Cold
-              </button>
+              </button> */}
           </div> 
           
           <div className="flex items-center space-x-2">

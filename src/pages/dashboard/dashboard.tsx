@@ -179,33 +179,6 @@ import { IconOption } from '../../components/Icon';
         }
     };
 
-    // const exportCSV = async () => {
-    //     if (!selectedTab) {
-    //         toast.error('Please select any leads status first, Like Cold,Warm, Hot Lead');
-    //         return;
-    //     }
-    //     try {
-    //         dispatch(setLoading(true));
-    //         const response = await dispatch(DashboardLeadslist({ page_number: meta.current_page,  lead_status: selectedTab,  type: 'csv' }) as any);
-    //         if (response.payload?.leadsdata?.data) {
-    //             const link = document.createElement('a');
-    //             link.href = response.payload.leadsdata.data;
-    //             link.target = '_blank';
-    //             link.click();
-    //             Refresh();
-            
-    //         } else {
-    //             toast.error('Failed to export CSV');
-    //         }
-    //     } catch (error) {
-    //         console.error(error);
-    //         toast.error('Something went wrong while exporting CSV');
-    //     } finally {
-    //         dispatch(setLoading(false));
-    //     }
-    // };
-
-
     const exportCSV = async () => {
         if (!selectedTab) {
             toast.error('Please select any leads status first, Like Cold,Warm, Hot Lead');
@@ -213,19 +186,16 @@ import { IconOption } from '../../components/Icon';
         }
         try {
             dispatch(setLoading(true));
-            const response = await dispatch(
-            DashboardLeadslist({
-                page_number: meta.current_page,
-                lead_status: selectedTab,
-                dashboardType: 'csv',   // backend gives URL
-            }) as any
-            );
-
-            const csvUrl = response.payload?.csvUrl || response.payload?.data;
-            if (csvUrl) {
-            window.open(csvUrl, '_blank'); // 👈 just open the URL
+            const response = await dispatch(DashboardLeadslist({ page_number: meta.current_page,  lead_status: selectedTab,  dashboardType: 'csv' }) as any);
+             if (response.payload.leadsdata) {
+                const link = document.createElement('a');
+                link.href = response.payload.leadsdata;
+                link.target = '_blank';
+                link.click();
+                Refresh();
+            
             } else {
-            toast.error('Failed to export CSV');
+                toast.error('Failed to export CSV');
             }
         } catch (error) {
             console.error(error);
@@ -233,7 +203,10 @@ import { IconOption } from '../../components/Icon';
         } finally {
             dispatch(setLoading(false));
         }
-        };
+    };
+
+
+    
         
     const AssignToAgent = async (leadId: any) => {
         try {

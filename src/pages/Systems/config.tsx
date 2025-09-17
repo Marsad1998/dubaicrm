@@ -171,11 +171,11 @@ const ConfigSettings = () => {
     };
 
     // Get selected agents for the multi-select
-    const getSelectedAgents = () => {
-        return agents.filter(agent => 
-            formData.agent_ids.includes(agent.value)
-        );
-    };
+    // const getSelectedAgents = () => {
+    //     return agents?.filter(agent => 
+    //         formData.agent_ids.includes(agent.value)
+    //     );
+    // };
 
     const handleCampaignChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -603,7 +603,7 @@ const ConfigSettings = () => {
                                             name="agent_ids"
                                             placeholder={loading ? 'Loading agents...' : 'Select agents'}
                                             options={agents}
-                                            value={getSelectedAgents()}
+                                            // value={getSelectedAgents()}
                                             onChange={handleAgentChange}
                                             isClearable={true}
                                             isDisabled={loading}
