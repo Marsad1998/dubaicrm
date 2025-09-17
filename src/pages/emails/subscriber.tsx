@@ -72,7 +72,7 @@ const SubscriberTemplate = () => {
     const showSuccessToast = (message: string) => {
         Swal.fire({
             toast: true,
-            position: 'top-end',
+            position: 'top-end',   
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true,

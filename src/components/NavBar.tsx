@@ -410,7 +410,6 @@ const NavBar = () => {
           )}
         </li>
       )}
-
       {/* Announcements */}
       <li className="menu nav-item relative">
         <button
