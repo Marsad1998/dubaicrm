@@ -36,7 +36,6 @@ const SubscriberTemplate = () => {
         direction: 'asc' 
     });
     const [searchQuery, setSearchQuery] = useState('');
-
     const [subscriber, setSubscriber] = useState([]);
 
     useEffect(() => {

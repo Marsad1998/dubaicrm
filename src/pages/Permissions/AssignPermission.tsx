@@ -29,8 +29,8 @@ const AssignPermission = () => {
 
     const getRoles = async () => {
         try {
-            const response = await apiClient.get('/users/get_user_role');
-            setRoles(response.data.data);
+            const response = await apiClient.get('/users/get_user_role?for_select=1');
+            setRoles(response.data);
         } catch (error) {
             toast.error('Failed to fetch roles');
         }
