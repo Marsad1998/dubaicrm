@@ -75,7 +75,7 @@ import { IconOption } from '../../components/Icon';
         const option = Statues.find((opt) => opt.value == leadStatus);
         return option && typeof option.notes2 === 'string' ? option.notes2 : 'Unknown Statu2s';
     }
-
+    
     const LeadsTabs = async (status: number) => {
         combinedRef.current.ishideshow = true;
         const response = await dispatch(DashboardLeadslist({ page_number : meta.current_page , lead_status : status, dashboardType: dashboardType || 'all', search: searchText  }) as any);

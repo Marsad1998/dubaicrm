@@ -900,7 +900,6 @@ const ExportPdf = () => {
           setLoading(true);
       }
     }
-
     return (
     <div>
         <div className="panel flex items-center justify-between overflow-visible whitespace-nowrap p-3 text-dark relative">
@@ -922,7 +921,6 @@ const ExportPdf = () => {
                   <IconSearch /> &nbsp; Send To Cold
               </button> */}
           </div> 
-          
           <div className="flex items-center space-x-2">
               <div className="w-[200px]">
                   <button className="btn btn-secondary" onClick={() => setShowPicker(!showPicker)}>
@@ -939,9 +937,7 @@ const ExportPdf = () => {
                       }} 
                   />
               </div> 
-              <button 
-                  onClick={() => { DownloadPdf(); }}  
-                  type="button" 
+              <button onClick={() => { DownloadPdf(); }}   type="button" 
                   className="btn btn-secondary btn-sm"
               >
                   <IconPlus /> Download 
