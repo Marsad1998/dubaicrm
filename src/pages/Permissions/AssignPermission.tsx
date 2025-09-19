@@ -17,7 +17,7 @@ const AssignPermission = () => {
     const combinedRef = useRef<any>({ userformRef: null });
     const toast = Toast();
     const requestMade = useRef(false);
-
+    
     useEffect(() => {
         if (!requestMade.current) {
             getRoles();

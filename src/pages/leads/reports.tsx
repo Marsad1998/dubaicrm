@@ -332,6 +332,7 @@ const Reports = () => {
             },
         },
         { accessor: 'date', title: 'Date', sortable: true },
+        
         {
             accessor: 'actions', 
             title: 'Actions',

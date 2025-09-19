@@ -17,6 +17,7 @@ import Swal from 'sweetalert2';
 import { DataTableSortStatus } from 'mantine-datatable';
 import { setLoading } from '../../slices/dashboardSlice';
 import IconSearch from '../../components/Icon/IconSearch';
+import LeadDetailModal from '../../components/LeadDetailModal';
 
 const ReAssign = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -47,6 +48,8 @@ const ReAssign = () => {
     const { leads, loading, agents, total, last_page, current_page, per_page } = useSelector((state: IRootState) => state.leadslices);
 
     const [SearchagentSelected, setSearchAgentSelected] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [selectedLead, setSelectedLead] = useState<any>(null);
 
     useEffect(() => {
         dispatch(setPageTitle('Re-Assign Leads'));
@@ -69,6 +72,9 @@ const ReAssign = () => {
     })) || [];
     
     const tableData = useMemo(() => {
+
+        console.log(leads);
+
         return (Array.isArray(leads) ? leads : []).map((lead: any) => ({
             id: lead.lead_id || 'Unknown',
             title: lead.lead_title || 'Unknown',
@@ -314,8 +320,8 @@ const ReAssign = () => {
             accessor: 'title',
             title: 'Title',
             sortable: true,
-            width: 320, // Fixed width in pixels
-            cellsClassName: 'break-all whitespace-normal', // Tailwind classes for word breaking
+            width: 320, 
+            cellsClassName: 'break-all whitespace-normal', 
             render: (record: any) => (
                 <div className="break-words whitespace-normal max-w-xs truncate">
                     {record.title}
@@ -326,8 +332,8 @@ const ReAssign = () => {
             accessor: 'name',
             title: 'Name',
             sortable: true,
-            width: 200, // Fixed width in pixels
-            cellsClassName: 'break-all whitespace-normal', // Tailwind classes for word breaking
+            width: 200, 
+            cellsClassName: 'break-all whitespace-normal', 
             render: (record: any) => (
                 <div className="break-words whitespace-normal max-w-xs truncate">
                     {record.name}
@@ -355,8 +361,19 @@ const ReAssign = () => {
         { accessor: 'created_at', title: 'Lead Created', sortable: true },
         { accessor: 'updated_at', title: 'Last Updated', sortable: true },
         { accessor: 'assigned_at', title: 'Last Assigned', sortable: true },
-    ];
 
+        {
+            accessor: 'actions', 
+            title: 'Actions',
+            render: (record: any) => {
+                const fullLead = leads.find((l: any) => l.lead_id === record.id);
+                return (
+                    <button type="button" className="btn btn-secondary btn-sm" style={{ height: '23px', borderRadius: '13px' }} onClick={() => { setIsDetailModalOpen(true); setSelectedLead((fullLead as any)?.comments || []); }} > View </button>
+                );
+            },
+        },
+    ];
+    
     return (
         <div>
             <div className="panel flex items-center justify-between overflow-visible whitespace-nowrap p-3 text-dark relative">
@@ -364,7 +381,7 @@ const ReAssign = () => {
                     <div className="rounded-full bg-primary p-1.5 text-white ring-2 ring-primary/30 ltr:mr-3 rtl:ml-3">
                         <IconBell />
                     </div>
-                    <span className="ltr:mr-3 rtl:ml-3">Details of Your New Leads: </span>
+                    <span className="ltr:mr-3 rtl:ml-3">Details of Your Re-Assign Leads: </span>
                     <button onClick={openLeadModal} className="btn btn-success btn-sm"> 
                         <IconPlus /> Add Lead
                     </button>
@@ -417,6 +434,11 @@ const ReAssign = () => {
                 />
             </div>
             <LeadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            <LeadDetailModal 
+                isOpen={isDetailModalOpen} 
+                onClose={() => setIsDetailModalOpen(false)} 
+                comments={selectedLead} 
+            />
         </div>
     );
 };

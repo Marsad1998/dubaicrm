@@ -94,7 +94,8 @@ import apiClient from '../utils/apiClient';
                 params: { page:effectivePage, per_page: perPage, sort_field: sortField, sort_order: sortOrder, search: search },
             });
             return {
-                data: response.data.data.data,
+                // data: response.data.data.data,
+                data: response.data.data,
                 agents: response.data.agents,
                 total: response.data.data.total,
                 last_page: response.data.data.last_page,
