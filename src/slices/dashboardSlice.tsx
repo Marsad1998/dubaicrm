@@ -82,7 +82,9 @@ import apiClient from '../utils/apiClient';
                     hrtopbar: response.data.hrtopbar || [], 
                     hrsidebar: response.data.hrsidebar || [], 
                     hrdropdown: response.data.hrdropdown || [],
-                    dashboardType : dashboardType
+                    dashboardType : dashboardType,
+                    overall_leads : response.data.overall_leads || 0,
+
 
                 };
             } catch (error: any) {
@@ -172,6 +174,7 @@ import apiClient from '../utils/apiClient';
         hrsidebar : [],
         hrdropdown : [],
         dashboardType :  '',
+        overall_leads : 0,
     };
     
     const DashboardSlice = createSlice({
@@ -216,6 +219,7 @@ import apiClient from '../utils/apiClient';
                     state.hrsidebar  = action.payload.hrsidebar;
                     state.hrdropdown = action.payload.hrdropdown;
                     state.dashboardType = action.payload.dashboardType ?? '';
+                    state.overall_leads = action.payload.overall_leads ?? '';
                     state.success = true;
                 })
                 .addCase(DashboardLeadslist.rejected, (state) => {

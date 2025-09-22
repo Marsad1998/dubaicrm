@@ -37,7 +37,7 @@ import { IconOption } from '../../components/Icon';
         isShowMailMenu, setIsShowMailMenu, isEdit, setIsEdit, searchText, setSearchText, isModalOpen, setIsModalOpen,
         errors, setErrors, date, setDate, IsDisable, setIsDisable, IsColor, setsColor, IsRemarkData, SetIsRemarkData,
         isMemark, setIsMemark, isOpen, setIsOpen, files, setFiles, isFileViewerOpen, setIsFileViewerOpen,
-        isCustomizerOpen, setIsCustomizerOpen
+        isCustomizerOpen, setIsCustomizerOpen, overall_leads
     } = useDashboardStates();
 
     useEffect(() => {    
@@ -285,9 +285,14 @@ import { IconOption } from '../../components/Icon';
                                 <div className="flex items-center w-full sm:w-auto">
                                     <div className="mr-2 sm:mr-4">
                                         <Tippy content="Refresh">
-                                            <button type="button" onClick={Refresh} className="hover:text-primary flex items-center p-1">
-                                                <IconRefresh className="w-5 h-5"/>
-                                            </button>
+                                            <button type="button" onClick={Refresh} className="hover:text-primary flex items-center p-2">
+                                                    <IconRefresh className="w-5 h-5" />  
+                                                    {loginuser?.roles[0]?.name === 'super admin' && (
+                                                        <span className="badge bg-dark text-white ml-4">
+                                                        Overall Leads: { overall_leads}
+                                                        </span>
+                                                    )}
+                                                    </button>
                                         </Tippy>
                                     </div>
                                 </div>

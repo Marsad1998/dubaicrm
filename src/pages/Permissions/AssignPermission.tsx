@@ -35,7 +35,7 @@ const AssignPermission = () => {
             toast.error('Failed to fetch roles');
         }
     };
-
+    
     const getAgents = async () => {
         try {
             // const url = forSelect ? '/users/user_list?for_select=1' : '/users/user_list';

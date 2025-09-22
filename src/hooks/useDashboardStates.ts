@@ -27,7 +27,8 @@ export const useDashboardStates = () => {
     const { loading, meta, counters } = useSelector((state: any) => state.dashboardslice);
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl';
     const combinedRef = useRef<any>({ fetched: false, form: null, topbarButtonRefs: {}, addleadform: null, ishideshow: false });
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);    
+    const overall_leads = useSelector((state: IRootState) => state.dashboardslice.overall_leads);
 
     const [AllLeadList, setAllLeadList]       = useState<any[]>([]);
     const [selectedLead, setSelectedLead]     = useState<any>(null);
@@ -86,6 +87,7 @@ export const useDashboardStates = () => {
         files, setFiles,
         isFileViewerOpen, setIsFileViewerOpen,
         isCustomizerOpen, setIsCustomizerOpen,
+        overall_leads
     };
 };
 
