@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDashboardStates } from '../../hooks/useDashboardStates';
-import { DashboardLeadslist, setLoading, updateSingleLead, createLeads, uploadFiles, getFiles } from '../../slices/dashboardSlice';
+import { DashboardLeadslist, setLoading, updateSingleLead, createLeads, uploadFiles, getFiles, voiceCall } from '../../slices/dashboardSlice';
 import { setPageTitle } from '../../slices/themeConfigSlice';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import IconCaretDown from '../../components/Icon/IconCaretDown';
@@ -205,9 +205,6 @@ import { IconOption } from '../../components/Icon';
         }
     };
 
-
-    
-        
     const AssignToAgent = async (leadId: any) => {
         try {
             // dispatch(setLoading(true));
@@ -224,6 +221,10 @@ import { IconOption } from '../../components/Icon';
             // dispatch(setLoading(false));
         }
     };
+
+
+   
+
     return (
         <div>
             <div className="flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full">
@@ -497,9 +498,16 @@ import { IconOption } from '../../components/Icon';
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />
-                                                    <span className="whitespace-nowrap text-secondary" dir="ltr">
-                                                    {selectedLead?.customer_phone || 'Not-Found'}
-                                                    </span>
+                                                    <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
+
+                                                <button
+                                                        type="button"
+                                                        className="btn btn-primary btn-sm ml-2"
+                                                        onClick={() => dispatch(voiceCall(selectedLead.customer_phone))}
+                                                    >
+                                                        Call
+                                                    </button>
+
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />

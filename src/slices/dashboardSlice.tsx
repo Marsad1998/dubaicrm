@@ -22,6 +22,10 @@ import apiClient from '../utils/apiClient';
         getfiles  : '/leads/get_files',
         deletefiles  : '/leads/delete_files',
         exportCsv    : '/leads/export_csv',
+        voiceCall    : '/voice/make-call',
+
+
+        
     };
 
     export const createLeads = createAsyncThunk('createlead', async ({ formData, id }: { formData: FormData; id?: number }, { rejectWithValue }) => {
@@ -149,6 +153,18 @@ import apiClient from '../utils/apiClient';
             return rejectWithValue(error.response?.data || error.message);
         }
     });
+
+
+     export const voiceCall = createAsyncThunk('voice/call', async (phone: string, { rejectWithValue }) => {
+        try {
+        const response = await apiClient.post('/voice/make-call', { to: phone });
+        return { response: response.data, status: response.status };
+        } catch (error: any) {
+        return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+    );
+
 
     const initialState = {
         leads: [] as Array<{ lead_id: number; files: any[]; }>,
