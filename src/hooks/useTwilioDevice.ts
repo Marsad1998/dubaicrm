@@ -5,24 +5,48 @@ import axios from 'axios';
 export const useTwilioDevice = (identity: string) => {
   const [device, setDevice] = useState<Device | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-
   useEffect(() => {
     let dev: Device | null = null;
 
     (async () => {
       try {
         // Ensure mic permission
-        await navigator.mediaDevices.getUserMedia({ audio: true });
+        // await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log("Mic access granted");
+            } catch (err:any) {
+            if (err.name === "NotReadableError") {
+                alert("Microphone is already in use by another application.");
+            } else {
+                alert("Unable to access microphone: " + err.message);
+            }
+        }
 
         // Direct URL to backend
         const res = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
 
         // Fix: Use 'as const' to assert literal types
-        dev = new Device(res.data.token, { 
-          codecPreferences: ['opus', 'pcmu'] as any[]
+        dev = new Device(res.data.token, { codecPreferences: ['opus', 'pcmu']  as any[] });
+
+        // dev = new Device(res.data.token, { 
+        //   codecPreferences: ['opus', 'pcmu'] as any[]
+        // });
+
+        dev.register();
+
+        dev.on('registered', () => {
+        console.log("Twilio Device Ready ✅");
+        setIsInitialized(true);
         });
+
+        // dev.on('unregistered', () => {
+        //   console.log("Twilio Device Unregistered ❌");
+        //     setIsInitialized(false);
+        // });
         
-        dev.on('registered', () => setIsInitialized(true));
+        // dev.on('registered', () => setIsInitialized(true));
         dev.on('error', err => console.error('Twilio Error ❌', err));
         dev.on('incoming', (call: Call) => {
           console.log('Incoming call 📞');
