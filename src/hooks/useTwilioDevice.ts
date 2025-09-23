@@ -21,17 +21,28 @@ export const useTwilioDevice = (identity: string) => {
         }
 
         const res = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
+
         dev = new Device(res.data.token, { codecPreferences: ['opus', 'pcmu']  as any[] });
         dev.register();
 
         dev.on('registered', () => {
-        console.log("Twilio Device Ready ✅");
-        setIsInitialized(true);
+             console.log("Twilio Device Ready ✅");
+            setIsInitialized(true);
         });
         dev.on('error', err => console.error('Twilio Error ❌', err));
         dev.on('incoming', (call: Call) => {
           console.log('Incoming call 📞');
           call.accept();
+        });
+        
+        dev.on('tokenWillExpire', async () => {
+            try {
+                const refreshRes = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
+                await dev?.updateToken(refreshRes.data.token);
+                console.log("🔄 Token refreshed");
+            } catch (error: any) {
+                console.error("Failed to refresh token", error);
+            }
         });
 
         setDevice(dev);
@@ -54,37 +65,11 @@ export const useTwilioDevice = (identity: string) => {
       console.error('Twilio device not ready');
       return null;
     }
-
-    // try {
-    //   const call = await device.connect({ params: { To: phone, LeadId: leadId.toString() } });
-    //   call.on('accept', async () => {
-    //     console.log("✅ Call accepted", call.parameters.CallSid);
-
-    //     await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
-    //         lead_id: leadId,
-    //         phone,
-    //         call_sid: call.parameters.CallSid,
-    //     });
-    //     });
-
-    //   call.on('disconnect', () => console.log("❌ Call ended"));
-    //   call.on('error', (error) => console.error("Call error:", error));
-
-    //   return call;
-    // } catch (err) {
-    //   console.error('Error making call:', err);
-    //   return null;
-    // }
-
     try {
         const call = await device.connect({ params: { To: phone, LeadId: leadId.toString() } });
         call.on('accept', async () => {
             console.log("✅ Call accepted", call.parameters.CallSid);
-            await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
-            lead_id: leadId,
-            phone,
-            call_sid: call.parameters.CallSid,
-            });
+            await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', { lead_id: leadId, phone, call_sid: call.parameters.CallSid, });
         });
         call.on('disconnect', () => console.log("❌ Call ended"));
         call.on('error', (error) => {
@@ -98,7 +83,6 @@ export const useTwilioDevice = (identity: string) => {
         alert("Could not start call: " + err.message);
         return null;
     }
-
   };
 
   return { device, isInitialized, makeCall };

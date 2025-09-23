@@ -506,48 +506,17 @@ import { useTwilioDevice } from '../../hooks/useTwilioDevice';
                                                     {selectedLead?.customer_name || 'Not-Found'}
                                                 </li>
                                                 <li className="flex items-center gap-2">
-                                                    <IconPhone />
-                                                    <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
-
-
-                                                    <li className="flex items-center gap-2">
-  <IconPhone />
-  <span className="whitespace-nowrap text-secondary" dir="ltr">
-    {selectedLead?.customer_phone || 'Not-Found'}
-  </span>
-
-  <button
-    type="button"
-    className="btn btn-primary btn-sm ml-2"
-    disabled={!isInitialized}
-    onClick={async () => {
-      if (selectedLead?.customer_phone && selectedLead?.lead_id) {
-        await makeCall(selectedLead.customer_phone, selectedLead.lead_id);
-      } else {
-        console.error("Lead has no valid phone number or ID");
-      }
-    }}
-  >
-    Call
-  </button>
-</li>
-                                                 
-                                            
-                                                {/* <button
-    type="button"
-    className="btn btn-primary btn-sm ml-2"
-    disabled={!isInitialized}
-    onClick={async () => {
-        if (selectedLead?.customer_phone && selectedLead?.lead_id) {
-            await makeCall(selectedLead.customer_phone, selectedLead.lead_id);
-        } else {
-            console.error("Lead has no valid phone number or ID");
-        }
-    }}
->
-    Call
-</button> */}
-
+                                                        <IconPhone /> <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
+                                                        <button type="button" className="btn btn-secondary btn-sm ml-2" disabled={!isInitialized}
+                                                            onClick={async () => {
+                                                            if (selectedLead?.customer_phone && selectedLead?.lead_id) {
+                                                                await makeCall(selectedLead.customer_phone, selectedLead.lead_id);
+                                                            } else {
+                                                                console.error("Lead has no valid phone number or ID");
+                                                            }
+                                                            }}
+                                                        > Voice Call
+                                                    </button>
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />
