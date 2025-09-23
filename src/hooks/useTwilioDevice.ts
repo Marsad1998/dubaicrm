@@ -14,14 +14,15 @@ export const useTwilioDevice = (identity: string) => {
             console.log("Mic access granted");
             } catch (err:any) {
             if (err.name === "NotReadableError") {
-                alert("Microphone is already in use by another application.");
+                console.log("Microphone is already in use by another application")
             } else {
-                alert("Unable to access microphone: " + err.message);
+                console.log("Unable to access microphone: " + err.message)
+                
             }
         }
 
         const res = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
-
+        // const res = await axios.post('http://10.99.1.40:8000/api/voice/token', { identity });
         dev = new Device(res.data.token, { codecPreferences: ['opus', 'pcmu']  as any[] });
         dev.register();
 
@@ -34,10 +35,12 @@ export const useTwilioDevice = (identity: string) => {
           console.log('Incoming call 📞');
           call.accept();
         });
-        
+
         dev.on('tokenWillExpire', async () => {
             try {
                 const refreshRes = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
+                // const refreshRes = await axios.post('http://10.99.1.40:8000/api/voice/token', { identity });
+
                 await dev?.updateToken(refreshRes.data.token);
                 console.log("🔄 Token refreshed");
             } catch (error: any) {
