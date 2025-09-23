@@ -74,30 +74,31 @@ export const useTwilioDevice = (identity: string) => {
     // } catch (err) {
     //   console.error('Error making call:', err);
     //   return null;
+    // }
 
     try {
-    const call = await device.connect({ params: { To: phone, LeadId: leadId.toString() } });
-    call.on('accept', async () => {
-        console.log("✅ Call accepted", call.parameters.CallSid);
-        await axios.post('/api/voice/log', {
-        lead_id: leadId,
-        phone,
-        call_sid: call.parameters.CallSid,
+        const call = await device.connect({ params: { To: phone, LeadId: leadId.toString() } });
+        call.on('accept', async () => {
+            console.log("✅ Call accepted", call.parameters.CallSid);
+            await axios.post('/api/voice/log', {
+            lead_id: leadId,
+            phone,
+            call_sid: call.parameters.CallSid,
+            });
         });
-    });
-    call.on('disconnect', () => console.log("❌ Call ended"));
-    call.on('error', (error) => {
-        console.error("Call error:", error.message, error);
-        alert("Call failed: " + error.message);
-    });
-    return call;
-    } catch (err: any) {
+        call.on('disconnect', () => console.log("❌ Call ended"));
+        call.on('error', (error) => {
+            console.error("Call error:", error.message, error);
+            alert("Call failed: " + error.message);
+        });
+
+        return call;
+        } catch (err: any) {
         console.error("Error making call:", err.message);
         alert("Could not start call: " + err.message);
-    return null;
+        return null;
     }
-
-
+    
   };
 
   return { device, isInitialized, makeCall };
