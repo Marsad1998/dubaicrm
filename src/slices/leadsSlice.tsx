@@ -93,14 +93,16 @@ import apiClient from '../utils/apiClient';
             const response = await apiClient.get(endpoints.reAssignApi, {
                 params: { page:effectivePage, per_page: perPage, sort_field: sortField, sort_order: sortOrder, search: search },
             });
+
+            console.log(response.data);
             return {
                 // data: response.data.data.data,
                 data: response.data.data,
                 agents: response.data.agents,
-                total: response.data.data.total,
-                last_page: response.data.data.last_page,
-                current_page: response.data.data.current_page,
-                per_page: response.data.data.per_page, 
+                total: response.data.total,
+                last_page: response.data.last_page,
+                current_page: response.data.current_page,
+                per_page: response.data.per_page, 
             };
         } catch (error: any) {
             return rejectWithValue(error.response?.data || error.message);

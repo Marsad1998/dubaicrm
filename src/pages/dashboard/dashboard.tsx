@@ -500,13 +500,13 @@ import { IconOption } from '../../components/Icon';
                                                     <IconPhone />
                                                     <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
 
-                                                <button
+                                                {/* <button
                                                         type="button"
                                                         className="btn btn-primary btn-sm ml-2"
                                                         onClick={() => dispatch(voiceCall(selectedLead.customer_phone))}
                                                     >
                                                         Call
-                                                    </button>
+                                                </button> */}
 
                                                 </li>
                                                 <li className="flex items-center gap-2">

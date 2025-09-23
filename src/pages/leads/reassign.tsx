@@ -72,9 +72,7 @@ const ReAssign = () => {
     })) || [];
     
     const tableData = useMemo(() => {
-
-        console.log(leads);
-
+        
         return (Array.isArray(leads) ? leads : []).map((lead: any) => ({
             id: lead.lead_id || 'Unknown',
             title: lead.lead_title || 'Unknown',
