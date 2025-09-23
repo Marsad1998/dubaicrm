@@ -75,21 +75,29 @@ export const useTwilioDevice = (identity: string) => {
     }
 
     try {
-      const call = await device.connect({ 
-        params: { 
-          To: phone, 
-          LeadId: leadId.toString() 
-        } 
-      });
+    //   const call = await device.connect({ params: {  To: phone,  LeadId: leadId.toString() }  });
+      const call = await device.connect({ params: { To: phone, LeadId: leadId.toString() } });
+
+
+      call.on('accept', async () => {
+        console.log("✅ Call accepted", call.parameters.CallSid);
+
+        await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
+            lead_id: leadId,
+            phone,
+            call_sid: call.parameters.CallSid,
+        });
+        });
+
 
       // Direct URL to backend
-      await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
-        lead_id: leadId,
-        phone,
-        call_sid: call.parameters.CallSid,
-      });
+    //   await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
+    //     lead_id: leadId,
+    //     phone,
+    //     call_sid: call.parameters.CallSid,
+    //   });
 
-      call.on('accept', () => console.log("✅ Call accepted"));
+    //   call.on('accept', () => console.log("✅ Call accepted"));
       call.on('disconnect', () => console.log("❌ Call ended"));
       call.on('error', (error) => console.error("Call error:", error));
 
