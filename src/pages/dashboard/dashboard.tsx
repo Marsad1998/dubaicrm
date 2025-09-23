@@ -499,7 +499,6 @@ import { IconOption } from '../../components/Icon';
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />
                                                     <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
-
                                                  <button
                                                         type="button"
                                                         className="btn btn-primary btn-sm ml-2"
