@@ -96,10 +96,7 @@ export const useTwilioDevice = (identity: string) => {
         alert("Could not start call: " + err.message);
     return null;
     }
-    
 
-
-    
 
   };
 
