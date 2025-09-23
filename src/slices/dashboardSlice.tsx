@@ -155,17 +155,16 @@ import apiClient from '../utils/apiClient';
     });
 
 
-     export const voiceCall = createAsyncThunk('voice/call', async (phone: string, { rejectWithValue }) => {
-        try {
-        const response = await apiClient.post('/voice/make-call', { to: phone });
-        return { response: response.data, status: response.status };
-        } catch (error: any) {
-        return rejectWithValue(error.response?.data || error.message);
+    export const voiceCall = createAsyncThunk('voice/call', async ({ phone, lead_id }: { phone: string; lead_id: number }, { rejectWithValue }) => {
+            try {
+                const response = await apiClient.post('/voice/make-call', { to: phone, lead_id });
+                return { response: response.data, status: response.status };
+            } catch (error: any) {
+                return rejectWithValue(error.response?.data || error.message);
+            }
         }
-    }
     );
-
-
+    
     const initialState = {
         leads: [] as Array<{ lead_id: number; files: any[]; }>,
         files: [] as any[],
