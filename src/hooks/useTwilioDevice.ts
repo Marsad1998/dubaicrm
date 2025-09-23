@@ -80,7 +80,7 @@ export const useTwilioDevice = (identity: string) => {
         const call = await device.connect({ params: { To: phone, LeadId: leadId.toString() } });
         call.on('accept', async () => {
             console.log("✅ Call accepted", call.parameters.CallSid);
-            await axios.post('/api/voice/log', {
+            await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
             lead_id: leadId,
             phone,
             call_sid: call.parameters.CallSid,
@@ -98,7 +98,7 @@ export const useTwilioDevice = (identity: string) => {
         alert("Could not start call: " + err.message);
         return null;
     }
-    
+
   };
 
   return { device, isInitialized, makeCall };
