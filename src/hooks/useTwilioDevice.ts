@@ -1,0 +1,80 @@
+import { useState, useEffect } from 'react';
+import { Device, Call } from '@twilio/voice-sdk';
+import axios from 'axios';
+
+export const useTwilioDevice = (identity: string) => {
+  const [device, setDevice] = useState<Device | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    let dev: Device | null = null;
+
+    (async () => {
+      try {
+        // Ensure mic permission
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // Direct URL to backend
+        const res = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
+
+        // Fix: Use 'as const' to assert literal types
+        dev = new Device(res.data.token, { 
+          codecPreferences: ['opus', 'pcmu'] as any[]
+        });
+        
+        dev.on('registered', () => setIsInitialized(true));
+        dev.on('error', err => console.error('Twilio Error ❌', err));
+        dev.on('incoming', (call: Call) => {
+          console.log('Incoming call 📞');
+          call.accept();
+        });
+
+        setDevice(dev);
+      } catch (err) {
+        console.error('Init Twilio failed', err);
+      }
+    })();
+
+    return () => {
+      if (dev) {
+        dev.destroy();
+        setDevice(null);
+        setIsInitialized(false);
+      }
+    };
+  }, [identity]);
+
+  const makeCall = async (phone: string, leadId: number): Promise<Call | null> => {
+    if (!device || !isInitialized) {
+      console.error('Twilio device not ready');
+      return null;
+    }
+
+    try {
+      const call = await device.connect({ 
+        params: { 
+          To: phone, 
+          LeadId: leadId.toString() 
+        } 
+      });
+
+      // Direct URL to backend
+      await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
+        lead_id: leadId,
+        phone,
+        call_sid: call.parameters.CallSid,
+      });
+
+      call.on('accept', () => console.log("✅ Call accepted"));
+      call.on('disconnect', () => console.log("❌ Call ended"));
+      call.on('error', (error) => console.error("Call error:", error));
+
+      return call;
+    } catch (err) {
+      console.error('Error making call:', err);
+      return null;
+    }
+  };
+
+  return { device, isInitialized, makeCall };
+};

@@ -26,6 +26,10 @@ import CustomSideNav from '../../components/CustomSideNav';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.css';
 import { IconOption } from '../../components/Icon';
+import { useTwilioDevice } from '../../hooks/useTwilioDevice';
+
+
+
 
   const DashboardBox = () => {
     const { dashboardType } = useParams();
@@ -39,6 +43,9 @@ import { IconOption } from '../../components/Icon';
         isMemark, setIsMemark, isOpen, setIsOpen, files, setFiles, isFileViewerOpen, setIsFileViewerOpen,
         isCustomizerOpen, setIsCustomizerOpen, overall_leads
     } = useDashboardStates();
+
+    //  const { makeCall, isInitialized } = useTwilioDevice();
+     const { makeCall, isInitialized } = useTwilioDevice(`agent_${loginuser?.client_user_id || 'guest'}`);
 
     useEffect(() => {    
 
@@ -221,6 +228,8 @@ import { IconOption } from '../../components/Icon';
             // dispatch(setLoading(false));
         }
     };
+
+
 
 
    
@@ -499,13 +508,45 @@ import { IconOption } from '../../components/Icon';
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />
                                                     <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
-                                                 <button
-                                                        type="button"
-                                                        className="btn btn-primary btn-sm ml-2"
-                                                        onClick={() => dispatch(voiceCall({ phone: selectedLead.customer_phone, lead_id: selectedLead.lead_id }))}
-                                                    >
-                                                        Call
-                                                </button> 
+
+
+                                                    <li className="flex items-center gap-2">
+  <IconPhone />
+  <span className="whitespace-nowrap text-secondary" dir="ltr">
+    {selectedLead?.customer_phone || 'Not-Found'}
+  </span>
+
+  <button
+    type="button"
+    className="btn btn-primary btn-sm ml-2"
+    disabled={!isInitialized}
+    onClick={async () => {
+      if (selectedLead?.customer_phone && selectedLead?.lead_id) {
+        await makeCall(selectedLead.customer_phone, selectedLead.lead_id);
+      } else {
+        console.error("Lead has no valid phone number or ID");
+      }
+    }}
+  >
+    Call
+  </button>
+</li>
+                                                 
+                                            
+                                                {/* <button
+    type="button"
+    className="btn btn-primary btn-sm ml-2"
+    disabled={!isInitialized}
+    onClick={async () => {
+        if (selectedLead?.customer_phone && selectedLead?.lead_id) {
+            await makeCall(selectedLead.customer_phone, selectedLead.lead_id);
+        } else {
+            console.error("Lead has no valid phone number or ID");
+        }
+    }}
+>
+    Call
+</button> */}
 
                                                 </li>
                                                 <li className="flex items-center gap-2">
