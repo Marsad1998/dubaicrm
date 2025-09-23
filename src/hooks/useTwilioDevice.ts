@@ -7,12 +7,8 @@ export const useTwilioDevice = (identity: string) => {
   const [isInitialized, setIsInitialized] = useState(false);
   useEffect(() => {
     let dev: Device | null = null;
-
     (async () => {
       try {
-        // Ensure mic permission
-        // await navigator.mediaDevices.getUserMedia({ audio: true });
-
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             console.log("Mic access granted");
@@ -24,29 +20,14 @@ export const useTwilioDevice = (identity: string) => {
             }
         }
 
-        // Direct URL to backend
         const res = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
-
-        // Fix: Use 'as const' to assert literal types
         dev = new Device(res.data.token, { codecPreferences: ['opus', 'pcmu']  as any[] });
-
-        // dev = new Device(res.data.token, { 
-        //   codecPreferences: ['opus', 'pcmu'] as any[]
-        // });
-
         dev.register();
 
         dev.on('registered', () => {
         console.log("Twilio Device Ready ✅");
         setIsInitialized(true);
         });
-
-        // dev.on('unregistered', () => {
-        //   console.log("Twilio Device Unregistered ❌");
-        //     setIsInitialized(false);
-        // });
-        
-        // dev.on('registered', () => setIsInitialized(true));
         dev.on('error', err => console.error('Twilio Error ❌', err));
         dev.on('incoming', (call: Call) => {
           console.log('Incoming call 📞');
@@ -74,38 +55,52 @@ export const useTwilioDevice = (identity: string) => {
       return null;
     }
 
+    // try {
+    //   const call = await device.connect({ params: { To: phone, LeadId: leadId.toString() } });
+    //   call.on('accept', async () => {
+    //     console.log("✅ Call accepted", call.parameters.CallSid);
+
+    //     await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
+    //         lead_id: leadId,
+    //         phone,
+    //         call_sid: call.parameters.CallSid,
+    //     });
+    //     });
+
+    //   call.on('disconnect', () => console.log("❌ Call ended"));
+    //   call.on('error', (error) => console.error("Call error:", error));
+
+    //   return call;
+    // } catch (err) {
+    //   console.error('Error making call:', err);
+    //   return null;
+
     try {
-    //   const call = await device.connect({ params: {  To: phone,  LeadId: leadId.toString() }  });
-      const call = await device.connect({ params: { To: phone, LeadId: leadId.toString() } });
-
-
-      call.on('accept', async () => {
+    const call = await device.connect({ params: { To: phone, LeadId: leadId.toString() } });
+    call.on('accept', async () => {
         console.log("✅ Call accepted", call.parameters.CallSid);
-
-        await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
-            lead_id: leadId,
-            phone,
-            call_sid: call.parameters.CallSid,
+        await axios.post('/api/voice/log', {
+        lead_id: leadId,
+        phone,
+        call_sid: call.parameters.CallSid,
         });
-        });
-
-
-      // Direct URL to backend
-    //   await axios.post('https://testcrmbackend.leadshub.ae/api/voice/log', {
-    //     lead_id: leadId,
-    //     phone,
-    //     call_sid: call.parameters.CallSid,
-    //   });
-
-    //   call.on('accept', () => console.log("✅ Call accepted"));
-      call.on('disconnect', () => console.log("❌ Call ended"));
-      call.on('error', (error) => console.error("Call error:", error));
-
-      return call;
-    } catch (err) {
-      console.error('Error making call:', err);
-      return null;
+    });
+    call.on('disconnect', () => console.log("❌ Call ended"));
+    call.on('error', (error) => {
+        console.error("Call error:", error.message, error);
+        alert("Call failed: " + error.message);
+    });
+    return call;
+    } catch (err: any) {
+        console.error("Error making call:", err.message);
+        alert("Could not start call: " + err.message);
+    return null;
     }
+    
+
+
+    
+
   };
 
   return { device, isInitialized, makeCall };
