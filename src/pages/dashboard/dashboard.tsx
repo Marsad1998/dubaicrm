@@ -45,7 +45,7 @@ import { useTwilioDevice } from '../../hooks/useTwilioDevice';
     } = useDashboardStates();
 
     //  const { makeCall, isInitialized } = useTwilioDevice();
-     const { makeCall, isInitialized } = useTwilioDevice(`agent_${loginuser?.client_user_id || 'guest'}`);
+     const { makeCall, isInitialized } = useTwilioDevice(`${loginuser?.client_user_id || 'guest'}`);
 
     useEffect(() => {    
 
