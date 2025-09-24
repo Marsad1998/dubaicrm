@@ -1,33 +1,45 @@
 import { useState, useEffect } from 'react';
 import { Device, Call } from '@twilio/voice-sdk';
 import axios from 'axios';
+import Toast from '../services/toast';
 
 export const useTwilioDevice = (identity: string) => {
   const [device, setDevice] = useState<Device | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const toast = Toast();
   useEffect(() => {
     let dev: Device | null = null;
     (async () => {
       try {
-        try {
-            // const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-            }
-            });
 
-            console.log("Mic access granted");
-            } catch (err:any) {
-            if (err.name === "NotReadableError") {
-                console.log("Microphone is already in use by another application")
-            } else {
-                console.log("Unable to access microphone: " + err.message)
-                
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const audioInputs = devices.filter(d => d.kind === "audioinput");
+          if (audioInputs.length === 0) {
+            toast.error("⚠️ No microphone/headphone detected. Please connect your headset.");
+            throw new Error("No audio input devices found");
+          }
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              deviceId: audioInputs[0].deviceId, 
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
             }
+          });
+          console.log("Mic access granted ✅", stream);
+        } catch (err: any) {
+          if (err.name === "NotReadableError") {
+             toast.error("Microphone is already in use by another application");
+          } else if (err.name === "NotFoundError") {
+             toast.error("⚠️ No microphone/headphone found. Please connect your headset");
+          } else {
+            console.log(err.message)
+            toast.error("Unable to access microphone. Please connect a mic or headset then try");
+          }
         }
+
+
 
         const res = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
         // const res = await axios.post('http://10.99.1.40:8000/api/voice/token', { identity });
