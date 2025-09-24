@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDashboardStates } from '../../hooks/useDashboardStates';
 import { DashboardLeadslist, setLoading, updateSingleLead, createLeads, uploadFiles, getFiles, voiceCall } from '../../slices/dashboardSlice';
 import { setPageTitle } from '../../slices/themeConfigSlice';
@@ -27,6 +27,7 @@ import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.css';
 import { IconOption } from '../../components/Icon';
 import { useTwilioDevice } from '../../hooks/useTwilioDevice';
+import Dialer from '../../components/Dialer';
 
 
 
@@ -44,8 +45,8 @@ import { useTwilioDevice } from '../../hooks/useTwilioDevice';
         isCustomizerOpen, setIsCustomizerOpen, overall_leads
     } = useDashboardStates();
 
-    //  const { makeCall, isInitialized } = useTwilioDevice();
      const { makeCall, isInitialized } = useTwilioDevice(`${loginuser?.client_user_id || 'guest'}`);
+     const [showDialer, setShowDialer] = useState(false);
 
     useEffect(() => {    
 
@@ -507,7 +508,8 @@ import { useTwilioDevice } from '../../hooks/useTwilioDevice';
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                         <IconPhone /> <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
-                                                        <button type="button" className="btn btn-secondary btn-sm ml-2" disabled={!isInitialized}
+
+                                                        {/* <button type="button" className="btn btn-secondary btn-sm ml-2" disabled={!isInitialized}
                                                             onClick={async () => {
                                                             if (selectedLead?.customer_phone && selectedLead?.lead_id) {
                                                                 await makeCall(selectedLead.customer_phone, selectedLead.lead_id);
@@ -516,7 +518,17 @@ import { useTwilioDevice } from '../../hooks/useTwilioDevice';
                                                             }
                                                             }}
                                                         > Voice Call
-                                                    </button>
+                                                    </button> */}
+
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-secondary btn-sm ml-2"
+                                                        disabled={!isInitialized}
+                                                        onClick={() => setShowDialer(true)} // ⟵ open dialer instead of calling
+                                                        >
+                                                        Voice Call
+                                                        </button>
+
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />
@@ -653,6 +665,16 @@ import { useTwilioDevice } from '../../hooks/useTwilioDevice';
                 onFilterUpdate={() => {}}
                 initialFilters={{ agents: [], statuses: [] }}
             />
+
+            {showDialer && (
+                <Dialer
+                    identity={`${loginuser?.client_user_id || 'guest'}`}
+                    lead={selectedLead}
+                    open={showDialer}
+                    onClose={() => setShowDialer(false)}
+                />
+                )}
+
     </div>
     );
 }
