@@ -517,7 +517,7 @@ import Dialer from '../../components/Dialer';
                                                                 console.error("Lead has no valid phone number or ID");
                                                             }
                                                             }}
-                                                        > Voice Call
+                                                        > Voice Call   
                                                     </button> */}
 
                                                     <button
@@ -526,8 +526,8 @@ import Dialer from '../../components/Dialer';
                                                         disabled={!isInitialized}
                                                         onClick={() => setShowDialer(true)} // ⟵ open dialer instead of calling
                                                         >
-                                                        Voice Call
-                                                        </button>
+                                                        iconc
+                                                    </button>
 
                                                 </li>
                                                 <li className="flex items-center gap-2">
