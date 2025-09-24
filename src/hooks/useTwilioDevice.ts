@@ -148,7 +148,6 @@ export const useTwilioDevice = (identity: string) => {
 
           const devices = await navigator.mediaDevices.enumerateDevices();
           const audioInputs = devices.filter(d => d.kind === 'audioinput');
-
           if (audioInputs.length === 0) {
             toast.error('⚠️ No microphone detected.');
             throw new Error('No audio input devices found');
@@ -180,7 +179,6 @@ export const useTwilioDevice = (identity: string) => {
           codecPreferences: ['opus', 'pcmu'] as any[],
         });
         dev.register();
-
         dev.on('registered', () => {
           console.log('Twilio Device Ready ✅');
           setIsInitialized(true);
@@ -231,3 +229,6 @@ export const useTwilioDevice = (identity: string) => {
 
   return { device, isInitialized, makeCall };
 };
+
+
+// recording_url

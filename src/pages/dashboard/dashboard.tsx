@@ -508,7 +508,6 @@ import Dialer from '../../components/Dialer';
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                         <IconPhone /> <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
-
                                                         {/* <button type="button" className="btn btn-secondary btn-sm ml-2" disabled={!isInitialized}
                                                             onClick={async () => {
                                                             if (selectedLead?.customer_phone && selectedLead?.lead_id) {
@@ -519,16 +518,14 @@ import Dialer from '../../components/Dialer';
                                                             }}
                                                         > Voice Call   
                                                     </button> */}
-
                                                     <button
                                                         type="button"
                                                         className="btn btn-secondary btn-sm ml-2"
                                                         disabled={!isInitialized}
                                                         onClick={() => setShowDialer(true)} // ⟵ open dialer instead of calling
                                                         >
-                                                        iconc
+                                                        <IconPhone/>
                                                     </button>
-
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />
