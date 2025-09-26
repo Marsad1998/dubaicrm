@@ -225,8 +225,6 @@ const Dialer: React.FC<DialerProps> = ({ identity, lead, open = true, onClose, c
               <span className="ml-2 text-gray-500 font-mono">{mm}:{ss}</span>
             )}
           </div>
-
-          {/* tiny voice wave when live & unmuted */}
           {status === 'in-progress' && !muted && (
             <div className="flex items-end gap-0.5 h-4">
               {[0,1,2,3,4].map(i => (

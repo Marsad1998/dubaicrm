@@ -235,6 +235,7 @@ const Reports = () => {
         setAllSelected(isChecked);
     };
 
+
     const handleTakeBackConfirm = async () => {
         if (!selectedAgent) {
             toast.error('Please select an agent before taking back leads.');
@@ -248,6 +249,7 @@ const Reports = () => {
         try {
             dispatch(setLoading(true));
             const leadIds = Array.from(bulkSelectedIds);
+            
             const response = await dispatch(updateLeadsStatus({ 
                 agent_id: selectedAgent, 
                 lead_ids: leadIds, 
@@ -257,7 +259,6 @@ const Reports = () => {
 
             if (response.status === 'success') {
                 toast.success(response.message || 'Selected leads successfully taken back!');
-                
                 setIsConfirmModalOpen(false);
                 setBulkSelectedIds(new Set());
                 setSelectedRecords([]);
@@ -292,7 +293,7 @@ const Reports = () => {
                         className="form-checkbox mr-2" 
                         checked={allSelected || (tableData.length > 0 && tableData.every(record => bulkSelectedIds.has(record.id)))} 
                         onChange={(e) => handleSelectAllCurrentPage(e.target.checked)} 
-                        disabled={!selectedStatus} 
+                        // disabled={!selectedStatus} 
                     />
                     Select
                     {bulkSelectedIds.size > 0 && (
@@ -307,7 +308,7 @@ const Reports = () => {
                     className="form-checkbox" 
                     checked={bulkSelectedIds.has(record.id)} 
                     onChange={(e) => handleCheckboxChange(record, e.target.checked)} 
-                    disabled={!selectedStatus} 
+                    // disabled={!selectedStatus} 
                 />
             ),
         },
@@ -453,8 +454,8 @@ const Reports = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg max-w-md">
                         <h3 className="text-lg font-bold mb-4">Confirm Take Back</h3>
-                        {/* <p>Are you sure you want to take back {bulkSelectedIds.size} selected leads?</p> */}
-                        <p>Are you sure you want to take back {total || 0} selected leads?</p>
+                        <p>Are you sure you want to take back {bulkSelectedIds.size} selected leads?</p>
+                        {/* <p>Are you sure you want to take back {total || 0} selected leads?</p> */}
                         <div className="flex justify-end mt-4 space-x-2">
                             <button onClick={() => setIsConfirmModalOpen(false)}  className="btn btn-outline-secondary"> Cancel </button>
                             <button  onClick={handleTakeBackConfirm} className="btn btn-primary">

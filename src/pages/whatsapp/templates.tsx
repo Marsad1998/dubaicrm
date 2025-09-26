@@ -33,21 +33,24 @@ const Templates = () => {
     const toast = Toast();
     const [wtemplates, setwTemplate] = useState([]);
 
-
-     useEffect(() => { 
+    useEffect(() => { 
         getTemplate();
     }, [page, pageSize, sortStatus, searchQuery]);
 
     const LoadTemplate = async () => {
         try {
+            setLoading(true); 
             const response = await apiClient.get(endpoints.loadTemplateApi);
-            if (response.status === 200) { 
+            if (response.status === 200) {
                 toast.success('Template Load Successfully');
+                await getTemplate(); 
             }
         } catch (error: any) {
             toast.error('Failed to load template');
+        } finally {
+            setLoading(false);
         }
-    }
+    };  
 
     const getTemplate = async () => {
         try {
@@ -85,12 +88,11 @@ const Templates = () => {
         // source: wtemplatess.status,
     }));
 
-
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
         setPage(1);
     };
-
+    
     const handleDelete = async (id: number) => {
         const result = await Swal.fire({
             title: 'Are you sure?',

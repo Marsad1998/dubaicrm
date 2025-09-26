@@ -180,7 +180,9 @@ const Assign = () => {
             page,
             sortField: sortStatus.columnAccessor,
             sortOrder: sortStatus.direction,
-            search: searchTerm  
+            search: searchTerm,  
+            cityname: selectedCity || ''
+
         }));
         setSelectedRecords([]);
         setDisable(true);
@@ -191,7 +193,8 @@ const Assign = () => {
             perPage: pageSize,
             sortField: sortStatus.columnAccessor,
             sortOrder: sortStatus.direction,
-            search: searchTerm  
+            search: searchTerm,
+            cityname: selectedCity || ''  
         }));
         setSelectedRecords([]);
         setDisable(true);
@@ -204,12 +207,12 @@ const Assign = () => {
             perPage: per_page,
             sortField: status.columnAccessor === 'date' ? 'created_at' : status.columnAccessor,
             sortOrder: status.direction,
-            search: searchTerm  
+            search: searchTerm,
+            cityname: selectedCity || ''  
         }));
         setSelectedRecords([]);
         setDisable(true);
     };
-
      const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const newSearchTerm = e.target.value;
             setSearchTerm(newSearchTerm);

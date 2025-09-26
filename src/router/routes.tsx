@@ -45,6 +45,9 @@ const KPIDashboard = lazy(() => import('../pages/kpi/kpidashboard'));
 const PermissionRouter = lazy(() => import('../pages/PermissionRouter/PermissionRouter'));
 const Templates = lazy(() => import('../pages/whatsapp/templates'));
 
+const RunCampaigns = lazy(() => import('../pages/whatsapp/runcampaign'));
+
+
 
 const routes = [
     {
@@ -192,6 +195,14 @@ const routes = [
         path: 'pages/whatsapp/templates',
         type: 'protected',
         element: <Templates />, 
+        layout: 'default',
+    },
+
+
+    {
+        path: 'pages/whatsapp/run-campaign',
+        type: 'protected',
+        element: <RunCampaigns />, 
         layout: 'default',
     },
     
