@@ -519,14 +519,14 @@ import Dialer from '../../components/Dialer';
                                                         > Voice Call   
                                                     </button> */}
                                                     
-                                                    {/* <button
+                                                     <button
                                                         type="button"
                                                         className="btn btn-secondary btn-sm ml-2"
                                                         disabled={!isInitialized}
                                                         onClick={() => setShowDialer(true)} 
                                                         >
                                                         <IconPhone/>
-                                                    </button> */}
+                                                    </button> 
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />

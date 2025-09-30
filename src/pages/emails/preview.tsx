@@ -10,6 +10,8 @@ import apiClient from '../../utils/apiClient';
 import Toast from '../../services/toast';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.css';
+import { SUBSCRIBER_TYPES } from "../../services/subscriberTypes";
+
 
 const endpoints = {
     createApi    : `${getBaseUrl()}/subscriber/send-campaign`,
@@ -107,14 +109,11 @@ const EmailPreview = () => {
         }));
         setIsSendNow(isChecked);
         if (!isChecked && !date) {
-            setErrors((prevErrors) => ({
-                ...prevErrors,
-                date: ['Please select a date for scheduled sending']
-            }));
+            setErrors((prevErrors) => ({ ...prevErrors, date: ['Please select a date for scheduled sending'] }));
             setActive('3'); 
         }
     };
-
+    
     const selectDate = (e: any) => {
         setIsSendNow(false);
         const selectedDate = e[0]; 
@@ -147,15 +146,10 @@ const EmailPreview = () => {
                                                     <div className="mb-3">
                                                         <label htmlFor="subscriber_type" className="block mb-2"> Select Import Type
                                                         </label>
-                                                        <select name="subscriber_type" id="subscriber_type" className="form-control w-full p-2 border rounded">
-                                                            <option value="">-- Select Option --</option>
-                                                            <option value="required">Required (No Import)</option>
-                                                            <option value="1">Hiring Candidate</option>
-                                                            <option value="2">Clients</option>
-                                                            <option value="3">Retargeting Clients</option>
-                                                            <option value="4">Roadshow Clients</option>
+                                                        <select name="subscriber_type" id="subscriber_type" className="form-control w-full p-2 border rounded" onChange={handleSelect} >
+                                                        {SUBSCRIBER_TYPES.map((type) => ( <option key={type.value} value={type.value}> {type.label} </option> ))}
                                                         </select>
-                                                          {errors.subscriber_type && <span className="text-red-500 text-sm">{errors.subscriber_type}</span>}
+                                                        {errors.subscriber_type && ( <span className="text-red-500 text-sm"> {errors.subscriber_type} </span> )}
                                                     </div>
                                                 </div>
                                             </AnimateHeight>
