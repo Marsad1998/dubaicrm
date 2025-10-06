@@ -58,9 +58,9 @@ const Assign = () => {
 
         const transformedAgents = agents?.map(agent => ({
             value: agent?.client_user_id,
-            label: agent?.client_user_name, // Plain text for searching
+            label: agent?.client_user_name, 
             phone: agent?.client_user_phone,
-            // Custom display component
+            
             customLabel: (
                 <>
                     {agent?.client_user_name}

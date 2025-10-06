@@ -28,11 +28,10 @@ import 'flatpickr/dist/flatpickr.css';
 import { IconOption } from '../../components/Icon';
 import { useTwilioDevice } from '../../hooks/useTwilioDevice';
 import Dialer from '../../components/Dialer';
+import AiCallModal from '../../components/AiCallModal';
 
 
-
-
-  const DashboardBox = () => {
+const DashboardBox = () => {
     const { dashboardType } = useParams();
     const {
         dispatch, navigate, TopbarStatuses, HrTopBarStatus, uniqueDropdownList, hrSidebarStatus,
@@ -47,6 +46,8 @@ import Dialer from '../../components/Dialer';
 
      const { makeCall, isInitialized } = useTwilioDevice(`${loginuser?.client_user_id || 'guest'}`);
      const [showDialer, setShowDialer] = useState(false);
+     const [isAiCallModal, setIsAiCallModal] = useState(false);
+     const [aiCallData, setAiCallData] = useState<any[]>([]);
 
     useEffect(() => {    
 
@@ -229,12 +230,7 @@ import Dialer from '../../components/Dialer';
             // dispatch(setLoading(false));
         }
     };
-
-
-
-
-   
-
+    
     return (
         <div>
             <div className="flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full">
@@ -462,13 +458,26 @@ import Dialer from '../../components/Dialer';
                                     </button>
                                     <h4 className="text-base md:text-lg font-medium ltr:mr-2 rtl:ml-2"> {selectedLead?.lead_title} </h4>
                                 </div>
-                                <div>
-                                    { selectedLead.lead_source == "Facebook"  ||  selectedLead.lead_source == "Instagram" && (
-                                    <Tippy content="Print">
-                                        <button type="button" onClick={() => RemarkHistory(selectedLead?.field_data)} className='btn btn-success btn-sm'> Remarks </button>
-                                    </Tippy>
+                                <div className="flex gap-2">
+                                    { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram") && (
+                                        <Tippy content="Remarks">
+                                        <button
+                                            type="button"
+                                            onClick={() => RemarkHistory(selectedLead?.field_data)}
+                                            className="btn btn-success btn-sm"
+                                        >
+                                            Remarks
+                                        </button>
+                                        </Tippy>
                                     )}
-                                </div>
+
+                                    {selectedLead?.qualifications && selectedLead.qualifications.length > 0 && (
+                                      <Tippy content="AI Response">
+                                        <button type="button" onClick={() => { setAiCallData(selectedLead.qualifications); setIsAiCallModal(true); }} className="btn btn-info btn-sm"
+                                        > AI Response </button>
+                                     </Tippy>
+                                    )}
+                                    </div>
                             </div>
                             <div className="h-px border-b border-white-light dark:border-[#1b2e4b]"></div>
                             <div className="p-4 relative">
@@ -507,18 +516,7 @@ import Dialer from '../../components/Dialer';
                                                     {selectedLead?.customer_name || 'Not-Found'}
                                                 </li>
                                                 <li className="flex items-center gap-2">
-                                                        <IconPhone /> <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
-                                                        {/* <button type="button" className="btn btn-secondary btn-sm ml-2" disabled={!isInitialized}
-                                                            onClick={async () => {
-                                                            if (selectedLead?.customer_phone && selectedLead?.lead_id) {
-                                                                await makeCall(selectedLead.customer_phone, selectedLead.lead_id);
-                                                            } else {
-                                                                console.error("Lead has no valid phone number or ID");
-                                                            }
-                                                            }}
-                                                        > Voice Call   
-                                                    </button> */}
-                                                    
+                                                    <IconPhone /> <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
                                                      <button
                                                         type="button"
                                                         className="btn btn-secondary btn-sm ml-2"
@@ -671,7 +669,8 @@ import Dialer from '../../components/Dialer';
                     open={showDialer}
                     onClose={() => setShowDialer(false)}
                 />
-                )}
+            )}
+            <AiCallModal isOpen={isAiCallModal} onClose={() => setIsAiCallModal(false)} data={aiCallData} />
 
     </div>
     );
