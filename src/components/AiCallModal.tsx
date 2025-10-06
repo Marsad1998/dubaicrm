@@ -61,13 +61,8 @@ const AiCallModal: React.FC<AiCallModalProps> = ({ isOpen, onClose, data }) => {
                                                 <tbody>
                                                     {Object.entries(item.answers).map(
                                                         ([key, value], idx) => (
-                                                            <tr
-                                                                key={idx}
-                                                                className="border-b border-gray-200"
-                                                            >
-                                                                <td className="px-4 py-2 font-semibold capitalize">
-                                                                    {key.replace(/_/g, ' ')}
-                                                                </td>
+                                                            <tr key={idx} className="border-b border-gray-200">
+                                                                <td className="px-4 py-2 font-semibold capitalize"> {key.replace(/_/g, ' ')} </td>
                                                                 <td className="px-4 py-2">
                                                                     {typeof value === 'object'
                                                                         ? value.raw ||

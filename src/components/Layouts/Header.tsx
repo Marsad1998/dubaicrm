@@ -28,7 +28,6 @@ import { getBaseUrl } from '../BaseUrl';
 import apiClient from '../../utils/apiClient';
 import { logoutUser } from '../../slices/authSlice';
 
-
 const endpoints = {
     notificationApi    : `${getBaseUrl()}/leads/lead_notifications`,
 };
@@ -60,8 +59,6 @@ const Header = () => {
     }, [location]);
 
     const [role, setRoles] = useState<string>();
-    
-    
     useEffect(() => {
         const userrole = localStorage.getItem('role') || '';
         setRoles(userrole);
