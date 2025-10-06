@@ -12,6 +12,7 @@ import apiClient from '../utils/apiClient';
         assignLeadsApi   : 'leads/assign-multiple-lead',
         takebackleads    : 'leads/take_back_leads',
         moveleadtocold  : 'leads/send_lead_cold',
+        LeadSummaryReportUrl : 'leads/lead-summary-report',
     };
     
     const initialState = {
@@ -169,6 +170,21 @@ import apiClient from '../utils/apiClient';
         }
     });
 
+
+    export const summaryreport = createAsyncThunk('summaryreport', async ({ formData }: { formData: FormData }, { rejectWithValue }) => {
+            try {
+            const response = await apiClient.post(endpoints.LeadSummaryReportUrl, formData, {
+                responseType: 'blob', 
+            });
+            const file = new Blob([response.data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(file);
+            return { blobUrl: url, status: response.status };
+            } catch (error: any) {
+            return rejectWithValue(error.response?.data || error.message);
+            }
+        }
+    );
+
     export const roadshowleads = createAsyncThunk('roadshowleads', async (params: FetchLeadsParams & { cityname?: string }, { rejectWithValue }) => {
         try {
             const { page = 1, perPage = 10, sortField, sortOrder, search, cityname } = params;
@@ -281,6 +297,15 @@ import apiClient from '../utils/apiClient';
                 state.leads        = action.payload.data;
                 state.agent_name   = action.payload.agent_name;
             })
+            .addCase(summaryreport.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(summaryreport.fulfilled, (state, action) => {
+                state.loading      = false;
+                // state.leads        = action.payload.data;
+                // state.agent_name   = action.payload.agent_name;
+            })
+
             .addCase(roadshowleads.pending, (state) => {
                 state.loading      = true;
             })

@@ -39,7 +39,9 @@
                     onClose();
                     setErrors({}); 
                     combinedRef.current.addleadform.reset();
-                    dispatch(DashboardLeadslist({ page_number : response.payload.last_page , lead_status : Number(currentstatus),  }) as any);
+                    window.location.reload();
+                    // dispatch(DashboardLeadslist({ page_number : response.payload.last_page , lead_status : Number(currentstatus),  }) as any);
+                    // dispatch(DashboardLeadslist({ page_number : response.payload.last_page , lead_status : 0,  }) as any);
                 }else{
                     setErrors(response.payload.errors);
                     return
