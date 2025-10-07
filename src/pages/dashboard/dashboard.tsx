@@ -517,14 +517,14 @@ const DashboardBox = () => {
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone /> <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
-                                                     <button
+                                                     {/* <button
                                                         type="button"
                                                         className="btn btn-secondary btn-sm ml-2"
                                                         disabled={!isInitialized}
                                                         onClick={() => setShowDialer(true)} 
                                                         >
                                                         <IconPhone/>
-                                                    </button> 
+                                                    </button>  */}
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />
