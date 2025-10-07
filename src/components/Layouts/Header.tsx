@@ -168,7 +168,6 @@ const Header = () => {
                             <IconMenu className="w-5 h-5" />
                         </button>
                     </div>
-
                     {/* <div className="ltr:mr-2 rtl:ml-2 hidden sm:block">
                         <ul className="flex items-center space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                             <li>
