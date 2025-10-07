@@ -46,10 +46,7 @@ export const useTwilioDevice = (identity: string) => {
             console.warn('getUserMedia warning (continuing):', err);
           }
         }
-        // Fetch Voice token
-        // const res = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
         const res = await axios.post('https://backend.leadshub.ae/api/voice/token', { identity });
-
         // Create + register Device (no call handlers here)
         dev = new Device(res.data.token, {
           codecPreferences: ['opus', 'pcmu'] as any[],
@@ -63,7 +60,6 @@ export const useTwilioDevice = (identity: string) => {
         // Keep tokens fresh (token-only responsibility)
         dev.on('tokenWillExpire', async () => {
           try {
-            // const refreshRes = await axios.post('https://testcrmbackend.leadshub.ae/api/voice/token', { identity });
             const refreshRes = await axios.post('https://backend.leadshub.ae/api/voice/token', { identity });
 
             await dev?.updateToken(refreshRes.data.token);
