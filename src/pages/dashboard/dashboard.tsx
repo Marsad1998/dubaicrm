@@ -48,16 +48,13 @@ const DashboardBox = () => {
      const [showDialer, setShowDialer] = useState(false);
      const [isAiCallModal, setIsAiCallModal] = useState(false);
      const [aiCallData, setAiCallData] = useState<any[]>([]);
-
     useEffect(() => {    
-
         dispatch(setPageTitle('Dashboard'));
         if (loginuser?.client_user_id && !combinedRef.current.fetched) {
             dispatch(DashboardLeadslist({search: searchText, dashboardType: dashboardType || 'all'}));
             combinedRef.current.fetched = true;
         }
     }, [loginuser?.client_user_id, dispatch, dashboardType]);
-    
     useEffect(() => {
         if (loginuser?.client_user_id) {
             const delayDebounceFn = setTimeout(() => {
