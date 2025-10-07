@@ -247,10 +247,7 @@ const Header = () => {
                                                             </div>
                                                             <div className="ltr:pl-3 rtl:pr-3 flex flex-auto">
                                                                 <div className="ltr:pr-3 rtl:pl-3">
-                                                                    <h6
-                                                                        dangerouslySetInnerHTML={{__html: notification.message, }}
-                                                                    ></h6>
-                                                                    {/* <span className="text-xs block font-normal dark:text-gray-500">{notification.time}</span> */}
+                                                                    <h6 dangerouslySetInnerHTML={{__html: notification.message, }}></h6>
                                                                 </div>
                                                                 <button type="button" className="ltr:ml-auto rtl:mr-auto text-neutral-300 hover:text-danger opacity-0 group-hover:opacity-100" onClick={() => removeNotification(notification.id)} >
                                                                     <IconXCircle />
@@ -260,11 +257,6 @@ const Header = () => {
                                                     </li>
                                                 );
                                             })}
-                                            {/* <li>
-                                                <div className="p-4">
-                                                    <button className="btn btn-primary block w-full btn-small">Read All Notifications</button>
-                                                </div>
-                                            </li> */}
                                         </>
                                     ) : (
                                         <li onClick={(e) => e.stopPropagation()}>
@@ -279,7 +271,6 @@ const Header = () => {
                                 </ul>
                             </Dropdown>
                         </div>
-
                         <div>
                             {themeConfig.theme === 'light' ? (
                                 <button
@@ -323,7 +314,6 @@ const Header = () => {
                                 </button>
                             )}
                         </div>
-                        
                         <div className="dropdown shrink-0 flex">
                             <Dropdown offset={[0, 8]} placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`} btnClassName="relative group block"
                                 button={<img className="w-9 h-9 rounded-full object-cover saturate-50 group-hover:saturate-100" src="https://www.w3schools.com/howto/img_avatar.png" alt="userProfile" />} >
