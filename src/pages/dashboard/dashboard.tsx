@@ -44,7 +44,8 @@ const DashboardBox = () => {
         isCustomizerOpen, setIsCustomizerOpen, overall_leads
     } = useDashboardStates();
 
-     const { makeCall, isInitialized } = useTwilioDevice(`${loginuser?.client_user_id || 'guest'}`);
+    //  const { makeCall, isInitialized } = useTwilioDevice(`${loginuser?.client_user_id || 'guest'}`);
+
      const [showDialer, setShowDialer] = useState(false);
      const [isAiCallModal, setIsAiCallModal] = useState(false);
      const [aiCallData, setAiCallData] = useState<any[]>([]);
@@ -659,15 +660,15 @@ const DashboardBox = () => {
                 initialFilters={{ agents: [], statuses: [] }}
             />
 
-            {showDialer && (
+            {/* {showDialer && (
                 <Dialer
                     identity={`${loginuser?.client_user_id || 'guest'}`}
                     lead={selectedLead}
                     open={showDialer}
                     onClose={() => setShowDialer(false)}
                 />
-            )}
-            <AiCallModal isOpen={isAiCallModal} onClose={() => setIsAiCallModal(false)} data={aiCallData} />
+            )} */}
+            {/* <AiCallModal isOpen={isAiCallModal} onClose={() => setIsAiCallModal(false)} data={aiCallData} /> */}
 
     </div>
     );
