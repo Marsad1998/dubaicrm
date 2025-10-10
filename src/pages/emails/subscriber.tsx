@@ -103,6 +103,8 @@ const SubscriberTemplate = () => {
         email: subscriberuser.email,
         phone: subscriberuser.phone,
         source: subscriberuser.status,
+        subscriber_type: subscriberuser.subscriber_type,
+
     }));
     const Import = async () => {
         window.open('https://backend.leadshub.ae/add-subscriber', '_blank');
@@ -176,6 +178,25 @@ const SubscriberTemplate = () => {
                                     default:
                                         return <span className="badge bg-light">Unknown</span>;
                                 }
+                            },
+                        },
+                        {
+                            accessor: 'subscriber_type',
+                            title: 'Subscriber Type',
+                            sortable: true,
+                            render: (record: any) => {
+                            switch (record.subscriber_type) {
+                                case 1:
+                                return <span className="badge bg-primary">Hiring Candidate</span>;
+                                case 2:
+                                return <span className="badge bg-success">Clients</span>;
+                                case 3:
+                                return <span className="badge bg-warning text-dark">Retargeting Clients</span>;
+                                case 4:
+                                return <span className="badge bg-info text-dark">Roadshow Clients</span>;
+                                default:
+                                return <span className="badge bg-light text-dark">Unknown</span>;
+                            }
                             },
                         },
                         {

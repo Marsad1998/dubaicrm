@@ -23,9 +23,6 @@ import apiClient from '../utils/apiClient';
         deletefiles  : '/leads/delete_files',
         exportCsv    : '/leads/export_csv',
         voiceCall    : '/voice/make-call',
-
-
-        
     };
 
     export const createLeads = createAsyncThunk('createlead', async ({ formData, id }: { formData: FormData; id?: number }, { rejectWithValue }) => {
