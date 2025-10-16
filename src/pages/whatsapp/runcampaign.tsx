@@ -115,7 +115,7 @@ const RunCampaign = () => {
     });
 
     if (!confirm.isConfirmed) return;
-
+    
     try {
       setSending(true);
       const payload = {
@@ -127,7 +127,7 @@ const RunCampaign = () => {
       const res = await apiClient.post(endpoints.runCampaign, payload);
       if (res.status === 200) {
         toast.success(sendType === 'now' ? 'Campaign started' : 'Campaign scheduled');
-        navigate('/whatsapp/campaigns');
+        navigate('/pages/whatsapp/campaign-dashboard');
       }
     } catch (e: any) {
       toast.error(e?.response?.data?.message || 'Failed to run campaign');
