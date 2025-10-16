@@ -46,6 +46,8 @@ const PermissionRouter = lazy(() => import('../pages/PermissionRouter/Permission
 const Templates = lazy(() => import('../pages/whatsapp/templates'));
 
 const RunCampaigns = lazy(() => import('../pages/whatsapp/runcampaign'));
+const CampaignDashboard = lazy(() => import('../pages/whatsapp/campaigndashboard'));
+
 
 
 
@@ -203,6 +205,14 @@ const routes = [
         path: 'pages/whatsapp/run-campaign',
         type: 'protected',
         element: <RunCampaigns />, 
+        layout: 'default',
+    },
+
+
+     {
+        path: 'pages/whatsapp/campaign-dashboard',
+        type: 'protected',
+        element: <CampaignDashboard />, 
         layout: 'default',
     },
     

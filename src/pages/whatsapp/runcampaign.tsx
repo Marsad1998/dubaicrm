@@ -148,7 +148,6 @@ const RunCampaign = () => {
         </div>
         <span className="text-xs text-slate-500">{loading ? 'Loading resources…' : 'Ready'}</span>
       </div>
-
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left Side */}
         <div className="xl:col-span-2">

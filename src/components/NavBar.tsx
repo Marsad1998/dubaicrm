@@ -4,8 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { IRootState } from '../store';
 import AnimateHeight from 'react-animate-height';
-
-// icons
 import IconCaretDown from './Icon/IconCaretDown';
 import IconMenuDashboard from './Icon/Menu/IconMenuDashboard';
 import IconMenuElements from './Icon/Menu/IconMenuElements';
@@ -303,10 +301,7 @@ const NavBar = () => {
             <>
                 <NavLink to="/pages/whatsapp/templates">{t('Whatsapp Templates')}</NavLink>
                 <NavLink to="/pages/whatsapp/run-campaign">{t('Run Campaign')}</NavLink>
-
-                {/* <NavLink to="/pages/email/template">{t('Create-Campaign')}</NavLink> */}
-                {/* <NavLink to="/pages/email/analyticsDashboard">{t('Tracking Dashboard')}</NavLink> */}
-                {/* <NavLink to="/pages/email/email-report-list">{t('Report List')}</NavLink> */}
+                <NavLink to="/pages/whatsapp/campaign-dashboard">{t('Campaign Dashboard')}</NavLink>
             </>
           )}
         </li>
