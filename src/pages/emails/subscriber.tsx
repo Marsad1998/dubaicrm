@@ -119,7 +119,6 @@ const SubscriberTemplate = () => {
             confirmButtonText: 'Yes, delete it!',
             cancelButtonText: 'No, cancel!',
         });
-        
         if (result.isConfirmed) {
             try {
                 const response = await apiClient.delete(`${getBaseUrl()}/subscriber/delete/${id}`);

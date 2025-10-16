@@ -104,7 +104,6 @@ const RunCampaign = () => {
 
   const onRun = async () => {
     if (!validate()) return;
-
     const selectedLabels = subscriberTypes.map((t) => t.label).join(', ');
     const confirm = await Swal.fire({
       title: sendType === 'now' ? 'Send campaign now?' : 'Schedule this campaign?',
@@ -113,9 +112,9 @@ const RunCampaign = () => {
       showCancelButton: true,
       confirmButtonText: sendType === 'now' ? 'Send Now' : 'Schedule',
     });
-
-    if (!confirm.isConfirmed) return;
     
+    if (!confirm.isConfirmed) return;
+
     try {
       setSending(true);
       const payload = {
