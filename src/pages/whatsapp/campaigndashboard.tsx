@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../dashboard/dashboard.css';
 import IconBell from '../../components/Icon/IconBell';
 import IconSend from '../../components/Icon/IconSend';
 import IconUsers from '../../components/Icon/IconUsers';
@@ -9,6 +8,8 @@ import IconTrendingUp from '../../components/Icon/IconTrendingUp';
 import { getBaseUrl } from '../../components/BaseUrl';
 import apiClient from '../../utils/apiClient';
 import Toast from '../../services/toast';
+import Loader3 from '../../services/loader3';
+import '../dashboard/dashboard.css';
 
 const endpoints = {
   dashboard: `${getBaseUrl()}/whatsapp/dashboard-report`,
@@ -17,7 +18,6 @@ const endpoints = {
 const CampaignDashboard = () => {
   const navigate = useNavigate();
   const toast    = Toast();
-
   const [loading, setLoading] = useState(false);
   const [overview, setOverview] = useState<any>(null);
   const [subscribers, setSubscribers] = useState<any>(null);
@@ -54,15 +54,13 @@ const CampaignDashboard = () => {
           </div>
         </div>
         <button onClick={() => navigate('/pages/whatsapp/run-campaign')} className="btn btn-primary btn-sm">
-          <IconSend className="w-3 h-3 mr-2" /> New Campaign
-        </button>
+          <IconSend className="w-3 h-3 mr-2" /> New Campaign </button>
       </div>
 
       {loading ? (
-        <div className="text-center text-slate-500 py-10">Loading dashboard...</div>
+        <Loader3 />
       ) : (
         <>
-          {/* ========== Latest Campaigns Table Card (full width) ========== */}
           <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
             <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
               <IconMessage className="w-5 h-5 text-primary" /> Latest Campaigns
@@ -118,14 +116,11 @@ const CampaignDashboard = () => {
             </div>
           </div>
 
-          {/* 🟩 Two Half-Width Cards in One Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* ========== Campaign Overview ========== */}
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                 <IconTrendingUp className="w-5 h-5 text-primary" /> Campaign Overview
               </h3>
-              {/* 3 cards per row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <StatCard label="Total Messages" value={overview?.total_messages ?? 0} color="blue" />
                 <StatCard label="Sent" value={overview?.sent ?? 0} color="emerald" />
