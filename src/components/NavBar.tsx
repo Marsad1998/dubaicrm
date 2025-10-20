@@ -261,6 +261,31 @@ const NavBar = () => {
         </li>
       )}
 
+
+      {(permissions.includes('manage marketing')) && (
+          <li className="menu nav-item relative">
+          <button
+            type="button"
+            className={`nav-link ${isVertical && currentMenu === 'subscribers' ? 'active' : ''}`}
+            onClick={() => isVertical && toggleMenu('subscribers')}
+          >
+            <div className="flex items-center">
+              <IconMultipleForwardRight className="shrink-0" />
+              <span className="px-1">{t(`Our Subscribers`)}</span>
+            </div>
+            <div className={`${isVertical && currentMenu !== 'subscribers' ? 'rtl:rotate-90 -rotate-90' : ''}`}>
+              <IconCaretDown />
+            </div>
+          </button>
+          {renderSubMenu(
+            'subscribers',
+            <>
+                <NavLink to="/pages/email/subscriber">{t('Create-Subscriber')}</NavLink>
+            </>
+          )}
+        </li>
+       )} 
+       
       {(permissions.includes('manage marketing')) && (
           <li className="menu nav-item relative">
           <button
@@ -279,7 +304,6 @@ const NavBar = () => {
           {renderSubMenu(
             'emailtool',
             <>
-                <NavLink to="/pages/email/subscriber">{t('Create-Subscriber')}</NavLink>
                 <NavLink to="/pages/email/template">{t('Create-Campaign')}</NavLink>
                 <NavLink to="/pages/email/analyticsDashboard">{t('Tracking Dashboard')}</NavLink>
                 <NavLink to="/pages/email/email-report-list">{t('Report List')}</NavLink>
@@ -299,9 +323,11 @@ const NavBar = () => {
           </button>
           {renderSubMenu('whatsappool',
             <>
-                <NavLink to="/pages/whatsapp/templates">{t('Whatsapp Templates')}</NavLink>
-                <NavLink to="/pages/whatsapp/run-campaign">{t('Run Campaign')}</NavLink>
-                <NavLink to="/pages/whatsapp/campaign-dashboard">{t('Campaign Dashboard')}</NavLink>
+              <NavLink to="/pages/whatsapp/campaign-dashboard">{t('Campaign Dashboard')}</NavLink>
+              <NavLink to="/pages/whatsapp/run-campaign">{t('Start Campaign')}</NavLink>
+              <NavLink to="/pages/whatsapp/templates">{t('Whatsapp Templates')}</NavLink>
+              <NavLink to="/pages/whatsapp/chat">{t('Messages Chat')}</NavLink>
+
             </>
           )}
         </li>
