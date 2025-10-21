@@ -174,26 +174,81 @@ const Chat = () => {
     setIsShowChatMenu(false);
   };
 
-  const sendMessage = async () => {
+//   const sendMessage = async () => {
+//     if (!newMessage.trim() || !selectedContact) return;
+
+//     try {
+//       const res = await apiClient.post(endpoints.sendMessage, {
+//         to: selectedContact.phone,
+//         message: newMessage.trim(),
+//       });
+
+//       const result = res.data;
+
+//       if (result?.status) {
+//         // Add message to local state immediately
+//         const tempMessage: WhatsAppMessage = {
+//           id: Date.now(), // Temporary ID
+//           from: selectedContact.phone,
+//           body: newMessage.trim(),
+//           created_at: new Date().toISOString(),
+//           type: 'outbound',
+//           status: 'sent',
+//         };
+
+//         setMessages((prev) => [...prev, tempMessage]);
+//         setNewMessage('');
+
+//         // Update contact last message
+//         setContacts((prev) =>
+//           prev.map((c) =>
+//             c.phone === selectedContact.phone
+//               ? {
+//                   ...c,
+//                   last_message: newMessage.trim(),
+//                   last_message_time: new Date().toLocaleTimeString(),
+//                 }
+//               : c
+//           )
+//         );
+//       }
+//     } catch (error) {
+//       console.error('Failed to send message:', error);
+//     }
+//   };
+
+
+    const sendMessage = async () => {
     if (!newMessage.trim() || !selectedContact) return;
 
     try {
-      const res = await apiClient.post(endpoints.sendMessage, {
+        // Get the last template used with this contact
+        const lastMessageRes = await apiClient.get(`${getBaseUrl()}/whatsapp/last-template/${selectedContact.phone}`);
+        const lastTemplate = lastMessageRes.data.data;
+
+        if (!lastTemplate) {
+        alert('No campaign template found for this contact');
+        return;
+        }
+
+        const res = await apiClient.post(`${getBaseUrl()}/whatsapp/campaign-reply`, {
         to: selectedContact.phone,
         message: newMessage.trim(),
-      });
+        template_id: lastTemplate.id
+        });
 
-      const result = res.data;
+        const result = res.data;
 
-      if (result?.status) {
-        // Add message to local state immediately
+        if (result?.status) {
+        // Add message to local state
         const tempMessage: WhatsAppMessage = {
-          id: Date.now(), // Temporary ID
-          from: selectedContact.phone,
-          body: newMessage.trim(),
-          created_at: new Date().toISOString(),
-          type: 'outbound',
-          status: 'sent',
+            id: Date.now(),
+            from: selectedContact.phone,
+            body: newMessage.trim(),
+            created_at: new Date().toISOString(),
+            type: 'outbound',
+            status: 'sent',
+            // template_id: lastTemplate.id
         };
 
         setMessages((prev) => [...prev, tempMessage]);
@@ -201,21 +256,23 @@ const Chat = () => {
 
         // Update contact last message
         setContacts((prev) =>
-          prev.map((c) =>
+            prev.map((c) =>
             c.phone === selectedContact.phone
-              ? {
-                  ...c,
-                  last_message: newMessage.trim(),
-                  last_message_time: new Date().toLocaleTimeString(),
+                ? {
+                    ...c,
+                    last_message: newMessage.trim(),
+                    last_message_time: new Date().toLocaleTimeString(),
                 }
-              : c
-          )
+                : c
+            )
         );
-      }
+        }
     } catch (error) {
-      console.error('Failed to send message:', error);
+        console.error('Failed to send message:', error);
+        alert('Failed to send reply. Please try again.');
     }
-  };
+    };
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
