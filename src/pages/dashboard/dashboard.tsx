@@ -655,6 +655,7 @@ const DashboardBox = () => {
                 onFilterUpdate={() => {}}
                 initialFilters={{ agents: [], statuses: [] }}
             />
+            
             {showDialer && (
                 <Dialer
                     identity={`${loginuser?.client_user_id || 'guest'}`}
