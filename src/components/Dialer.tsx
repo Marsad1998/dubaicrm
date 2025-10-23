@@ -371,21 +371,33 @@ const Dialer: React.FC<DialerProps> = ({ identity, lead, open = true, onClose, c
         clearTimer();
         console.log('Call disconnected');
       });
-
+      
       call.on('error', (err: any) => {
         setStatus('failed');
         clearTimer();
         console.error('Call error:', err);
         
         if (err?.code === 31402) {
-          toast.error('Audio device error (31402). Close other apps using the mic and retry');
-        } else if (err?.code === 31003) {
-          toast.error('Connection error. Check your internet connection');
-        } else if (err?.code === 31208) {
-          toast.error('Call rejected - number may be invalid');
-        } else {
-          toast.error('Call error: ' + (err?.message || 'Unknown error'));
-        }
+            toast.error('Please close other apps using the microphone and try again.');
+          } else if (err?.code === 31003) {
+            toast.error('Please check your internet connection.');
+          } else if (err?.code === 31208) {
+            toast.error('The number may be invalid or unreachable.');
+          } else if (err?.code === 31005) {
+            toast.error('Client is busy or unavailable.');
+          } else if (err?.code === 31001) {
+            toast.error('Call failed to connect, Please try again later.');
+          } else if (err?.code === 31002) {
+            toast.error('Network error, Unable to reach the destination.');
+          } else if (err?.code === 31004) {
+            toast.error('Call timed out, The destination did not answer in time.');
+          } else if (err?.code === 31006) {
+            toast.error('Call dropped, The connection was lost unexpectedly.');
+          } else if (err?.code === 31205) {
+            toast.error('Call canceled, The caller ended the call before it connected.');
+          } else {
+            toast.error('Call error: ' + (err?.message || 'Unknown error occurred.'));
+          }
       });
 
       call.on('cancel', () => {
