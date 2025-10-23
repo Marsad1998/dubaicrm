@@ -371,11 +371,10 @@ const Dialer: React.FC<DialerProps> = ({ identity, lead, open = true, onClose, c
         clearTimer();
         console.log('Call disconnected');
       });
-      
+
       call.on('error', (err: any) => {
         setStatus('failed');
         clearTimer();
-        console.error('Call error:', err);
         
         if (err?.code === 31402) {
             toast.error('Please close other apps using the microphone and try again.');
@@ -384,7 +383,7 @@ const Dialer: React.FC<DialerProps> = ({ identity, lead, open = true, onClose, c
           } else if (err?.code === 31208) {
             toast.error('The number may be invalid or unreachable.');
           } else if (err?.code === 31005) {
-            toast.error('Client is busy or unavailable.');
+            toast.error('Client is busy unavailable — the number may be unreachable, inactive, or blocked.');
           } else if (err?.code === 31001) {
             toast.error('Call failed to connect, Please try again later.');
           } else if (err?.code === 31002) {
@@ -408,7 +407,7 @@ const Dialer: React.FC<DialerProps> = ({ identity, lead, open = true, onClose, c
       });
 
     } catch (error: any) {
-      console.error('Call initiation error:', error);
+      // console.error('Call initiation error:', error);
       setStatus('failed');
       toast.error('Failed to start call: ' + (error?.message || 'Unknown error'));
     }
