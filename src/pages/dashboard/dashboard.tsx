@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDashboardStates } from '../../hooks/useDashboardStates';
-import { DashboardLeadslist, setLoading, updateSingleLead, createLeads, uploadFiles, getFiles, voiceCall } from '../../slices/dashboardSlice';
+import { DashboardLeadslist, setLoading, updateSingleLead, createLeads, uploadFiles, getFiles, voiceCall, voiceCallLogs } from '../../slices/dashboardSlice';
 import { setPageTitle } from '../../slices/themeConfigSlice';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import IconCaretDown from '../../components/Icon/IconCaretDown';
@@ -21,6 +21,7 @@ import IconMail from '../../components/Icon/IconMail';
 import Select from 'react-select';
 import LeadModal from '../../components/LeadModal';
 import RemarkModal from '../../components/RemarkModal';
+import CallLogModal from '../../components/CallLogModal';
 import FileViewerModal from '../../components/FileViewerModal';
 import CustomSideNav from '../../components/CustomSideNav';
 import Flatpickr from 'react-flatpickr';
@@ -40,6 +41,7 @@ const DashboardBox = () => {
         AllLeadList, setAllLeadList, selectedLead, setSelectedLead, selectedTab, setSelectedTab,
         isShowMailMenu, setIsShowMailMenu, isEdit, setIsEdit, searchText, setSearchText, isModalOpen, setIsModalOpen,
         errors, setErrors, date, setDate, IsDisable, setIsDisable, IsColor, setsColor, IsRemarkData, SetIsRemarkData,
+        IsCallLogData, SetIsCallLogData, isCallLog, setCallLog,
         isMemark, setIsMemark, isOpen, setIsOpen, files, setFiles, isFileViewerOpen, setIsFileViewerOpen,
         isCustomizerOpen, setIsCustomizerOpen, overall_leads
     } = useDashboardStates();
@@ -146,6 +148,13 @@ const DashboardBox = () => {
         const $data  =JSON.parse(data);
         SetIsRemarkData($data)
         setIsMemark(true);
+    }
+
+    async function callLogHistory(data: any) {
+        const response = await dispatch(voiceCallLogs(data));
+        console.log(response.payload?.response);
+        SetIsCallLogData(response.payload?.response);
+        setCallLog(true);
     }
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -470,6 +479,16 @@ const DashboardBox = () => {
                                         </Tippy>
                                     )}
 
+                                    <Tippy content="Show Call Logs">
+                                        <button
+                                            type="button"
+                                            onClick={() => callLogHistory(selectedLead)}
+                                            className="btn btn-success btn-sm"
+                                        >
+                                            Show Call Logs
+                                        </button>
+                                        </Tippy>
+
                                     {selectedLead?.qualifications && selectedLead.qualifications.length > 0 && (
                                       <Tippy content="AI Response">
                                         <button type="button" onClick={() => { setAiCallData(selectedLead.qualifications); setIsAiCallModal(true); }} className="btn btn-info btn-sm"
@@ -643,6 +662,11 @@ const DashboardBox = () => {
             </div>
             <LeadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}  />
             <RemarkModal isOpen={isMemark} onClose={() => setIsMemark(false)} data={IsRemarkData} />
+            <CallLogModal 
+                isOpen={isCallLog} 
+                onClose={() => setCallLog(false)}
+                data={IsCallLogData} 
+            />
             <FileViewerModal isOpen={isFileViewerOpen} onClose={() => setIsFileViewerOpen(false)} files={files} />    
             <CustomSideNav
                 isOpen={isCustomizerOpen}

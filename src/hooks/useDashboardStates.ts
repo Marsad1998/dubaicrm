@@ -42,7 +42,9 @@ export const useDashboardStates = () => {
     const [IsDisable, setIsDisable]           = useState(true);
     const [IsColor, setsColor]                = useState('hsl(0, 0%, 95%)');
     const [IsRemarkData, SetIsRemarkData]     = useState<Array<{ name: string; values: string[] }>>([]);
+    const [IsCallLogData, SetIsCallLogData]     = useState<any>(null);
     const [isMemark, setIsMemark]             = useState(false);
+    const [isCallLog, setCallLog]             = useState(false);
     const [isOpen, setIsOpen]                 = useState(false);
     const [files, setFiles]                   = useState([]);
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
@@ -82,6 +84,8 @@ export const useDashboardStates = () => {
         IsDisable, setIsDisable,
         IsColor, setsColor,
         IsRemarkData, SetIsRemarkData,
+        IsCallLogData, SetIsCallLogData,
+        isCallLog, setCallLog,
         isMemark, setIsMemark,
         isOpen, setIsOpen,
         files, setFiles,

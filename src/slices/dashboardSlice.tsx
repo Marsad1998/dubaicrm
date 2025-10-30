@@ -23,6 +23,7 @@ import apiClient from '../utils/apiClient';
         deletefiles  : '/leads/delete_files',
         exportCsv    : '/leads/export_csv',
         voiceCall    : '/voice/make-call',
+        voiceCallLogs    : '/voice/get-call-logs',
     };
 
     export const createLeads = createAsyncThunk('createlead', async ({ formData, id }: { formData: FormData; id?: number }, { rejectWithValue }) => {
@@ -62,8 +63,6 @@ import apiClient from '../utils/apiClient';
                     sort_order: sortOrder,
                     dashboardType:dashboardType
                 });
-
-                
 
                 return {
                     leadsdata: response.data.data || [],
@@ -151,10 +150,35 @@ import apiClient from '../utils/apiClient';
         }
     });
 
-
-    export const voiceCall = createAsyncThunk('voice/call', async ({ phone, lead_id }: { phone: string; lead_id: number }, { rejectWithValue }) => {
+    export const voiceCallLogs = createAsyncThunk('voice/call-logs', async ({ phone, lead_id }: { phone: string; lead_id: number }, { rejectWithValue }) => {
             try {
-                const response = await apiClient.post('/voice/make-call', { to: phone, lead_id });
+                const response = await apiClient.post('/voice/get-call-logs', { to: phone, lead_id });
+                return { response: response.data, status: response.status };
+            } catch (error: any) {
+                return rejectWithValue(error.response?.data || error.message);
+            }
+        }
+    );
+
+    export const fetchVoiceRecordingUrl = createAsyncThunk('voice/fetchRecording', async (recordingSid: string, { rejectWithValue }) => {
+            try {
+                const response = await apiClient.get(`/voice/audio-stream/${recordingSid}`, {
+                    responseType: 'blob'
+                });
+                // Convert blob to Object URL
+                const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                return audioUrl; // frontend can use <audio src={audioUrl} />
+            } catch (error: any) {
+                return rejectWithValue(error.response?.data || error.message);
+            }
+        }
+    );
+
+    export const voiceCall = createAsyncThunk('voice/call', async ({ data }: { data: any }, { rejectWithValue }) => {
+            try {
+                const response = await apiClient.post('/voice/make-call', { data: data });
                 return { response: response.data, status: response.status };
             } catch (error: any) {
                 return rejectWithValue(error.response?.data || error.message);
