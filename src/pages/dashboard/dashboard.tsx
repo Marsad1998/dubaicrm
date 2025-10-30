@@ -486,7 +486,7 @@ const DashboardBox = () => {
                                         <div className="flex items-center mb-5">
                                             {loginuser?.roles[0].name === 'HR' ? (
                                                 <>
-                                                    <h5 className="font-semibold text-lg dark:text-white-light">Job Seeker Detail</h5>
+                                                   <h5 className="font-semibold text-lg dark:text-white-light"> Job Seeker Detail</h5>
                                                     &nbsp; &nbsp;
                                                     <button type="button" className="btn btn-success" onClick={triggerFileInput}>
                                                         <IconFile className="w-4 h-4" />
