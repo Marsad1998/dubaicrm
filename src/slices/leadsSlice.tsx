@@ -6,11 +6,13 @@ import apiClient from '../utils/apiClient';
         destoryApi       : '/leads/delete_leads',
         reAssignApi      : '/leads/reassign-lead-list',
         closeLeadsApi    : '/leads/close-deal',
+        pollLeadsApi    : '/leads/poll-leads',
         allLeadsApi      : '/leads/all-leads',
         pdfurl           : 'leads/filter-pdf-data',
         roadshowLeadApi  : 'leads/roadshow-leads',
         assignLeadsApi   : 'leads/assign-multiple-lead',
         takebackleads    : 'leads/take_back_leads',
+        takePollleads    : 'leads/take_poll_leads',
         moveleadtocold  : 'leads/send_lead_cold',
         LeadSummaryReportUrl : 'leads/lead-summary-report',
     };
@@ -100,6 +102,27 @@ import apiClient from '../utils/apiClient';
                 // data: response.data.data.data,
                 data: response.data.data,
                 agents: response.data.agents,
+                total: response.data.total,
+                last_page: response.data.last_page,
+                current_page: response.data.current_page,
+                per_page: response.data.per_page, 
+            };
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    });
+
+    export const pollLeads = createAsyncThunk('pollLeads', async (params: FetchLeadsParams = {}, { rejectWithValue }) => {
+        try {
+            const { page = 1, perPage = 10, sortField, sortOrder, search } = params;
+            const effectivePage = search ? 1 : page;
+            const response = await apiClient.get(endpoints.pollLeadsApi, {
+                params: { page:effectivePage, per_page: perPage, sort_field: sortField, sort_order: sortOrder, search: search },
+            });
+            console.log(response.data.data);
+            return {
+                data: response.data.data,
+                agents: response.data.agents || [],
                 total: response.data.total,
                 last_page: response.data.last_page,
                 current_page: response.data.current_page,
@@ -205,10 +228,16 @@ import apiClient from '../utils/apiClient';
         }
     });
 
-    export const updateLeadsStatus = createAsyncThunk('updateStatus', async (payload: { agent_id: number,  lead_ids: any[], status_id: any,  date_range: any }, { rejectWithValue }) => {
+    export const updateLeadsStatus = createAsyncThunk('updateStatus', async (payload: { agent_id: any,  lead_ids: any[], status_id: any,  date_range: any, type: string }, { rejectWithValue }) => {
         try {
-            const response = await apiClient.post(endpoints.takebackleads, payload);
-            return response.data;
+            if(payload.type === 'take') {
+                const response = await apiClient.post(endpoints.takebackleads, payload);
+                return response.data;
+            }
+            else {
+                const response = await apiClient.post(endpoints.takePollleads, payload);
+                return response.data;
+            }
         } catch (error) {
             return rejectWithValue((error as any).response?.data);
         }
@@ -268,6 +297,15 @@ import apiClient from '../utils/apiClient';
             }).addCase(closeleads.pending, (state) => {
                 state.loading = true;
             }).addCase(closeleads.fulfilled, (state, action) => {
+                state.loading      = false;
+                state.leads        = action.payload.data;
+                state.total        = action.payload.total;
+                state.last_page    = action.payload.last_page;
+                state.current_page = action.payload.current_page;
+                state.per_page     = action.payload.per_page;
+            }).addCase(pollLeads.pending, (state) => {
+                state.loading = true;
+            }).addCase(pollLeads.fulfilled, (state, action) => {
                 state.loading      = false;
                 state.leads        = action.payload.data;
                 state.total        = action.payload.total;

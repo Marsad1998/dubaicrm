@@ -20,10 +20,13 @@ const Reports = () => {
     const toast = Toast();
     const navigate = useNavigate();
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [isConfirmPollModal, setisConfirmPollModal] = useState(false);
+    
     const [bulkSelectedIds, setBulkSelectedIds] = useState<Set<string>>(new Set());
     const [allSelected, setAllSelected] = useState(false);    
     const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
     const [disable, setDisable] = useState(true);
+    const [disablePoll, setDisablePoll] = useState(true);
     const [selectedAgent, setSelectedAgent] = useState<number | null>(null);
     const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -100,6 +103,8 @@ const Reports = () => {
 
     const SelectAgent = (agentId: number) => {
         setSelectedAgent(agentId);
+        setDisablePoll(agentId !== null || selectedStatus === null);
+
         dispatch(DashboardLeadslist({
             page_number: 1,
             per_page: per_page,
@@ -114,6 +119,8 @@ const Reports = () => {
 
     const SelectStatus = (status: any) => {
         setSelectedStatus(status.value);
+        setDisablePoll(selectedAgent !== null || status.value === null);
+
         dispatch(DashboardLeadslist({
             page_number: 1,
             per_page: per_page,
@@ -236,12 +243,12 @@ const Reports = () => {
     };
 
 
-    const handleTakeBackConfirm = async () => {
-        if (!selectedAgent) {
+    const handleTakeBackConfirm = async (type: string) => {
+        if (!selectedAgent && type == 'take') {
             toast.error('Please select an agent before taking back leads.');
             return;
         }
-        if (bulkSelectedIds.size === 0) {
+        if (bulkSelectedIds.size === 0 && type == 'take') {
             toast.error('Please select the leads you want to take back.');
             return;
         }
@@ -251,10 +258,12 @@ const Reports = () => {
             const leadIds = Array.from(bulkSelectedIds);
             
             const response = await dispatch(updateLeadsStatus({ 
-                agent_id: selectedAgent, 
+                agent_id: selectedAgent ?? null, 
                 lead_ids: leadIds, 
                 status_id: selectedStatus, 
-                date_range: dateRange 
+                date_range: dateRange,
+                type: type
+
             })).unwrap();
 
             if (response.status === 'success') {
@@ -263,6 +272,7 @@ const Reports = () => {
                 setBulkSelectedIds(new Set());
                 setSelectedRecords([]);
                 setDisable(true);
+                setisConfirmPollModal(false);
                 setAllSelected(false);
                 dispatch(DashboardLeadslist({ 
                     page_number: current_page, 
@@ -288,13 +298,15 @@ const Reports = () => {
             accessor: 'id', 
             title: (
                 <div className="flex items-center">
-                    <input 
-                        type="checkbox" 
-                        className="form-checkbox mr-2" 
-                        checked={allSelected || (tableData.length > 0 && tableData.every(record => bulkSelectedIds.has(record.id)))} 
-                        onChange={(e) => handleSelectAllCurrentPage(e.target.checked)} 
-                        // disabled={!selectedStatus} 
-                    />
+                    {disablePoll ? (
+                        <input 
+                            type="checkbox" 
+                            className="form-checkbox mr-2" 
+                            checked={allSelected || (tableData.length > 0 && tableData.every(record => bulkSelectedIds.has(record.id)))} 
+                            onChange={(e) => handleSelectAllCurrentPage(e.target.checked)} 
+                            // disabled={!selectedStatus} 
+                        />
+                    ) : (<></>)}
                     Select
                     {bulkSelectedIds.size > 0 && (
                         <span className="ml-2 text-xs">({bulkSelectedIds.size} selected)</span>
@@ -303,13 +315,16 @@ const Reports = () => {
             ), 
             sortable: false, 
             render: (record: any) => (
-                <input 
-                    type="checkbox" 
-                    className="form-checkbox" 
-                    checked={bulkSelectedIds.has(record.id)} 
-                    onChange={(e) => handleCheckboxChange(record, e.target.checked)} 
-                    // disabled={!selectedStatus} 
-                />
+                disablePoll ? (
+                    <input
+                        type="checkbox"
+                        className="form-checkbox"
+                        checked={bulkSelectedIds.has(record.id)}
+                        onChange={(e) => handleCheckboxChange(record, e.target.checked)}
+                    />
+                ) : (
+                    <></>
+                )
             ),
         },
         { accessor: 'title', title: 'Title', sortable: true },
@@ -424,6 +439,21 @@ const Reports = () => {
                         >
                             Take Back
                         </button>
+
+                        {
+                            disablePoll ? (
+                                <></>
+                            ) : (
+                                <button 
+                                    onClick={() => setisConfirmPollModal(true)} 
+                                    type="button" 
+                                    className="btn btn-success btn-sm flex items-center"
+                                >
+                                    Send to Poll
+                                </button>
+                            )
+                        }
+                        
                     </div>
                 </div>
             </div>
@@ -458,7 +488,23 @@ const Reports = () => {
                         {/* <p>Are you sure you want to take back {total || 0} selected leads?</p> */}
                         <div className="flex justify-end mt-4 space-x-2">
                             <button onClick={() => setIsConfirmModalOpen(false)}  className="btn btn-outline-secondary"> Cancel </button>
-                            <button  onClick={handleTakeBackConfirm} className="btn btn-primary">
+                            <button  onClick={() => handleTakeBackConfirm('take')} className="btn btn-primary">
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isConfirmPollModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg max-w-md">
+                        <h3 className="text-lg font-bold mb-4">Confirm to send to Poll</h3>
+                        <p>Are you sure you want to sent into Poll {total} selected leads?</p>
+                        {/* <p>Are you sure you want to take back {total || 0} selected leads?</p> */}
+                        <div className="flex justify-end mt-4 space-x-2">
+                            <button onClick={() => setisConfirmPollModal(false)}  className="btn btn-outline-secondary"> Cancel </button>
+                            <button  onClick={() => handleTakeBackConfirm('poll')} className="btn btn-primary">
                                 Confirm
                             </button>
                         </div>

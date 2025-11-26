@@ -20,6 +20,7 @@ const Leaves = lazy(() => import('../pages/Users/Leaves'));
 const Dashboardanalysis = lazy(() => import('../pages/dashboard/leadsanalysis'));
 import ProtectedRoute from '../components/ProtectedRoute';
 import AssignPermission from '../pages/Permissions/AssignPermission';
+import PollLeads from '../pages/leads/poll_leads';
 const Assign = lazy(() => import('../pages/leads/assign'));
 const ReAssign = lazy(() => import('../pages/leads/reassign'));
 const WonLeads = lazy(() => import('../pages/leads/won'));
@@ -100,6 +101,12 @@ const routes = [
         path: 'pages/leads/reports',
         type: 'protected',
         element : <Reports/>,
+        layout: 'default',
+    },
+    {
+        path: 'pages/leads/poll-leads',
+        type: 'protected',
+        element : <PollLeads/>,
         layout: 'default',
     },
 

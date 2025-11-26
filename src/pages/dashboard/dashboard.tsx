@@ -152,8 +152,8 @@ const DashboardBox = () => {
 
     async function callLogHistory(data: any) {
         const response = await dispatch(voiceCallLogs(data));
-        console.log(response.payload?.response);
-        SetIsCallLogData(response.payload?.response);
+        // console.log(response.payload?.response);
+        // SetIsCallLogData(response.payload?.response);
         setCallLog(true);
     }
 
