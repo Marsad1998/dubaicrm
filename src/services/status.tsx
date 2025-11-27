@@ -258,6 +258,18 @@ export const STATUSES = [
         tab     : 'followuptab',
         activeColor: "bg-white-dark/10 text-secondary",
     },
+    {
+        value: 19,
+        label: 'Poll Leads',
+        displayIn: ['matchcolorlist',],
+        icon: <IconThumbUp className="w-5 h-5 ltr:mr-2 rtl:ml-2" />,
+        outlineColor: 'bg-white text-secondary',
+        bgColor : 'bg-primary',
+        notes  : ' Moved to: <span class="text-primary">Poll Leads </span>',
+        notes2   : ' From Poll Leads',
+        tab     : 'pollleads',
+        activeColor: "bg-white-dark/10 text-secondary",
+    },
     
     // 1 to 50 statuses reserved for future use
     // Above 50 are custom hired statuses
