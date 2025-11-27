@@ -259,7 +259,7 @@ export const STATUSES = [
         activeColor: "bg-white-dark/10 text-secondary",
     },
     {
-        value: 19,
+        value: 20,
         label: 'Poll Leads',
         displayIn: ['matchcolorlist',],
         icon: <IconThumbUp className="w-5 h-5 ltr:mr-2 rtl:ml-2" />,
