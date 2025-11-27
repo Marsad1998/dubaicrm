@@ -308,6 +308,7 @@ import apiClient from '../utils/apiClient';
             }).addCase(pollLeads.fulfilled, (state, action) => {
                 state.loading      = false;
                 state.leads        = action.payload.data;
+                state.agents       = action.payload.agents;
                 state.total        = action.payload.total;
                 state.last_page    = action.payload.last_page;
                 state.current_page = action.payload.current_page;
