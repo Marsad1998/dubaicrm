@@ -288,6 +288,7 @@ const LeadsAnalysis = () => {
                         </div>
                         <ReactApexChart options={dailySales.options} series={dailySales.series} type="bar" height={360} className="overflow-hidden" />
                     </div>
+                    {loginuser?.roles[0].name === 'super admin' && (
                     <div className="panel h-full">
                         <div className="flex items-start justify-between dark:text-white-light mb-5 -mx-5 p-5 pt-0 border-b border-white-light dark:border-[#1b2e4b]">
                             <h5 className="font-semibold text-lg">Last Activities Report</h5>
@@ -319,6 +320,7 @@ const LeadsAnalysis = () => {
                             </div>
                         </PerfectScrollbar>
                     </div>
+                   )}
                 </div>
             </div>
             <CustomSideNav isOpen={isCustomizerOpen} onClose={() => setIsCustomizerOpen(false)} onFilterUpdate={handleFilterUpdate} initialFilters={filters} leadId={null} onSuccess={() => {}} />
