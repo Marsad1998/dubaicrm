@@ -52,7 +52,16 @@ const Users = () => {
     const [selectedUser, setSelectedUser] = useState<any | null>(null);
     const [birthdaydate, setDateOfBirthday] = useState<any | null>(null);
     const [joindate, SetJoingDate] = useState<any | null>(null);
-   
+    const [photo, setPhoto] = useState<any>(null);
+    const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setPhoto(file);
+            setPhotoPreview(URL.createObjectURL(file));
+        }
+    };
 
     useEffect(() => {
         if (!requestMade.current) {
@@ -118,6 +127,9 @@ const Users = () => {
         try {
             if (combinedRef.current.userformRef) {
                 const formData = new FormData(combinedRef.current.userformRef);
+                if (photo) {
+                    formData.append("profile_photo", photo);
+                }
                     items.forEach((item:any, index:number) => {
                         if (item.file) {
                             formData.append(`user_files[]`, item.file);
@@ -292,6 +304,26 @@ const Users = () => {
             title: '#',
             width: 80,
             key: 'id'
+        },
+        {
+            accessor: 'profile_photo',
+            title: 'Photo',
+            width: 80,
+            key: 'photo',
+            render: (item: any) => {
+                const photo =
+                    item.media?.length > 0
+                        ? item.media[0].original_url
+                        : "/default-user.png"; // fallback image
+
+                return (
+                    <img
+                        src={photo}
+                        alt={item.client_user_name}
+                        className="w-10 h-10 rounded-full object-cover border"
+                    />
+                );
+            },
         },
         {
             accessor: 'team.client_user_name',
@@ -472,10 +504,38 @@ const Users = () => {
                                         </span>
                                     )}
                                 </div>
+
                                 <div className="form-group sm:col-span-3 mt-2">
                                     <input name="client_user_allow_leave" type="number" placeholder="Allow Leave" className="form-input" />
                                     {errors.client_user_allow_leave && ( <span className="text-red-500 text-sm"> {errors.client_user_allow_leave} </span> )}
                                 </div>
+
+                                <div className="form-group sm:col-span-3 mt-2">
+                                    <label htmlFor="profile_photo">Profile Photo</label>
+
+                                    <input
+                                        type="file"
+                                        name="profile_photo"
+                                        accept="image/*"
+                                        className="form-input"
+                                        onChange={handlePhotoChange}
+                                    />
+
+                                    {photoPreview && (
+                                        <div className="mt-3">
+                                            <img
+                                                src={photoPreview}
+                                                alt="Preview"
+                                                className="w-32 h-32 object-cover rounded border"
+                                            />
+                                        </div>
+                                    )}
+
+                                    {errors.profile_photo && (
+                                        <span className="text-red-500 text-sm">{errors.profile_photo}</span>
+                                    )}
+                                </div>
+
 
                               </div>
                                 <div className="mt-8">
