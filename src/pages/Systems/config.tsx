@@ -309,6 +309,7 @@ const ConfigSettings = () => {
                                                 className="form-input" 
                                                 value={formData.meta_user_token}
                                                 onChange={handleInputChange} 
+                                                readOnly={true}
                                             />
                                             {errors.meta_user_token && <span className="text-red-500 text-sm">{errors.meta_user_token}</span>}
                                         </div>
@@ -320,10 +321,11 @@ const ConfigSettings = () => {
                                                 id="meta_page_token" 
                                                 name="meta_page_token" 
                                                 type="text" 
-                                                placeholder="Enter Meta User Token" 
+                                                placeholder="Enter Meta Page Token" 
                                                 className="form-input" 
                                                 value={formData.meta_page_token}
                                                 onChange={handleInputChange} 
+                                                readOnly={true}
                                             />
                                             {errors.meta_page_token && <span className="text-red-500 text-sm">{errors.meta_page_token}</span>}
                                             <p className="text-xs text-gray-500 mt-1">These token are used to authenticate with Meta APIs</p>
