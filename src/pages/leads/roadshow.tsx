@@ -8,12 +8,16 @@ import IconPlus from '../../components/Icon/IconPlus';
 import { useNavigate } from 'react-router-dom';
 import Toast from '../../services/toast';
 import { setPageTitle } from '../../slices/themeConfigSlice';
-import { roadshowleads, destoryLeads } from '../../slices/leadsSlice';
+import { roadshowleads, destoryLeads, download } from '../../slices/leadsSlice';
 import Select from 'react-select';
 import LeadModal from '../../components/LeadModal';
 import { CountryList } from '../../services/status';
 import { DataTableSortStatus } from 'mantine-datatable';
 import Swal from 'sweetalert2';
+import { jsPDF } from 'jspdf';
+import "jspdf-autotable";
+import autoTable from 'jspdf-autotable';
+
 
 const RoadShow = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -202,6 +206,61 @@ const RoadShow = () => {
         { accessor: 'date', title: 'Date', sortable: true },
     ];
 
+    // const handleDownloadPdf = async () => {
+    //     const formData = new FormData();
+    //     if (selectedCity) formData.append('cityname', selectedCity);
+    //     await dispatch(download({ formData, cityname: selectedCity }) as any);
+    // };
+
+
+    const handleDownloadPdf = async () => {
+    try {
+        const formData = new FormData();
+        if (selectedCity) formData.append("cityname", selectedCity);
+
+        const response = await dispatch(download({ formData, cityname: selectedCity }) as any);
+        const data = response?.payload?.data || [];
+
+        if (!data || data.length === 0) {
+            toast.error("No data available to export.");
+            return;
+        }
+
+        // ✅ Create jsPDF instance
+        const doc = new jsPDF("p", "pt", "a4");
+        doc.setFontSize(14);
+        doc.text(`Roadshow Leads - ${selectedCity}`, 40, 40);
+        doc.setFontSize(10);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 40, 60);
+
+        // ✅ Define table headers & rows
+        const tableColumn = ["#", "Lead Title", "Name", "Phone", "Email"];
+        const tableRows = data.map((lead: any, index: number) => [
+            index + 1,
+            lead.lead_title || "-",
+            lead.customer_name || "-",
+            lead.customer_phone || "-",
+            lead.customer_email || "-",
+        ]);
+
+        // ✅ Create table
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 80,
+            styles: { fontSize: 9, cellPadding: 4 },
+            headStyles: { fillColor: [139, 93, 59], textColor: 255 }, // your theme brown
+        });
+
+        // ✅ Save PDF
+        doc.save(`Roadshow-Leads-${selectedCity}.pdf`);
+        toast.success("PDF downloaded successfully!");
+    } catch (error) {
+        toast.error("Failed to generate PDF.");
+        console.error(error);
+    }
+};
+
     return (
         <div>
             <div className="panel flex items-center justify-between overflow-visible whitespace-nowrap p-3 text-dark relative">
@@ -222,6 +281,11 @@ const RoadShow = () => {
                         className="cursor-pointer custom-multiselect z-10 w-[300px]" 
                         isClearable
                     />
+                    {selectedCity && (
+                    <button onClick={handleDownloadPdf} type="button" className="btn btn-secondary btn-sm">
+                        Download PDF
+                    </button>
+                    )}                    
                     <button 
                         onClick={RemoveLead} 
                         type="button" 

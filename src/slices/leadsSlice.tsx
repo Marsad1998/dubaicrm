@@ -184,14 +184,31 @@ import apiClient from '../utils/apiClient';
         }
     });
 
-    export const download = createAsyncThunk('download', async ({ formData }: { formData: FormData; }, { rejectWithValue }) => {
+    // export const download = createAsyncThunk('download', async ({ formData }: { formData: FormData; }, { rejectWithValue }) => {
+    //     try {
+    //         const response = await apiClient.post(endpoints.pdfurl, formData);
+    //         return {data: response?.data.data, status: response?.status, agent_name:response?.data.agent_name};
+    //     } catch (error: any) {
+    //         return rejectWithValue(error.response?.data || error.message);
+    //     }
+    // });
+
+     export const download = createAsyncThunk('download', async (params: { formData?: FormData; cityname?: string }, { rejectWithValue }) => {
         try {
-            const response = await apiClient.post(endpoints.pdfurl, formData);
-            return {data: response?.data.data, status: response?.status, agent_name:response?.data.agent_name};
+        const { formData, cityname } = params;
+        const response = await apiClient.post(endpoints.pdfurl, formData, {
+            params: { cityname }, 
+        });
+        return {
+            data: response?.data.data,
+            status: response?.status,
+            agent_name: response?.data.agent_name,
+        };
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+        return rejectWithValue(error.response?.data || error.message);
         }
-    });
+    }
+    );
 
 
     export const summaryreport = createAsyncThunk('summaryreport', async ({ formData }: { formData: FormData }, { rejectWithValue }) => {
