@@ -421,6 +421,10 @@ export const CountryList = [
       value: 'Chennai',
       name: 'Chennai',
     },
+    {
+      value: 'Australia',
+      name: 'Australia',
+    },
     
     
 
