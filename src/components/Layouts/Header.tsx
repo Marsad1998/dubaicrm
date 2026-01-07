@@ -156,7 +156,7 @@ const Header = () => {
                 <div className="relative bg-white flex w-full items-center px-5 py-2.5 dark:bg-black">
                     <div className="horizontal-logo flex lg:hidden justify-between items-center ltr:mr-2 rtl:ml-2">
                         <Link to="/" className="main-logo flex items-center shrink-0">
-                            <img className="w-8 ltr:-ml-1 rtl:-mr-1 inline" src="https://evernest.ae/assets/img/homepage/larger_logo1.png" alt="logo" />
+                            <img className="w-8 ltr:-ml-1 rtl:-mr-1 inline" src="https://leadshub.ae/assets/images/Favicon.webp" alt="logo" />
                             <span className="text-2xl ltr:ml-1.5 rtl:mr-1.5  font-semibold  align-middle hidden md:inline dark:text-white-light transition-all duration-300">Evernest Real Estate</span>
                         </Link>
                         <button type="button"
