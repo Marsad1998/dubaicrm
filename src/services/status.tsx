@@ -408,6 +408,22 @@ export const CountryList = [
       value: 'Riyadh',
       name: 'Riyadh',
     },
+
+    {
+      value: 'Dammam',
+      name: 'Dammam',
+    },
+    {
+      value: 'Bangalore',
+      name: 'Bangalore',
+    },
+    {
+      value: 'Chennai',
+      name: 'Chennai',
+    },
+    
+    
+
   ];
   
   export const Rentoptions = [
