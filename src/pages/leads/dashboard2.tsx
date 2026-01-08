@@ -721,9 +721,17 @@ const DashboardBox2 = () => {
                                                 <div className="flex flex-col justify-between lg:flex-row">
                                                     <div className="w-full cursor-pointer">
                                                         <div className="mt-3 items-center">
-                                                        <Select placeholder="Move Lead...." options={ 
-                                                        loginuser?.roles[0].name === 'HR' ? Object.values(hrdropdownOption) : uniqueDropdownList }  name="lead_status" className="cursor-pointer" onChange={handleSelectChange} />
+                                                        {/* <Select placeholder="Move Lead...." options={ 
+                                                        loginuser?.roles[0].name === 'HR' ? Object.values(hrdropdownOption) : uniqueDropdownList }  name="lead_status" className="cursor-pointer" onChange={handleSelectChange} /> */}
+                                                        <Select placeholder="Move Lead...." 
+                                                            options={ loginuser?.roles[0].name === 'HR' ? Object.values(hrdropdownOption || {}) : Object.values(uniqueDropdownList || {}) }  
+                                                            name="lead_status" 
+                                                            className="cursor-pointer" 
+                                                            onChange={handleSelectChange} 
+                                                            />
+
                                                         
+
                                                         <input type="hidden" name="lead_id" className="form-input" defaultValue={selectedLead?.lead_id} />
                                                         <input type="hidden" name="agent_id" className="form-input" defaultValue={selectedLead?.agent_id} />
                                                         <input type="hidden" name="login_user_id" className="form-input" defaultValue={loginuser?.client_user_id}/>
@@ -751,7 +759,8 @@ const DashboardBox2 = () => {
                                         <div className="mb-5">
                                             <h5 className="font-semibold text-lg dark:text-white-light">History of the Leads </h5>
                                         </div>
-                                        <div className="mb-5">
+
+                                        {/* <div className="mb-5">
                                             <div className="table-responsive text-[#515365] dark:text-white-light font-semibold  overflow-y-hidden">
                                                 <div className="max-w-[900px] mx-auto">
                                                     {selectedLead?.comments?.map((comment: any, i: any) => (
@@ -811,7 +820,168 @@ const DashboardBox2 = () => {
                                                     ))}
                                                 </div>
                                             </div>
+                                        </div> */}
+
+                                             <div className="mb-5">
+                                            <div className="table-responsive text-[#515365] dark:text-white-light font-semibold overflow-y-hidden">
+                                                <div className="max-w-[900px] mx-auto">
+                                                    {selectedLead?.comments?.map((comment: any, index: number) => {
+                                                        const prevComment = index > 0 ? selectedLead.comments[index - 1] : null;
+
+                                                        // const statusOptions = (uniqueDropdownList || []) as any[];
+                                                        const statusOptions = Object.values(uniqueDropdownList || {}) as any[];
+                                                        
+
+                                                        const currentStatus = statusOptions?.find((opt: any) => opt.value === comment.lead_status);
+                                                        const prevStatus = prevComment ? statusOptions?.find((opt: any) => opt.value == prevComment.lead_status) : null;
+
+                                                        const currentStatusLabel = currentStatus?.label || `Status ${comment.lead_status}`;
+                                                        const prevStatusLabel = prevStatus?.label || (prevComment ? `Status ${prevComment.lead_status}` : '');
+
+                                                        let statusText = '';
+                                                        let agentText = '';
+
+                                                        // NEW LEAD (17)
+                                                        if (comment.lead_status === 17) {
+                                                            statusText = `
+                          <span class="text-success">
+                            New Lead Created by Meta Campaign or System
+                          </span>
+                        `;
+                                                        }
+
+                                                        // ASSIGNMENT (2)
+                                                        else if (comment.lead_status === 2 && comment.lead_comment?.includes('Lead Assigned')) {
+                                                            statusText = `
+                          <span class="text-dark">Assigned Lead</span>
+                        `;
+                                                            agentText = comment.agent_name;
+                                                        }
+
+                                                        // STATUS CHANGE (PREVIOUS → NEXT)
+                                                        else if (comment.lead_status && prevComment && prevComment.lead_status !== comment.lead_status) {
+                                                            statusText = `
+                          <span class="text-gray-500">Moved</span>
+                          <span class="font-semibold text-danger">
+                            ${prevStatusLabel}
+                          </span>
+                          <span class="text-gray-500"> → </span>
+                          <span class="font-semibold text-success">
+                            ${currentStatusLabel}
+                          </span>
+                        `;
+                                                        }
+
+                                                        // SAME STATUS AGAIN (FIXED)
+                                                        else if (comment.lead_status && prevComment && prevComment.lead_status === comment.lead_status) {
+                                                            statusText = `
+                          <span class="text-gray-500">Moved</span>
+                          <span class="font-semibold text-primary">
+                            ${currentStatusLabel}
+                          </span>
+                          <span class="text-gray-500"> → </span>
+                          <span class="font-semibold text-primary">
+                            ${currentStatusLabel}
+                          </span>
+                        `;
+                                                        }
+
+                                                        // STATUS WITHOUT PREVIOUS
+                                                        else if (comment.lead_status) {
+                                                            statusText = `
+                          <span class="text-primary">
+                            Changed status to ${currentStatusLabel}
+                          </span>
+                        `;
+                                                        }
+
+                                                        // STATUS COLOR (1–20 ONLY)
+                                                        const STATUS_COLOR_MAP: Record<number, string> = {
+                                                            1: 'before:border-gray-400 after:border-gray-400',
+                                                            2: 'before:border-dark after:border-dark',
+                                                            3: 'before:border-danger after:border-danger',
+                                                            4: 'before:border-primary after:border-primary',
+                                                            5: 'before:border-secondary after:border-secondary',
+                                                            6: 'before:border-warning after:border-warning',
+                                                            7: 'before:border-info after:border-info',
+                                                            8: 'before:border-success after:border-success',
+                                                            9: 'before:border-primary after:border-primary',
+                                                            10: 'before:border-warning after:border-warning',
+                                                            11: 'before:border-info after:border-info',
+                                                            12: 'before:border-secondary after:border-secondary',
+                                                            13: 'before:border-primary after:border-primary',
+                                                            14: 'before:border-warning after:border-warning',
+                                                            15: 'before:border-info after:border-info',
+                                                            16: 'before:border-secondary after:border-secondary',
+                                                            17: 'before:border-success after:border-success',
+                                                            18: 'before:border-primary after:border-primary',
+                                                            19: 'before:border-warning after:border-warning',
+                                                            20: 'before:border-info after:border-info',
+                                                        };
+
+                                                        const colorClass = STATUS_COLOR_MAP[comment.lead_status] || 'before:border-primary after:border-primary';
+
+                                                        return (
+                                                            <div className="flex" key={index}>
+                                                                <p className="text-[#3b3f5c] dark:text-white-light min-w-[180px] max-w-[150px] text-sm font-semibold py-2.5">
+                                                                    {comment?.created_at || 'Invalid Time'}
+                                                                </p>
+
+                                                                <div
+                                                                    className={`
+                                  relative
+                                  before:absolute before:left-1/2 before:-translate-x-1/2 before:top-[15px]
+                                  before:w-2.5 before:h-2.5 before:border-2 before:rounded-full
+                                  after:absolute after:left-1/2 after:-translate-x-1/2 after:top-[25px]
+                                  after:-bottom-[15px] after:w-0 after:h-auto after:border-l-2
+                                  after:rounded-full
+                                  ${colorClass}
+                                `}
+                                                                ></div>
+
+                                                                <div className="p-2.5 self-center ltr:ml-2.5 rtl:mr-2.5 w-full">
+                                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                        <span className="text-[#3b3f5c] dark:text-white-light font-semibold text-[13px]">{comment?.user_name || 'System'}</span>
+
+                                                                        {statusText && (
+                                                                            <span
+                                                                                className="text-gray-500 dark:text-gray-400 text-[13px]"
+                                                                                dangerouslySetInnerHTML={{
+                                                                                    __html: statusText,
+                                                                                }}
+                                                                            />
+                                                                        )}
+
+                                                                        {agentText && <span className="text-blue-500 dark:text-blue-400 text-[13px]">{agentText}</span>}
+                                                                    </div>
+                                                                    {comment.lead_comment &&
+                                                                        !comment.lead_comment.includes('Lead Assigned By') &&
+                                                                        !comment.lead_comment.includes('Idrees assign this leads to') &&
+                                                                        comment.lead_comment !== 'abc' && (
+                                                                            <div className="bg-gray-50 dark:bg-gray-800 p-2 border-l-4 border">
+                                                                                <p className="text-[#3b3f5c] dark:text-white-light text-sm">{comment.lead_comment}</p>
+                                                                            </div>
+                                                                        )}
+
+                                                                    {/* ASSIGNMENT INFO */}
+                                                                    {comment.lead_comment && comment.lead_comment.includes('Lead Assigned By') && (
+                                                                        <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md mt-1 text-blue-600 dark:text-blue-400 text-xs">
+                                                                            {comment.lead_comment}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+
+                                                    {(!selectedLead?.comments || selectedLead.comments.length === 0) && (
+                                                        <div className="text-center py-4 text-gray-500">No history available for this lead.</div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
+
+
                                     </div>
                                 </div> 
                             </div>
@@ -827,7 +997,7 @@ const DashboardBox2 = () => {
                 data={IsCallLogData} 
             />
             <FileViewerModal isOpen={isFileViewerOpen} onClose={() => setIsFileViewerOpen(false)} files={files} />    
-            <CustomSideNav
+            {/* <CustomSideNav
                 isOpen={isCustomizerOpen}
                 leadId={selectedLead?.lead_id}
                 onClose={() => setIsCustomizerOpen(false)}
@@ -837,7 +1007,7 @@ const DashboardBox2 = () => {
                 }}
                 onFilterUpdate={() => {}}
                 initialFilters={{ agents: [], statuses: [] }}
-            />
+            /> */}
             {showDialer && ( <Dialer identity={`${loginuser?.client_user_id || 'guest'}`} lead={selectedLead} open={showDialer} onClose={() => setShowDialer(false)} /> )}
             <AiCallModal isOpen={isAiCallModal} onClose={() => setIsAiCallModal(false)} data={aiCallData} />
     </div>
