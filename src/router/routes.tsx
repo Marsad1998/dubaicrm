@@ -50,6 +50,7 @@ const RunCampaigns = lazy(() => import('../pages/whatsapp/runcampaign'));
 const CampaignDashboard = lazy(() => import('../pages/whatsapp/campaigndashboard'));
 
 const Chat = lazy(() => import('../pages/whatsapp/chat'));
+const Dashboard2 = lazy(() => import('../pages/leads/dashboard2'));
 
 
 
@@ -66,6 +67,14 @@ const routes = [
         type: 'protected',
         element: <DashboardBox key="dashboard" />,
     },
+
+    {
+        path: 'pages/leads/dashboard2',
+        type: 'protected',
+        element : <Dashboard2/>,
+        layout: 'default',
+    },
+
     {
         path: 'pages/leads/assign',
         type: 'protected',

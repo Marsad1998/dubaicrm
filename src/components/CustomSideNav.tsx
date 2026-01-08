@@ -96,14 +96,6 @@ const CustomSideNav: React.FC<CustomSideNavProps> = ({ isOpen, onClose, onFilter
                     <div className="flex-1 overflow-y-auto p-6">
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"> Select Agents </label>
-                            {/* <Select
-                                isMulti
-                                options={agentOptions}
-                                value={agentOptions.filter(option => selectedAgents.includes(option.value))}
-                                onChange={(selected) => setSelectedAgents(selected.map(item => item.value))}
-                                className="react-select-container"
-                                classNamePrefix="react-select"
-                            /> */}
                             <Select isMulti={false}   options={agentOptions} value={agentOptions.find(option => selectedAgents[0] === option.value)}  onChange={(selected) => setSelectedAgents(selected ? [selected.value] : [])}  className="react-select-container" classNamePrefix="react-select"
                             />
                         </div>
@@ -116,8 +108,58 @@ const CustomSideNav: React.FC<CustomSideNavProps> = ({ isOpen, onClose, onFilter
                         )}
                     </div>
                     <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
-                        <button  className="px-4 py-2 rounded-md text-white font-medium transition-colors duration-200 bg-gray-500 hover:bg-gray-600 btn-sm" onClick={handleResetFilters}> Reset Changes </button>
-                        <button className="px-4 py-2 rounded-md text-white font-medium transition-colors duration-200 bg-blue-600 hover:bg-blue-700 btn-sm" onClick={handleApplyFilters}> Apply  Changes </button>
+                        <div className="flex justify-between w-full">
+                            <div
+                                className="inline-block p-[1px] rounded-md"
+                                style={{
+                                backgroundColor: '#6b7280', 
+                                clipPath:
+                                    'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
+                                }}
+                            >
+                                <button
+                                onClick={handleResetFilters}
+                                className="
+                                    px-4 py-2
+                                    text-white font-medium btn-sm
+                                    bg-gray-500 hover:bg-gray-600
+                                    transition-colors duration-200
+                                    rounded
+                                "
+                                style={{
+                                    clipPath:
+                                    'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
+                                }}
+                                >
+                                Reset Changes
+                                </button>
+                            </div>
+                            <div
+                                className="inline-block p-[1px] rounded-md"
+                                style={{
+                                backgroundColor: '#2563eb', 
+                                clipPath:
+                                    'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
+                                }}
+                            >
+                                <button
+                                onClick={handleApplyFilters}
+                                className="
+                                    px-4 py-2
+                                    text-white font-medium btn-sm
+                                    bg-blue-600 hover:bg-blue-700
+                                    transition-colors duration-200
+                                    rounded
+                                "
+                                style={{
+                                    clipPath:
+                                    'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
+                                }}
+                                >
+                                Apply Changes
+                                </button>
+                            </div>
+                            </div>
                     </div>
                 </div>
             </nav>

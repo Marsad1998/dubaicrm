@@ -105,8 +105,8 @@
                             {errors?.lead_comments && <p className="text-danger error">{errors.lead_comments[0]}</p>}
                         </div>
                         <div className="ltr:text-right rtl:text-left flex justify-end items-center mt-8">
-                          <button type="button" className="btn btn-outline-danger btn-sm" onClick={onClose} > Cancel </button>
-                          <button type="submit" className="btn btn-success ltr:ml-2 rtl:mr-2 btn-sm">Save</button>
+                          <button type="button" className="btn btn-outline-danger btn-sm rounded-sm" onClick={onClose} > Cancel </button>
+                          <button type="submit" className="btn btn-success ltr:ml-2 rtl:mr-2 btn-sm rounded-sm">Save</button>
                         </div>
                     </form>
                     </div>

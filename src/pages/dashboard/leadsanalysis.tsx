@@ -227,20 +227,62 @@ const LeadsAnalysis = () => {
                 </ul>
 
                 <div className="flex space-x-2 rtl:space-x-reverse">
-                    <span className="badge bg-dark text-white">
-                        Overall Leads: {leadsData.total_leads}
-                    </span>
-                    <span className="badge bg-info text-white">
+                    <span className="badge bg-dark text-white rounded-sm"> Overall Leads: {leadsData.total_leads} </span>
+                    <span className="badge bg-info text-white rounded-sm">
                         Filtered Leads: {Object.values(leadsData.status_counts).reduce((sum, count) => sum + count, 0)} leads
                     </span>
                 </div>
-
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
+                    {/* Lead Dashboard – btn-success */}
+                    <div
+                        className="inline-block p-[1px] rounded-md"
+                        style={{
+                        backgroundColor: '#198754', // btn-success border
+                        clipPath:
+                            'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
+                        }}
+                     >
+                        <Link
+                        to="/pages/leads/dashboard"
+                        className="
+                            px-4 py-1.5
+                            text-white font-medium btn-sm
+                            bg-green-600 hover:bg-green-700
+                            transition-colors duration-200
+                            rounded
+                            inline-flex items-center
+                        "
+                        style={{
+                            clipPath:
+                            'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
+                        }}
+                        >
+                        Lead Dashboard
+                        </Link>
+                     </div>
+                     {loginuser?.roles[0].name === 'super admin' && (
+                        <div
+                        className="inline-block p-[1px] rounded-md"
+                        style={{
+                            backgroundColor: '#805dca', 
+                            clipPath:
+                            'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
+                        }}
+                        >
+                        <button type="button" onClick={() => setIsCustomizerOpen(true)}
+                            className="px-4 py-1.5 text-white font-medium btn-sm bg-gray-500 hover:bg-gray-600 transition-colors duration-200 rounded" style={{
+                            clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}>
+                            Update Filter
+                        </button>
+                        </div>
+                        )}
+                    </div>
+                {/* <div className="flex items-center">
                     <Link to="/pages/leads/dashboard" className="btn btn-success btn-sm"> Lead Dashboard </Link> &nbsp; &nbsp;
                      {loginuser?.roles[0].name === 'super admin' && (
                         <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsCustomizerOpen(true)}> Update Filter </button>
                     )}
-                </div>
+                </div> */}
             </div>
             <div className="pt-5">
                 <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">

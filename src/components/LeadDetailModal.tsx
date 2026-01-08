@@ -49,12 +49,8 @@ const LeadDetailModal: React.FC<LeadDetailModalProps> = ({ isOpen, onClose, comm
                     <div className="flex min-h-full items-center justify-center px-4 py-8">
                         <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
                             <Dialog.Panel className="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-6xl h-[90vh] text-black dark:text-white-dark">
-                                <button 
-                                    type="button" 
-                                    onClick={onClose} 
-                                    className="absolute top-4 ltr:right-4 rtl:left-4 text-gray-400 hover:text-gray-800 dark:hover:text-gray-600 outline-none"
-                                >
-                                    <IconX className="w-6 h-6" />
+                                <button type="button" onClick={onClose} className="absolute top-4 ltr:right-4 rtl:left-4 text-gray-400 hover:text-gray-800 dark:hover:text-gray-600 outline-none"
+                                > <IconX className="w-6 h-6" />
                                 </button>
                                 <div className="text-xl font-semibold bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-6 rtl:pr-6 py-4 ltr:pr-[60px] rtl:pl-[60px]">
                                     History of the Leads
@@ -122,9 +118,7 @@ const LeadDetailModal: React.FC<LeadDetailModalProps> = ({ isOpen, onClose, comm
                                         </div>
                                     </div>
                                     <div className="ltr:text-right rtl:text-left flex justify-end items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
-                                        <button 
-                                            type="button" 
-                                            className="btn btn-outline-danger px-6 py-2 text-base" 
+                                        <button type="button"  className="btn btn-outline-danger px-6 py-2 text-base" 
                                             onClick={onClose}
                                         >
                                             Close
