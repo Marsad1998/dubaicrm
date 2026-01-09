@@ -35,7 +35,7 @@ const DashboardBox2 = () => {
     const { dashboardType } = useParams();
     const {
         dispatch, navigate, TopbarStatuses, HrTopBarStatus, uniqueDropdownList, hrSidebarStatus,
-        Statues, loader2, SidebarStatuses, colorsarray, hrdropdownOption, toast,
+        Statues, loader2, SidebarStatuses, colorsarray, hrdropdownOption, toast, all_statuses,
         loginuser, leads, currentStatus, loading, meta, counters, isRtl, combinedRef, fileInputRef,
         AllLeadList, setAllLeadList, selectedLead, setSelectedLead, selectedTab, setSelectedTab,
         isShowMailMenu, setIsShowMailMenu, isEdit, setIsEdit, searchText, setSearchText, isModalOpen, setIsModalOpen,
@@ -74,15 +74,30 @@ const DashboardBox2 = () => {
         }
     }, [leads]);
 
-    const getNotesByLeadStatus = (leadStatus:number) => { 
-        const option = Statues.find((opt) => opt.value == leadStatus);
-        return option && typeof option.notes === "string" ? option.notes : "Unknown Status1";
-    };
+    // const getNotesByLeadStatus = (leadStatus:number) => { 
+    //     const option = all_statuses.find(
+    //         (opt: any) => Number(opt.value) === Number(leadStatus)
+    //     );
+
+    //     console.log('option', all_statuses);
+    //     return option;
+    // };
     
-    const getNotes2ByLeadStatus = (leadStatus:number) => {
-        const option = Statues.find((opt) => opt.value == leadStatus);
-        return option && typeof option.notes2 === 'string' ? option.notes2 : 'Unknown Statu2s';
-    }
+    // const getNotes2ByLeadStatus = (leadStatus:number) => {
+    //     const option = all_statuses.find(
+    //         (opt: any) => Number(opt.value) === Number(leadStatus)
+    //     );
+
+    //     console.log('option', all_statuses);
+    //     return option;
+    // }
+
+    const getStatusById = (id: number): any => {
+        return (all_statuses as any[]).find(
+            (s: any) => Number(s.value) === Number(id)
+        );
+    };
+
 
     const LeadsTabs = async (status: number) => {
         combinedRef.current.ishideshow = true;
@@ -151,8 +166,6 @@ const DashboardBox2 = () => {
 
     async function callLogHistory(data: any) {
         const response = await dispatch(voiceCallLogs(data));
-        // console.log(response.payload?.response);
-        // SetIsCallLogData(response.payload?.response);
         setCallLog(true);
     }
 
@@ -243,56 +256,6 @@ const DashboardBox2 = () => {
                 <div className={`overlay bg-black/60 z-[5] w-full h-full rounded-md absolute hidden ${isShowMailMenu ? '!block xl:!hidden' : ''}`}
                 onClick={() => setIsShowMailMenu(!isShowMailMenu)}></div>
 
-                {/* <div className={`panel xl:block p-4 dark:gray-50 w-[250px] max-w-full flex-none space-y-3 xl:relative absolute z-10 xl:h-auto h-full hidden ltr:xl:rounded-r-md ltr:rounded-r-none rtl:xl:rounded-l-md rtl:rounded-l-none overflow-hidden ${isShowMailMenu ? '!block' : '' }`}>
-                    <div className="flex flex-col h-full">
-                             <div className="pb-5"> 
-                                <button className="btn btn-success w-full btn-sm" type="button" onClick={openLeadModal}> Add Lead </button> 
-                                <br/>
-                                <Link to="/">
-                                    <button className="btn btn-info w-full btn-sm" type="button"> Leads Analytics </button> 
-                                </Link>
-                            </div>  
-                             <PerfectScrollbar className="relative ltr:pr-3.5 rtl:pl-3.5 ltr:-mr-3.5 rtl:-ml-3.5 h-full grow">
-                            <div className="space-y-1">
-                                {(loginuser?.roles[0].name === 'HR' || dashboardType == 'hr' ? hrSidebarStatus : SidebarStatuses).map((sidebarstatus:any) => { 
-                                    const counterKey = sidebarstatus.id || '';
-                                    const sidebarcount = counters[counterKey] || 0;
-                                    return (
-                                        <button key={sidebarstatus?.id} onClick={() => LeadsTabs(sidebarstatus?.id)} 
-                                            type="button" className={`w-full flex justify-between items-center p-2 font-medium h-10 rounded-md text-secondary ${
-                                                selectedTab == sidebarstatus.id ? 'bg-[#eaf1ff] text-secondary' 
-                                                    : `hover:bg-white-dark/10 dark:hover:bg-[#181F32] ${sidebarstatus.outlineColor}`
-                                            }`}
-                                        >  
-                                            <div className="flex items-center">
-                                                <span className="w-5 h-5 ltr:mr-2 rtl:ml-2">  
-                                                    {IconOption.find((icon) => icon.value == sidebarstatus.icon)?.label}
-                                                </span>
-
-                                                <div className="ltr:ml-3 rtl:mr-3">{sidebarstatus?.name}</div>
-                                            </div>
-                                            <div className={`text-secondary ${ selectedTab == sidebarstatus.id ? 'bg-white/20 text-secondary':'bg-primary-light dark:bg-[#060818]'
-                                                } rounded-md py-0.5 px-2 font-semibold whitespace-nowrap`}
-                                            >
-                                                {sidebarcount}
-                                            </div>
-                                        </button>
-                                    );
-                                })}
-                                <div className="h-px border-b border-white-light dark:border-[#1b2e4b]"></div>
-                                <button type="button" className={`w-full flex justify-between items-center p-2 hover:bg-white-dark/10 rounded-md dark:hover:text-primary hover:text-primary dark:hover:bg-[#181F32] font-medium h-10`}>
-                                    <div className="flex items-center">
-                                        <IconVideo className="shrink-0" />
-                                        <div className="ltr:ml-3 rtl:mr-3">
-                                            <Link to="https://meet.google.com/landing" target="_blank"> New meeting </Link>
-                                        </div>    
-                                    </div>
-                                </button>
-                            </div>
-                            </PerfectScrollbar> 
-                    </div>
-                </div> */}
-                
                 <div className="panel p-0 flex-1 overflow-x-hidden h-full">
                     {!selectedLead && !isEdit && (
                         <div className="flex flex-col h-full">
@@ -378,36 +341,6 @@ const DashboardBox2 = () => {
                             <div className="h-px border-b border-white-light dark:border-[#1b2e4b]"></div>
                             <div className="flex flex-wrap flex-col md:flex-row xl:w-auto justify-between items-center px-2 sm:px-4 pb-4">
                                 
-                             {/* <div className="w-full grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 xl:grid-cols-7 gap-1.5 sm:gap-2 mt-4">
-                                {(loginuser?.roles[0].name === 'HR' || dashboardType == 'hr' ? HrTopBarStatus : TopbarStatuses).map((status: any) => { 
-                                const counterKey = status.id || '';
-                                const topcounter = counters[counterKey] || 0;
-                                return (
-                                <button key={status.id} onClick={() => LeadsTabs(status.id)} type="button" 
-                                    className={`btn shadow-none flex items-start justify-start text-sm sm:text-xs lg:text-sm md:text-sm xl:text-sm px-1 sm:px-2 lg:px-3 relative duration-300 whitespace-nowrap overflow-hidden ${selectedTab === status.id ? 'text-white' : 'border'}`}
-                                    style={{
-                                        borderColor: selectedTab === status.id ? status.color : status.color,
-                                        backgroundColor: selectedTab === status.id ? status.color : 'transparent',
-                                        color: selectedTab === status.id ? '#fff' : status.color
-                                    }}
-                                    > 
-                                    <span className="flex items-center space-x-0"> 
-                                        <span className="w-5 h-5 ltr:mr-2 rtl:ml-2">  
-                                            {IconOption.find((icon) => icon.value == status.icon)?.label}
-                                        </span>
-                                        <span className="sm:inline text-sm" style={{ fontSize: '13px' }}>{status.name}</span>
-                                    </span>
-                                    <span 
-                                        className="badge absolute -top-2 -right-1 text-x p-0.5 px-1.5 rounded-full text-white"
-                                        style={{ backgroundColor: status.color }}
-                                    > 
-                                        {topcounter} 
-                                    </span>
-                                    </button>
-                                )
-                                })}
-                            </div>  */}
-
                             <div className="w-full mt-4 overflow-visible"
                                 style={{
                                     display:
@@ -729,9 +662,6 @@ const DashboardBox2 = () => {
                                                             className="cursor-pointer" 
                                                             onChange={handleSelectChange} 
                                                             />
-
-                                                        
-
                                                         <input type="hidden" name="lead_id" className="form-input" defaultValue={selectedLead?.lead_id} />
                                                         <input type="hidden" name="agent_id" className="form-input" defaultValue={selectedLead?.agent_id} />
                                                         <input type="hidden" name="login_user_id" className="form-input" defaultValue={loginuser?.client_user_id}/>
@@ -759,227 +689,102 @@ const DashboardBox2 = () => {
                                         <div className="mb-5">
                                             <h5 className="font-semibold text-lg dark:text-white-light">History of the Leads </h5>
                                         </div>
-
-                                        {/* <div className="mb-5">
-                                            <div className="table-responsive text-[#515365] dark:text-white-light font-semibold  overflow-y-hidden">
-                                                <div className="max-w-[900px] mx-auto">
-                                                    {selectedLead?.comments?.map((comment: any, i: any) => (
-                                                        <div className="flex" key={i}>
-                                                            <p className="text-[#3b3f5c] dark:text-white-light min-w-[180px] max-w-[150px] text-sm font-semibold py-2.5">
-                                                                {comment?.created_at || 'Invalid Time'}
-                                                            </p>
-                                                            <div className={`
-                                                                relative
-                                                                before:absolute before:left-1/2 before:-translate-x-1/2 before:top-[15px] 
-                                                                before:w-2.5 before:h-2.5 before:border-2 before:rounded-full
-                                                                after:absolute after:left-1/2 after:-translate-x-1/2 after:top-[25px] 
-                                                                after:-bottom-[15px] after:w-0 after:h-auto after:border-l-2 
-                                                                after:rounded-full
-                                                                ${i % 5 === 0 ? 'before:border-primary after:border-primary' : 
-                                                                i % 5 === 1 ? 'before:border-dark after:border-dark' :
-                                                                i % 5 === 2 ? 'before:border-success after:border-success' :
-                                                                i % 5 === 3 ? 'before:border-danger after:border-danger' :
-                                                                                'before:border-warning after:border-warning'}
-                                                            `}></div>
-                                                            <div className="p-2.5 self-center ltr:ml-2.5 rtl:mr-2.5 w-full">
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <span className="text-[#3b3f5c] dark:text-white-light font-semibold text-[13px]">
-                                                                        {comment?.user_id !== null  ? comment?.user_name : i > 0  ? selectedLead.comments[i - 1]?.user_name  : ''
-                                                                        }
-                                                                    </span>
-                                                                    
-                                                                    <span 
-                                                                        className="text-gray-500 dark:text-gray-400 text-[13px]"
-                                                                        dangerouslySetInnerHTML={{ 
-                                                                            __html: getNotesByLeadStatus(comment.lead_status || '') 
-                                                                        }}
-                                                                    />
-                                                                    {comment.lead_status == 2 && (
-                                                                        <span className="text-blue-500 dark:text-blue-400 text-[13px]">
-                                                                            {comment?.agent_name}
-                                                                        </span>
-                                                                    )}
-                                                                {i > 0 && (
-                                                                    <div 
-                                                                        className="text-gray-500 dark:text-gray-400 text-[13px]"
-                                                                        dangerouslySetInnerHTML={{
-                                                                            __html: getNotes2ByLeadStatus(selectedLead.comments[i - 1]?.lead_status || '')
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                                </div>
-                                                                {comment.lead_comment && (
-                                                                    <div className="bg-gray-50 dark:bg-gray-800 p-1 border-l-4 border">
-                                                                        <p className="text-[#3b3f5c] dark:text-white-light text-sm italic">
-                                                                            {comment?.lead_comment}
-                                                                        </p>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div> */}
-
-                                             <div className="mb-5">
+                                            <div className="mb-5">
                                             <div className="table-responsive text-[#515365] dark:text-white-light font-semibold overflow-y-hidden">
                                                 <div className="max-w-[900px] mx-auto">
-                                                    {selectedLead?.comments?.map((comment: any, index: number) => {
-                                                        const prevComment = index > 0 ? selectedLead.comments[index - 1] : null;
+                                                {selectedLead?.comments?.map((comment: any, i: number) => {
+                                                    const currentStatus = getStatusById(comment.lead_status);
 
-                                                        // const statusOptions = (uniqueDropdownList || []) as any[];
-                                                        const statusOptions = Object.values(uniqueDropdownList || {}) as any[];
-                                                        
+                                                    const prevComment = i > 0 ? selectedLead.comments[i - 1] : null;
+                                                    const prevStatus = prevComment ? getStatusById(prevComment.lead_status) : null;
 
-                                                        const currentStatus = statusOptions?.find((opt: any) => opt.value === comment.lead_status);
-                                                        const prevStatus = prevComment ? statusOptions?.find((opt: any) => opt.value == prevComment.lead_status) : null;
+                                                    const fromLabel = prevStatus ? prevStatus.label : "New Lead";
+                                                    const fromColor = prevStatus ? prevStatus.color : "#5dc66e";
 
-                                                        const currentStatusLabel = currentStatus?.label || `Status ${comment.lead_status}`;
-                                                        const prevStatusLabel = prevStatus?.label || (prevComment ? `Status ${prevComment.lead_status}` : '');
+                                                    return (
+                                                    <div className="flex" key={i}>
+                                                        {/* Date */}
+                                                        <p className="text-[#3b3f5c] dark:text-white-light min-w-[180px] max-w-[150px] text-sm font-semibold py-2.5">
+                                                        {comment?.created_at || "Invalid Time"}
+                                                        </p>
 
-                                                        let statusText = '';
-                                                        let agentText = '';
+                                                        {/* Timeline dot */}
+                                                        <div
+                                                        className={`
+                                                            relative
+                                                            before:absolute before:left-1/2 before:-translate-x-1/2 before:top-[15px]
+                                                            before:w-2.5 before:h-2.5 before:border-2 before:rounded-full
+                                                            after:absolute after:left-1/2 after:-translate-x-1/2 after:top-[25px]
+                                                            after:-bottom-[15px] after:w-0 after:h-auto after:border-l-2
+                                                            after:rounded-full
+                                                            ${i % 5 === 0 ? "before:border-primary after:border-primary" :
+                                                            i % 5 === 1 ? "before:border-dark after:border-dark" :
+                                                            i % 5 === 2 ? "before:border-success after:border-success" :
+                                                            i % 5 === 3 ? "before:border-danger after:border-danger" :
+                                                                        "before:border-warning after:border-warning"}
+                                                        `}
+                                                        />
 
-                                                        // NEW LEAD (17)
-                                                        if (comment.lead_status === 17) {
-                                                            statusText = `
-                          <span class="text-success">
-                            New Lead Created by Meta Campaign or System
-                          </span>
-                        `;
-                                                        }
+                                                        {/* Content */}
+                                                        <div className="p-2.5 self-center ltr:ml-2.5 rtl:mr-2.5 w-full">
+                                                        <div className="flex flex-wrap items-center gap-2 mb-1">
 
-                                                        // ASSIGNMENT (2)
-                                                        else if (comment.lead_status === 2 && comment.lead_comment?.includes('Lead Assigned')) {
-                                                            statusText = `
-                          <span class="text-dark">Assigned Lead</span>
-                        `;
-                                                            agentText = comment.agent_name;
-                                                        }
+                                                            {/* User */}
+                                                            <span className="text-[#3b3f5c] dark:text-white-light font-semibold text-[13px]">
+                                                            {comment?.user_id
+                                                                ? comment.user_name
+                                                                : prevComment?.user_name || ""}
+                                                            </span>
 
-                                                        // STATUS CHANGE (PREVIOUS → NEXT)
-                                                        else if (comment.lead_status && prevComment && prevComment.lead_status !== comment.lead_status) {
-                                                            statusText = `
-                          <span class="text-gray-500">Moved</span>
-                          <span class="font-semibold text-danger">
-                            ${prevStatusLabel}
-                          </span>
-                          <span class="text-gray-500"> → </span>
-                          <span class="font-semibold text-success">
-                            ${currentStatusLabel}
-                          </span>
-                        `;
-                                                        }
+                                                            {prevStatus && (
+                                                                <span className="text-gray-500 text-[13px]">moved to</span>
+                                                            )}
 
-                                                        // SAME STATUS AGAIN (FIXED)
-                                                        else if (comment.lead_status && prevComment && prevComment.lead_status === comment.lead_status) {
-                                                            statusText = `
-                          <span class="text-gray-500">Moved</span>
-                          <span class="font-semibold text-primary">
-                            ${currentStatusLabel}
-                          </span>
-                          <span class="text-gray-500"> → </span>
-                          <span class="font-semibold text-primary">
-                            ${currentStatusLabel}
-                          </span>
-                        `;
-                                                        }
+                                                            {/* TO */}
+                                                            <span
+                                                            className="text-[13px] font-semibold"
+                                                            style={{ color: currentStatus?.color || "#6b7280" }}
+                                                            >
+                                                            {currentStatus?.label || "Unknown"}
+                                                            </span>
 
-                                                        // STATUS WITHOUT PREVIOUS
-                                                        else if (comment.lead_status) {
-                                                            statusText = `
-                          <span class="text-primary">
-                            Changed status to ${currentStatusLabel}
-                          </span>
-                        `;
-                                                        }
+                                                            
+                                                            {!prevStatus && (
+                                                                <span className="text-gray-500 text-[13px]">to</span>
+                                                            )}
 
-                                                        // STATUS COLOR (1–20 ONLY)
-                                                        const STATUS_COLOR_MAP: Record<number, string> = {
-                                                            1: 'before:border-gray-400 after:border-gray-400',
-                                                            2: 'before:border-dark after:border-dark',
-                                                            3: 'before:border-danger after:border-danger',
-                                                            4: 'before:border-primary after:border-primary',
-                                                            5: 'before:border-secondary after:border-secondary',
-                                                            6: 'before:border-warning after:border-warning',
-                                                            7: 'before:border-info after:border-info',
-                                                            8: 'before:border-success after:border-success',
-                                                            9: 'before:border-primary after:border-primary',
-                                                            10: 'before:border-warning after:border-warning',
-                                                            11: 'before:border-info after:border-info',
-                                                            12: 'before:border-secondary after:border-secondary',
-                                                            13: 'before:border-primary after:border-primary',
-                                                            14: 'before:border-warning after:border-warning',
-                                                            15: 'before:border-info after:border-info',
-                                                            16: 'before:border-secondary after:border-secondary',
-                                                            17: 'before:border-success after:border-success',
-                                                            18: 'before:border-primary after:border-primary',
-                                                            19: 'before:border-warning after:border-warning',
-                                                            20: 'before:border-info after:border-info',
-                                                        };
+                                                            {/* Agent name (only if assignment) */}
+                                                            {comment.lead_status == 2 && comment.agent_name && (
+                                                            <span className="text-blue-500 text-[13px]">
+                                                                {comment.agent_name}
+                                                            </span>
+                                                            )}
+                                                            <span className="text-gray-400 text-[13px]">from</span>
 
-                                                        const colorClass = STATUS_COLOR_MAP[comment.lead_status] || 'before:border-primary after:border-primary';
+                                                            {/* FROM */}
+                                                            <span
+                                                            className="text-[13px] font-semibold"
+                                                            style={{ color: fromColor }}
+                                                            >
+                                                            {fromLabel}
+                                                            </span>
+                                                        </div>
 
-                                                        return (
-                                                            <div className="flex" key={index}>
-                                                                <p className="text-[#3b3f5c] dark:text-white-light min-w-[180px] max-w-[150px] text-sm font-semibold py-2.5">
-                                                                    {comment?.created_at || 'Invalid Time'}
-                                                                </p>
-
-                                                                <div
-                                                                    className={`
-                                  relative
-                                  before:absolute before:left-1/2 before:-translate-x-1/2 before:top-[15px]
-                                  before:w-2.5 before:h-2.5 before:border-2 before:rounded-full
-                                  after:absolute after:left-1/2 after:-translate-x-1/2 after:top-[25px]
-                                  after:-bottom-[15px] after:w-0 after:h-auto after:border-l-2
-                                  after:rounded-full
-                                  ${colorClass}
-                                `}
-                                                                ></div>
-
-                                                                <div className="p-2.5 self-center ltr:ml-2.5 rtl:mr-2.5 w-full">
-                                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                                        <span className="text-[#3b3f5c] dark:text-white-light font-semibold text-[13px]">{comment?.user_name || 'System'}</span>
-
-                                                                        {statusText && (
-                                                                            <span
-                                                                                className="text-gray-500 dark:text-gray-400 text-[13px]"
-                                                                                dangerouslySetInnerHTML={{
-                                                                                    __html: statusText,
-                                                                                }}
-                                                                            />
-                                                                        )}
-
-                                                                        {agentText && <span className="text-blue-500 dark:text-blue-400 text-[13px]">{agentText}</span>}
-                                                                    </div>
-                                                                    {comment.lead_comment &&
-                                                                        !comment.lead_comment.includes('Lead Assigned By') &&
-                                                                        !comment.lead_comment.includes('Idrees assign this leads to') &&
-                                                                        comment.lead_comment !== 'abc' && (
-                                                                            <div className="bg-gray-50 dark:bg-gray-800 p-2 border-l-4 border">
-                                                                                <p className="text-[#3b3f5c] dark:text-white-light text-sm">{comment.lead_comment}</p>
-                                                                            </div>
-                                                                        )}
-
-                                                                    {/* ASSIGNMENT INFO */}
-                                                                    {comment.lead_comment && comment.lead_comment.includes('Lead Assigned By') && (
-                                                                        <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md mt-1 text-blue-600 dark:text-blue-400 text-xs">
-                                                                            {comment.lead_comment}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
+                                                        {/* Comment */}
+                                                        {comment.lead_comment && (
+                                                            <div className="bg-gray-50 dark:bg-gray-800 p-1 border-l-4 border">
+                                                            <p className="text-[#3b3f5c] dark:text-white-light text-sm italic">
+                                                                {comment.lead_comment}
+                                                            </p>
                                                             </div>
-                                                        );
-                                                    })}
-
-                                                    {(!selectedLead?.comments || selectedLead.comments.length === 0) && (
-                                                        <div className="text-center py-4 text-gray-500">No history available for this lead.</div>
-                                                    )}
+                                                        )}
+                                                        </div>
+                                                    </div>
+                                                    );
+                                                })}
                                                 </div>
                                             </div>
-                                        </div>
+                                            </div>
                                     </div>
                                 </div> 
                             </div>
@@ -995,17 +800,6 @@ const DashboardBox2 = () => {
                 data={IsCallLogData} 
             />
             <FileViewerModal isOpen={isFileViewerOpen} onClose={() => setIsFileViewerOpen(false)} files={files} />    
-             <CustomSideNav
-                isOpen={isCustomizerOpen}
-                leadId={selectedLead?.lead_id}
-                onClose={() => setIsCustomizerOpen(false)}
-                onSuccess={() => {
-                    setSelectedLead(null);
-                    Refresh();
-                }}
-                onFilterUpdate={() => {}}
-                initialFilters={{ agents: [], statuses: [] }}
-            /> 
             {showDialer && ( <Dialer identity={`${loginuser?.client_user_id || 'guest'}`} lead={selectedLead} open={showDialer} onClose={() => setShowDialer(false)} /> )}
             <AiCallModal isOpen={isAiCallModal} onClose={() => setIsAiCallModal(false)} data={aiCallData} />
     </div>

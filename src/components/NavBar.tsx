@@ -71,8 +71,8 @@ const NavBar = () => {
           {renderSubMenu(
             'leads',
             <>
-              <li><NavLink to="/pages/leads/dashboard">{t('Lead-Dashboard')}</NavLink></li>
-              <li><NavLink to="/pages/leads/dashboard2">{t('Lead-Dashboard2')}</NavLink></li>
+              {/* <li><NavLink to="/pages/leads/dashboard">{t('Lead-Dashboard')}</NavLink></li> */}
+              <li><NavLink to="/pages/leads/dashboard2">{t('Lead-Dashboard')}</NavLink></li>
 
               {role === 'super admin' && (
                 <li><NavLink to="/pages/leads/hr">{t('HR Dashboard')}</NavLink></li>

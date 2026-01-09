@@ -243,7 +243,7 @@ const LeadsAnalysis = () => {
                         }}
                      >
                         <Link
-                        to="/pages/leads/dashboard"
+                        to="/pages/leads/dashboard2"
                         className="
                             px-4 py-1.5
                             text-white font-medium btn-sm

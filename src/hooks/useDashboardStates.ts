@@ -5,7 +5,6 @@ import { IRootState, AppDispatch } from '../store';
 import { topBarStatus, SidebarStatus, MatchColorList, HRDropdownOption, statues, JobDashboard, uniqueDropdown, HrSidebarStatus } from '../services/status';
 import Toast from '../services/toast';
 import Loader2 from '../services/loader2';
-import { DashboardLeadslist } from '../slices/dashboardSlice';
 
 
 export const useDashboardStates = () => {
@@ -29,6 +28,7 @@ export const useDashboardStates = () => {
     const combinedRef = useRef<any>({ fetched: false, form: null, topbarButtonRefs: {}, addleadform: null, ishideshow: false });
     const fileInputRef = useRef<HTMLInputElement>(null);    
     const overall_leads = useSelector((state: IRootState) => state.dashboardslice.overall_leads);
+    const all_statuses = useSelector((state: IRootState) => state.dashboardslice.allStatues);
 
     const [AllLeadList, setAllLeadList]       = useState<any[]>([]);
     const [selectedLead, setSelectedLead]     = useState<any>(null);
@@ -91,7 +91,8 @@ export const useDashboardStates = () => {
         files, setFiles,
         isFileViewerOpen, setIsFileViewerOpen,
         isCustomizerOpen, setIsCustomizerOpen,
-        overall_leads
+        overall_leads,
+        all_statuses
     };
 };
 

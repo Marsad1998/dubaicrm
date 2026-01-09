@@ -87,7 +87,7 @@ import apiClient from '../utils/apiClient';
                     hrdropdown: response.data.hrdropdown || [],
                     dashboardType : dashboardType,
                     overall_leads : response.data.overall_leads || 0,
-
+                    all_statuses : response.data.all_statuses || [],
 
                 };
             } catch (error: any) {
@@ -214,6 +214,7 @@ import apiClient from '../utils/apiClient';
         hrdropdown : [],
         dashboardType :  '',
         overall_leads : 0,
+        allStatues : [],
     };
     
     const DashboardSlice = createSlice({
@@ -256,6 +257,7 @@ import apiClient from '../utils/apiClient';
                     state.lead_status = action.payload.lead_status;
                     state.topbarleadstatus  = action.payload.topbarstatuses;
                     state.sidebarstatus     = action.payload.sidebarstatus;
+                    state.allStatues = action.payload.all_statuses;
                     state.dropdownstatus    = action.payload.dropdownstatus;
                     state.hrtopbar   = action.payload.hrtopbar;
                     state.hrsidebar  = action.payload.hrsidebar;
