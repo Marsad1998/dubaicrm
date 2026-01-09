@@ -980,8 +980,6 @@ const DashboardBox2 = () => {
                                                 </div>
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </div> 
                             </div>
@@ -997,7 +995,7 @@ const DashboardBox2 = () => {
                 data={IsCallLogData} 
             />
             <FileViewerModal isOpen={isFileViewerOpen} onClose={() => setIsFileViewerOpen(false)} files={files} />    
-            {/* <CustomSideNav
+             <CustomSideNav
                 isOpen={isCustomizerOpen}
                 leadId={selectedLead?.lead_id}
                 onClose={() => setIsCustomizerOpen(false)}
@@ -1007,7 +1005,7 @@ const DashboardBox2 = () => {
                 }}
                 onFilterUpdate={() => {}}
                 initialFilters={{ agents: [], statuses: [] }}
-            /> */}
+            /> 
             {showDialer && ( <Dialer identity={`${loginuser?.client_user_id || 'guest'}`} lead={selectedLead} open={showDialer} onClose={() => setShowDialer(false)} /> )}
             <AiCallModal isOpen={isAiCallModal} onClose={() => setIsAiCallModal(false)} data={aiCallData} />
     </div>
