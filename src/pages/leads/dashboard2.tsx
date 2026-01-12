@@ -609,7 +609,7 @@ const DashboardBox2 = () => {
                                                                 style={{ backgroundColor: '#198754',  color: '#fff', clipPath:
                                                                     'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
                                                                 }}
-                                                                > Transfer Lead { selectedLead?.lead_id }
+                                                                > Transfer Lead 
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -778,7 +778,7 @@ const DashboardBox2 = () => {
                                                             </p>
                                                             </div>
                                                         )}
-                                                        </div>
+                                                    </div>
                                                     </div>
                                                     );
                                                 })}
