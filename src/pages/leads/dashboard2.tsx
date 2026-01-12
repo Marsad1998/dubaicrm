@@ -609,7 +609,7 @@ const DashboardBox2 = () => {
                                                                 style={{ backgroundColor: '#198754',  color: '#fff', clipPath:
                                                                     'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
                                                                 }}
-                                                                > Transfer Lead
+                                                                > Transfer Lead { selectedLead?.lead_id }
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -794,16 +794,19 @@ const DashboardBox2 = () => {
             </div>
             <LeadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}  />
             <RemarkModal isOpen={isMemark} onClose={() => setIsMemark(false)} data={IsRemarkData} />
-            <CallLogModal 
-                isOpen={isCallLog} 
-                onClose={() => setCallLog(false)}
-                data={IsCallLogData} 
-            />
+            <CallLogModal isOpen={isCallLog}  onClose={() => setCallLog(false)} data={IsCallLogData} />
             <FileViewerModal isOpen={isFileViewerOpen} onClose={() => setIsFileViewerOpen(false)} files={files} />    
             {showDialer && ( <Dialer identity={`${loginuser?.client_user_id || 'guest'}`} lead={selectedLead} open={showDialer} onClose={() => setShowDialer(false)} /> )}
             <AiCallModal isOpen={isAiCallModal} onClose={() => setIsAiCallModal(false)} data={aiCallData} />
+            <CustomSideNav
+                isOpen={isCustomizerOpen}
+                leadId={selectedLead?.lead_id}
+                onClose={() => setIsCustomizerOpen(false)}
+                onSuccess={() => { setSelectedLead(null); Refresh(); }}
+                onFilterUpdate={() => {}}
+                initialFilters={{ agents: [], statuses: [] }}
+            />
     </div>
     );
 }
-
 export default DashboardBox2;
