@@ -35,7 +35,6 @@ const Create = () => {
     const [totalRecords, setTotalRecords] = useState(0);
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'client_user_id', direction: 'asc' });
     const [searchQuery, setSearchQuery] = useState('');
-
     useEffect(() => {
         setPageTitle('Create Announcements')
         fetchAnnouncementsList();
