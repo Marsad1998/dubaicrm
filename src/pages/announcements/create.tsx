@@ -74,11 +74,7 @@ const Create = () => {
                 }
             }
         } catch (error: any) {
-
-        
-
             if (error.response?.data?.errors) {
-
                 setErrors(error.response.data.errors);
             } else if (error.response?.status === 403) {
                 // window.location.href = '/error';
@@ -147,7 +143,7 @@ const Create = () => {
     };
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
-        setPage(1); // Reset to first page when searching
+        setPage(1); 
     };
     const handlePageChange = (p: number) => {
         setPage(p);
