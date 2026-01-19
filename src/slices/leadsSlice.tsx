@@ -15,6 +15,7 @@ import apiClient from '../utils/apiClient';
         takePollleads    : 'leads/take_poll_leads',
         moveleadtocold  : 'leads/send_lead_cold',
         LeadSummaryReportUrl : 'leads/lead-summary-report',
+        LeadCampaignReportUrl : 'leads/lead-campaign-report',
     };
     
     const initialState = {
@@ -195,32 +196,45 @@ import apiClient from '../utils/apiClient';
 
      export const download = createAsyncThunk('download', async (params: { formData?: FormData; cityname?: string }, { rejectWithValue }) => {
         try {
-        const { formData, cityname } = params;
-        const response = await apiClient.post(endpoints.pdfurl, formData, {
-            params: { cityname }, 
-        });
-        return {
-            data: response?.data.data,
-            status: response?.status,
-            agent_name: response?.data.agent_name,
-        };
+            const { formData, cityname } = params;
+            const response = await apiClient.post(endpoints.pdfurl, formData, {
+                params: { cityname }, 
+            });
+            return {
+                data: response?.data.data,
+                status: response?.status,
+                agent_name: response?.data.agent_name,
+            };
         } catch (error: any) {
-        return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
     );
 
+    export const leadcampaignreport = createAsyncThunk('leadcampaignreport', async ({ formData }: { formData: FormData }, { rejectWithValue }) => {
+        try {
+            const response = await apiClient.post(endpoints.LeadCampaignReportUrl, formData, {
+                responseType: 'blob', 
+            });
+            const file = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(file);
+            return { blobUrl: url, status: response.status };
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    });
+
 
     export const summaryreport = createAsyncThunk('summaryreport', async ({ formData }: { formData: FormData }, { rejectWithValue }) => {
             try {
-            const response = await apiClient.post(endpoints.LeadSummaryReportUrl, formData, {
-                responseType: 'blob', 
-            });
-            const file = new Blob([response.data], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(file);
-            return { blobUrl: url, status: response.status };
+                const response = await apiClient.post(endpoints.LeadSummaryReportUrl, formData, {
+                    responseType: 'blob', 
+                });
+                const file = new Blob([response.data], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(file);
+                return { blobUrl: url, status: response.status };
             } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+                return rejectWithValue(error.response?.data || error.message);
             }
         }
     );

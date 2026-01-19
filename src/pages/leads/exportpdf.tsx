@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import Toast from '../../services/toast';
 import Loader from '../../services/loader';
 import { setPageTitle } from '../../slices/themeConfigSlice';
-import { allLeads, download, moveleadtocold, summaryreport } from '../../slices/leadsSlice';
+import { allLeads, download, moveleadtocold, summaryreport, leadcampaignreport } from '../../slices/leadsSlice';
 import Select from 'react-select';
 import LeadModal from '../../components/LeadModal';
 import '../dashboard/dashboard.css'; 
@@ -24,7 +24,6 @@ import 'react-date-range/dist/theme/default.css';
 import { DateRangePicker } from 'react-date-range';
 import IconSearch from '../../components/Icon/IconSearch';
 import { setLoading } from '../../slices/dashboardSlice';
-
 
 const ExportPdf = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -387,9 +386,47 @@ const ExportPdf = () => {
       }
     }
 
+    const handleLeadCampaignReport = async () => {
+        // Validate date range
+        if (!selectionRange.startDate || !selectionRange.endDate) {
+            toast.error('Please select a date range.');
+            return;
+        }
 
-  
+        const dateRange = {
+            startDate: selectionRange.startDate.toISOString().split('T')[0],
+            endDate: selectionRange.endDate.toISOString().split('T')[0]
+        };
 
+        const formData = new FormData();
+        formData.append('agent_id', selectedAgent?.toString() ?? '');
+        formData.append('date_range', JSON.stringify(dateRange));
+        
+        try {
+            const response = await dispatch(leadcampaignreport({ formData }) as any);
+            
+            if (response?.payload?.status === 200 || response?.payload?.status === 201) {
+                const blobUrl = response.payload.blobUrl;
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                // Generate filename with timestamp like backend does
+                const timestamp = new Date().toISOString().replace(/[-:]/g, '_').split('.')[0];
+                a.download = `lead_campaign_${timestamp}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                toast.success('Leads campaign report generated successfully.');
+            } else {
+                const errorMessage = response?.payload?.message || 'Failed to generate leads campaign report.';
+                toast.error(errorMessage);
+            }
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || 'Failed to generate leads campaign report.';
+            toast.error(errorMessage);
+        }
+    }
+    
     const LeadsSummaryReport = async () => {
         const formData = new FormData();
         formData.append('agent_id', selectedAgent?.toString() ?? '');
@@ -449,6 +486,7 @@ const ExportPdf = () => {
               </div> 
               <button onClick={() => { DownloadPdf(); }} type="button"  className="btn btn-secondary btn-sm"> Download Pdf </button>
               <button onClick={() => { LeadsSummaryReport(); }} type="button"  className="btn btn-info btn-sm"> Leads Summary Report </button>
+              <button onClick={() => { handleLeadCampaignReport(); }} type="button"  className="btn btn-info btn-sm"> Leads Campaign Report </button>
           </div>
       </div>
         {showPicker && (
