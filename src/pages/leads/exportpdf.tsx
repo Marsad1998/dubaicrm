@@ -24,6 +24,7 @@ import 'react-date-range/dist/theme/default.css';
 import { DateRangePicker } from 'react-date-range';
 import IconSearch from '../../components/Icon/IconSearch';
 import { setLoading } from '../../slices/dashboardSlice';
+import apiClient from '../../utils/apiClient';
 
 const ExportPdf = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -43,14 +44,22 @@ const ExportPdf = () => {
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'lead_id', direction: 'desc', });
     const { leads, loading, agents, statuses, total, last_page, current_page, per_page } = useSelector((state: IRootState) => state.leadslices);
     const [showPicker, setShowPicker] = useState(false);
-    const [selectionRange, setSelectionRange] = useState({
-      startDate: new Date(),
-      endDate: new Date(),
+    const [selectionRange, setSelectionRange] = useState<{
+      startDate: Date | undefined;
+      endDate: Date | undefined;
+      key: string;
+    }>({
+      startDate: undefined,
+      endDate: undefined,
       key: 'selection',
     })
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [bulkSelectedIds, setBulkSelectedIds] = useState<Set<string>>(new Set());
     const [allSelected, setAllSelected] = useState(false);
+    const [selectedCampaignSource, setSelectedCampaignSource] = useState<string | null>(null);
+    const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
+    const [campaigns, setCampaigns] = useState<any[]>([]);
+    const [loadingCampaigns, setLoadingCampaigns] = useState(false);
 
     useEffect(() => {
       dispatch(setPageTitle('All Leads'));
@@ -69,9 +78,9 @@ const ExportPdf = () => {
           combinedRef.current.fetched = true;
           return;
       } 
-      // combinedRef.current.prevPage = current_page;
-      // combinedRef.current.prevPerPage = per_page;
-      // combinedRef.current.prevSortStatus = sortStatus;
+      
+      
+      
     }, [dispatch, current_page, per_page, sortStatus, searchTerm]);
 
     const transformedAgents = agents?.map(agent => ({
@@ -79,10 +88,6 @@ const ExportPdf = () => {
         label: agent?.client_user_name,
         phone: agent?.client_user_phone,
     }));
-
-    const openLeadModal = () => {
-        setIsModalOpen(true);
-    }
 
       const handleCheckboxChange = (record: any, isChecked: boolean) => {
           const newSelectedIds = new Set(bulkSelectedIds);
@@ -96,7 +101,7 @@ const ExportPdf = () => {
           setBulkSelectedIds(newSelectedIds);
           setDisable(newSelectedIds.size === 0);
           
-          // Update the allSelected state if needed
+          
           if (isChecked && newSelectedIds.size === tableData.length) {
               setAllSelected(true);
           } else if (!isChecked) {
@@ -106,6 +111,115 @@ const ExportPdf = () => {
 
       const SelectAgent = (agentId: number) => {
         setSelectedAgent(agentId);
+        dispatch(allLeads({ 
+          page: 1, 
+          perPage: per_page,
+          sortField: sortStatus.columnAccessor,
+          sortOrder: sortStatus.direction,
+          search: searchTerm,
+          date_range: selectionRange.startDate && selectionRange.endDate ? JSON.stringify(selectionRange) : '',
+          agent_id: agentId,
+          campaign_id: selectedCampaign
+        }));
+      }
+
+      
+      const campaignSourceOptions = [
+        { value: 'meta', label: 'Meta Leads' },
+        { value: 'google', label: 'Google Leads' }
+      ];
+
+      
+      const fetchCampaigns = async (source: string) => {
+        setLoadingCampaigns(true);
+        setSelectedCampaign(null); 
+        setCampaigns([]);
+        
+        try {
+          const response = await apiClient.get(`/leads/campaigns?source=${source}`);
+          
+          
+          let campaignData = [];
+          if (response.data) {
+            if (response.data.status === 200 || response.data.status === 201) {
+              campaignData = response.data.data || response.data.campaigns || [];
+            } else if (Array.isArray(response.data)) {
+              campaignData = response.data;
+            } else if (response.data.data && Array.isArray(response.data.data)) {
+              campaignData = response.data.data;
+            }
+          }
+          console.log(campaignData);
+          const campaignOptions = campaignData.map((campaign: any) => ({
+            value: campaign.id,
+            label: campaign.campaign_name
+          }));
+          
+          setCampaigns(campaignOptions);
+          
+          if (campaignOptions.length === 0) {
+            toast.info('No campaigns found for the selected source.');
+          }
+        } catch (error: any) {
+          console.error('Error fetching campaigns:', error);
+          const errorMessage = error?.response?.data?.message || error?.message || 'Failed to fetch campaigns.';
+          toast.error(errorMessage);
+          setCampaigns([]);
+        } finally {
+          setLoadingCampaigns(false);
+        }
+      };
+
+      const SelectCampaignSource = async (option: any) => {
+        const source = option?.value;
+        setSelectedCampaignSource(source);
+        setSelectedCampaign(null); 
+        
+        if (source) {
+          await fetchCampaigns(source);
+          
+          dispatch(allLeads({ 
+            page: 1, 
+            perPage: per_page,
+            sortField: sortStatus.columnAccessor,
+            sortOrder: sortStatus.direction,
+            search: searchTerm,
+            date_range: selectionRange.startDate && selectionRange.endDate ? JSON.stringify(selectionRange) : '',
+            agent_id: selectedAgent,
+            status_id: selectedStatus
+          }));
+        } else {
+          setCampaigns([]);
+          
+          dispatch(allLeads({ 
+            page: 1, 
+            perPage: per_page,
+            sortField: sortStatus.columnAccessor,
+            sortOrder: sortStatus.direction,
+            search: searchTerm,
+            date_range: selectionRange.startDate && selectionRange.endDate ? JSON.stringify(selectionRange) : '',
+            agent_id: selectedAgent,
+            status_id: selectedStatus
+          }));
+        }
+      };
+
+      const SelectCampaign = async (campaign: any) => {
+        console.log(campaign);
+        setSelectedCampaign(campaign.value);
+        
+        
+        dispatch(allLeads({ 
+          page: 1, 
+          perPage: per_page,
+          sortField: sortStatus.columnAccessor,
+          sortOrder: sortStatus.direction,
+          search: searchTerm,
+          date_range: selectionRange.startDate && selectionRange.endDate ? JSON.stringify(selectionRange) : '',
+          agent_id: selectedAgent,
+          status_id: selectedStatus,
+          campaign_id: campaign.label
+        }));
       }
       const SelectStatus = async (status:any) => {
         setSelectedStatus(status.value);
@@ -126,7 +240,12 @@ const ExportPdf = () => {
         const formData = new FormData();
         formData.append('lead_status', selectedStatus ?? '');
         formData.append('agent_id', selectedAgent?.toString() ?? '');
-        formData.append('date_range', JSON.stringify(selectionRange));
+        if (selectedCampaign) {
+          formData.append('campaign_id', selectedCampaign.toString());
+        }
+        if (selectionRange.startDate && selectionRange.endDate) {
+          formData.append('date_range', JSON.stringify(selectionRange));
+        }
         
         const response = await dispatch(download({ formData }) as any);
         if (response.payload.status === 200 || response.payload.status === 201){
@@ -141,16 +260,18 @@ const ExportPdf = () => {
             doc.setFontSize(16);
 
             doc.text(`Agent: ${response.payload.agent_name}`, 10, 10);
-            doc.text(
-              `Dates: ${new Date(selectionRange.startDate).toLocaleDateString()} - ${new Date(selectionRange.endDate).toLocaleDateString()}`,
-              200,
-              10,
-              { align: 'right', maxWidth: 100 }
-            );
+            if (selectionRange.startDate && selectionRange.endDate) {
+              doc.text(
+                `Dates: ${new Date(selectionRange.startDate).toLocaleDateString()} - ${new Date(selectionRange.endDate).toLocaleDateString()}`,
+                200,
+                10,
+                { align: 'right', maxWidth: 100 }
+              );
+            }
             doc.text(' ', 10, 10);
             const headers = [['Lead Title', 'Customer Name', 'Phone', 'Assigned Date', 'Source']];
             
-            // Group leads by title (or another unique identifier if available)
+            
         const groupedLeads = response.payload.data?.reduce((acc: any, lead: any) => {
             const key = lead.lead_title;
             if (!acc[key]) {
@@ -173,7 +294,7 @@ const ExportPdf = () => {
             return acc;
         }, {});
 
-        // Convert grouped leads to PDF rows
+        
         const body = Object.values(groupedLeads).flatMap((lead: any) => {
             const mainRow = [
                 lead.title,
@@ -183,13 +304,13 @@ const ExportPdf = () => {
                 lead.source
             ];
 
-            // Add comment rows as nested data
+            
             const commentRows = lead.comments.map((comment: any) => [
-                '', // Empty first column for indentation
+                '', 
                 `Comment: ${comment.comment}`,
                 `By: ${comment.agent}`,
                 `On: ${comment.date}`,
-                '' // Empty last column
+                '' 
             ]);
 
             return [mainRow, ...commentRows];
@@ -223,17 +344,17 @@ const ExportPdf = () => {
                 },
                 bodyStyles: {
                   fillColor: [240, 240, 240],
-                  // fillColor: (row: any) => {
-                  //   console.log(row);
+                  
+                  
                     
-                  //   return row.some((cell: any) => cell !== '') ? [220, 240, 255] : false;
-                  // },
+                  
+                  
                   fontSize: 8,
                   cellPadding: 1
                 },
-                //  alternateRowStyles: {
-                //     fillColor: false // No background for comment rows
-                // },
+                
+                
+                
               });
               doc.save('reports.pdf');
         }
@@ -242,10 +363,6 @@ const ExportPdf = () => {
         const formattedDate = new Date(date);
         return formattedDate.toLocaleString(); 
       } 
-      const getLeadStatusLabel = (leadStatus: any) => {
-        const status = dropdownOption.find(option => option.value === leadStatus);
-        return status ? status.label : 'Unknown Status';
-      }
 
     const tableData = useMemo(() => {
       return (Array.isArray(leads) ? leads : []).map((lead: any, index: number) => ({
@@ -387,20 +504,19 @@ const ExportPdf = () => {
     }
 
     const handleLeadCampaignReport = async () => {
-        // Validate date range
-        if (!selectionRange.startDate || !selectionRange.endDate) {
-            toast.error('Please select a date range.');
-            return;
-        }
-
-        const dateRange = {
-            startDate: selectionRange.startDate.toISOString().split('T')[0],
-            endDate: selectionRange.endDate.toISOString().split('T')[0]
-        };
-
         const formData = new FormData();
         formData.append('agent_id', selectedAgent?.toString() ?? '');
-        formData.append('date_range', JSON.stringify(dateRange));
+        if (selectedCampaign) {
+          formData.append('campaign_id', selectedCampaign.toString());
+        }        
+        
+        if (selectionRange.startDate && selectionRange.endDate) {
+            const dateRange = {
+                startDate: selectionRange.startDate.toISOString().split('T')[0],
+                endDate: selectionRange.endDate.toISOString().split('T')[0]
+            };
+            formData.append('date_range', JSON.stringify(dateRange));
+        }
         
         try {
             const response = await dispatch(leadcampaignreport({ formData }) as any);
@@ -409,7 +525,7 @@ const ExportPdf = () => {
                 const blobUrl = response.payload.blobUrl;
                 const a = document.createElement('a');
                 a.href = blobUrl;
-                // Generate filename with timestamp like backend does
+                
                 const timestamp = new Date().toISOString().replace(/[-:]/g, '_').split('.')[0];
                 a.download = `lead_campaign_${timestamp}.xlsx`;
                 document.body.appendChild(a);
@@ -430,7 +546,12 @@ const ExportPdf = () => {
     const LeadsSummaryReport = async () => {
         const formData = new FormData();
         formData.append('agent_id', selectedAgent?.toString() ?? '');
-        formData.append('date_range', JSON.stringify(selectionRange));
+        if (selectedCampaign) {
+          formData.append('campaign_id', selectedCampaign.toString());
+        }
+        if (selectionRange.startDate && selectionRange.endDate) {
+          formData.append('date_range', JSON.stringify(selectionRange));
+        }
         const response = await dispatch(summaryreport({ formData }) as any);
         if (response?.payload?.status === 200 || response?.payload?.status === 201) {
             const blobUrl = response.payload.blobUrl;
@@ -450,75 +571,182 @@ const ExportPdf = () => {
     return (
     <div>
         <div className="panel flex items-center justify-between overflow-visible whitespace-nowrap p-3 text-dark relative">
-          <div className="flex items-center">
-              <div className="rounded-full bg-primary p-1.5 text-white ring-2 ring-primary/30 ltr:mr-3 rtl:ml-3"> 
-                  <IconBell /> 
-              </div>
-              <span className="ltr:mr-3 rtl:ml-3"> Details of Your Agents Pdf Reports. </span>
-              {/* <div className='w-[200px] ltr:ml-3 rtl:mr-3'>
-                  <Select placeholder="Select a Status" options={Object.entries(statuses || {}).map(([value, label]) => ({ value: value, label: label }))}
-                      classNamePrefix="custom-select"
-                      className="custom-multiselect z-10"
-                      onChange={(selectedOption) => { 
-                        if (selectedOption?.value !== undefined) SelectStatus(selectedOption);
-                      }}
-                  />
-              </div> */}
-              {/* <button onClick={() => setIsConfirmModalOpen(true)}  type="button" className="btn btn-secondary btn-sm flex items-center ltr:ml-2 rtl:mr-2">
-                  <IconSearch /> &nbsp; Send To Cold
-              </button> */}
-          </div> 
-          <div className="flex items-center space-x-2">
-              <div className="w-[200px]">
-                  <button className="btn btn-secondary" onClick={() => setShowPicker(!showPicker)}>
-                      <IconCalender className='mr-2' />
-                      {showPicker ? 'Hide Date Filter' : 'Filter by Date'}
-                  </button>
-                  {errors?.meeting_date && <p className="text-danger error">{errors.meeting_date[0]}</p>}
-              </div>
-               <div className="w-full md:w-[200px]">
-                  <Select placeholder="Select an option" options={transformedAgents} classNamePrefix="custom-select" 
-                      className="custom-multiselect z-10" 
-                      onChange={(selectedOption) => { 
-                          if (selectedOption?.value !== undefined) SelectAgent(selectedOption.value); 
-                      }} 
-                  />
-              </div> 
-              <button onClick={() => { DownloadPdf(); }} type="button"  className="btn btn-secondary btn-sm"> Download Pdf </button>
-              <button onClick={() => { LeadsSummaryReport(); }} type="button"  className="btn btn-info btn-sm"> Leads Summary Report </button>
-              <button onClick={() => { handleLeadCampaignReport(); }} type="button"  className="btn btn-info btn-sm"> Leads Campaign Report </button>
-          </div>
-      </div>
+            <div className="flex items-center">
+                <div className="rounded-full bg-primary p-1.5 text-white ring-2 ring-primary/30 ltr:mr-3 rtl:ml-3"> 
+                    <IconBell /> 
+                </div>
+                <span className="ltr:mr-3 rtl:ml-3"> Details of Your Agents Pdf Reports. </span>
+            </div> 
+        </div>
+        <div className="panel mt-2">
+            <div className="p-1">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                    {/* Filters Section */}
+                    <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                        {/* Date Filter Button */}
+                        <div className="w-full sm:w-auto">
+                            <button 
+                                className={`btn w-full sm:w-auto ${showPicker ? 'btn-primary' : 'btn-secondary'} flex items-center justify-center`} 
+                                onClick={() => setShowPicker(!showPicker)}
+                            >
+                                <IconCalender className='w-4 h-4 ltr:mr-2 rtl:ml-2' />
+                                {showPicker ? 'Hide Date Filter' : 'Filter by Date'}
+                            </button>
+                            {errors?.meeting_date && (
+                                <p className="text-danger text-xs mt-1">{errors.meeting_date[0]}</p>
+                            )}
+                        </div>
+
+                        {/* Agent Select */}
+                        <div className="w-full sm:w-[250px]">
+                            <Select 
+                                placeholder="Select Agent" 
+                                options={transformedAgents} 
+                                classNamePrefix="custom-select" 
+                                className="custom-multiselect z-10" 
+                                onChange={(selectedOption) => { 
+                                    if (selectedOption?.value !== undefined) SelectAgent(selectedOption.value); 
+                                }} 
+                            />
+                        </div>
+
+                        {/* Campaign Source Select */}
+                        <div className="w-full sm:w-[200px]">
+                            <Select 
+                                placeholder="Campaign Source" 
+                                options={campaignSourceOptions} 
+                                classNamePrefix="custom-select" 
+                                className="custom-multiselect z-10" 
+                                onChange={(selectedOption) => { 
+                                    SelectCampaignSource(selectedOption); 
+                                }}
+                                value={selectedCampaignSource ? campaignSourceOptions.find(opt => opt.value === selectedCampaignSource) : null}
+                            />
+                        </div>
+
+                        {/* Campaign Name Select - Only shows when source is selected */}
+                        {selectedCampaignSource && (
+                            <div className="w-full sm:w-[250px]">
+                                <Select 
+                                    placeholder={loadingCampaigns ? "Loading campaigns..." : "Select Campaign"} 
+                                    options={campaigns} 
+                                    classNamePrefix="custom-select" 
+                                    className="custom-multiselect z-10" 
+                                    onChange={(selectedOption) => { 
+                                        SelectCampaign(selectedOption); 
+                                    }}
+                                    value={selectedCampaign ? campaigns.find(opt => opt.value === selectedCampaign) : null}
+                                    isLoading={loadingCampaigns}
+                                    isDisabled={loadingCampaigns}
+                                    isClearable={true}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Action Buttons Section */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <button 
+                            onClick={() => { DownloadPdf(); }} 
+                            type="button"  
+                            className="btn btn-secondary btn-sm flex items-center justify-center gap-2"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span className="hidden sm:inline">Download PDF</span>
+                            <span className="sm:hidden">PDF</span>
+                        </button>
+                        <button 
+                            onClick={() => { LeadsSummaryReport(); }} 
+                            type="button"  
+                            className="btn btn-info btn-sm flex items-center justify-center gap-2"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span className="hidden sm:inline">Summary Report</span>
+                            <span className="sm:hidden">Summary</span>
+                        </button>
+                        <button 
+                            onClick={() => { handleLeadCampaignReport(); }} 
+                            type="button"  
+                            className="btn btn-info btn-sm flex items-center justify-center gap-2"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span className="hidden sm:inline">Campaign Report</span>
+                            <span className="sm:hidden">Campaign</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Selected Date Range Display */}
+                {selectionRange.startDate && selectionRange.endDate && (
+                    <div className="mt-4 p-3 bg-info/10 dark:bg-info/20 rounded-lg border border-info/20">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
+                            <div className="flex items-center gap-2">
+                                <IconCalender className="w-4 h-4 text-info" />
+                                <span className="text-dark dark:text-white font-medium">Selected Date Range:</span>
+                            </div>
+                            <span className="text-info">
+                                {new Date(selectionRange.startDate).toLocaleDateString()} - {new Date(selectionRange.endDate).toLocaleDateString()}
+                            </span>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
         {showPicker && (
-          <div className="panel flex items-center justify-center overflow-visible whitespace-nowrap p-3 text-dark relative">
-            <DateRangePicker
-              ranges={[selectionRange]}
-              onChange={(ranges) =>
-                setSelectionRange({
-                  startDate: ranges.selection.startDate ?? new Date(),
-                  endDate: ranges.selection.endDate ?? new Date(),
-                  key: ranges.selection.key ?? 'selection',
-                })
-              }
-              />
+          <div className="panel">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold text-dark dark:text-white">Select Date Range</h3>
+                <button 
+                  onClick={() => {
+                    setSelectionRange({
+                      startDate: undefined,
+                      endDate: undefined,
+                      key: 'selection',
+                    });
+                  }}
+                  className="btn btn-sm btn-outline-danger"
+                >
+                  Clear Dates
+                </button>
+              </div>
+              <div className="flex justify-center overflow-x-auto">
+                <DateRangePicker
+                  ranges={[selectionRange]}
+                  onChange={(ranges) =>
+                    setSelectionRange({
+                      startDate: ranges.selection.startDate,
+                      endDate: ranges.selection.endDate,
+                      key: ranges.selection.key ?? 'selection',
+                    })
+                  }
+                />
+              </div>
+            </div>
           </div>
         )}
       <div className="datatables mt-6"> 
-              <Table title="All Leads"  
-                  columns={columns}  
-                  rows={tableData}  
-                  totalRecords={total || 0}  
-                  currentPage={current_page} 
-                  recordsPerPage={per_page} 
-                  onPageChange={handlePageChange} 
-                  onRecordsPerPageChange={handlePerPageChange} 
-                  onSortChange={handleSortChange} 
-                  sortStatus={sortStatus} 
-                  isLoading={loading}
-                  onSearchChange={onSearchChange}
-                  searchValue={searchTerm}
-                  noRecordsText="No records found matching your search criteria"
-              />
+            <Table title="All Leads"  
+                columns={columns}  
+                rows={tableData}  
+                totalRecords={total || 0}  
+                currentPage={current_page} 
+                recordsPerPage={per_page} 
+                onPageChange={handlePageChange} 
+                onRecordsPerPageChange={handlePerPageChange} 
+                onSortChange={handleSortChange} 
+                sortStatus={sortStatus} 
+                isLoading={loading}
+                onSearchChange={onSearchChange}
+                searchValue={searchTerm}
+                noRecordsText="No records found matching your search criteria"
+            />
             </div>
         <LeadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}  />
 

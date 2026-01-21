@@ -46,6 +46,7 @@ import apiClient from '../utils/apiClient';
         date_range?: string;
         agent_id?: any;
         status_id?: any;
+        campaign_id?: any;
         idsOnly?: boolean;
     }
 
@@ -156,7 +157,7 @@ import apiClient from '../utils/apiClient';
 
     export const allLeads = createAsyncThunk('allLeads', async (params: FetchLeadsParams = {}, { rejectWithValue }) => {
         try {
-            const { page = 1, perPage = 10, sortField, sortOrder, search, date_range, agent_id, status_id  } = params;
+            const { page = 1, perPage = 10, sortField, sortOrder, search, date_range, agent_id, status_id, campaign_id  } = params;
             const effectivePage = search ? 1 : page;
             const response = await apiClient.get(endpoints.allLeadsApi, 
                 { params: { 
@@ -167,7 +168,8 @@ import apiClient from '../utils/apiClient';
                     search: search,
                     date_range: date_range,
                     agent_id : agent_id, 
-                    status_id: status_id
+                    status_id: status_id,
+                    campaign_id: campaign_id
                 },
             });
             return {
