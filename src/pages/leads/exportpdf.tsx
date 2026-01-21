@@ -56,13 +56,13 @@ const ExportPdf = () => {
       dispatch(setPageTitle('All Leads'));
 
       const fetchData = () => {
-          dispatch(allLeads({ 
-              page: searchTerm ? 1 : current_page, 
-              perPage: per_page,
-              sortField: sortStatus.columnAccessor,
-              sortOrder: sortStatus.direction,
-              search: searchTerm
-          }));
+        dispatch(allLeads({ 
+            page: searchTerm ? 1 : current_page, 
+            perPage: per_page,
+            sortField: sortStatus.columnAccessor,
+            sortOrder: sortStatus.direction,
+            search: searchTerm
+        }));
       };
       if (!combinedRef.current.fetched) {
           fetchData();
