@@ -273,24 +273,25 @@ const Create = () => {
                 </div>
             ),
         },
-        {
-            accessor: 'actions',
-            title: 'Actions',
-            width: 120,
-            key: 'actions-column', 
-            render: (item: any) => (
-                <div className="flex space-x-2">
-                    <button type="button" onClick={() => handleEdit(item)} className="btn px-1 py-0.5 rounded text-white bg-info" key={`edit-${item.client_user_id}`} 
-                    >
-                    <IconPencil />
-                    </button>
-                    <button type="button" onClick={() => handleDelete(item)} className="btn px-1 py-0.5 rounded text-white bg-red-600" key={`delete-${item.client_user_id}`} 
-                    >
-                        <IconTrashLines />
-                    </button>
-                </div>
-            ),
-        },
+
+        // {
+        //     accessor: 'actions',
+        //     title: 'Actions',
+        //     width: 120,
+        //     key: 'actions-column', 
+        //     render: (item: any) => (
+        //         <div className="flex space-x-2">
+        //             <button type="button" onClick={() => handleEdit(item)} className="btn px-1 py-0.5 rounded text-white bg-info" key={`edit-${item.client_user_id}`} 
+        //             >
+        //             <IconPencil />
+        //             </button>
+        //             <button type="button" onClick={() => handleDelete(item)} className="btn px-1 py-0.5 rounded text-white bg-red-600" key={`delete-${item.client_user_id}`} 
+        //             >
+        //                 <IconTrashLines />
+        //             </button>
+        //         </div>
+        //     ),
+        // },
     ];
     
     return (
