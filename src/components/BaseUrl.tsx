@@ -3,7 +3,7 @@ export const getBaseUrl = () => {
   if (currentUrl.includes('localhost')) {
     return 'http://127.0.0.1:8000/api';
     // return 'http://10.255.254.61:8000/api';
-    return 'https://newcrmbackend.ddev.site/api';
+    // return 'https://newcrmbackend.ddev.site/api';
     // return 'http://10.99.1.53:8000/api';
   } else if (currentUrl.includes('testcrm.leadshub.ae')) {
     return 'https://testcrmbackend.leadshub.ae/api';

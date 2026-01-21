@@ -477,7 +477,7 @@ import { IconOption } from '../../components/Icon';
                                 <div>
                                     { selectedLead.lead_source == "Facebook"  ||  selectedLead.lead_source == "Instagram" && (
                                     <Tippy content="Print">
-                                        <button type="button" onClick={() => RemarkHistory(selectedLead?.field_data)} className='btn btn-success btn-sm'> Remarks </button>
+                                        <button type="button" onClick={() => RemarkHistory(selectedLead?.field_data)} className='btn btn-success btn-sm'> Lead Details </button>
                                     </Tippy>
                                     )}
                                 </div>

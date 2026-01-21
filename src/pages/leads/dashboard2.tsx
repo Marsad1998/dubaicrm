@@ -545,13 +545,13 @@ const DashboardBox2 = () => {
                                 </div>
                                 <div className="flex gap-2">
                                     { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram") && (
-                                        <Tippy content="Remarks">
+                                        <Tippy content="Lead Details">
                                         <button
                                             type="button"
                                             onClick={() => RemarkHistory(selectedLead?.field_data)}
                                             className="btn btn-success btn-sm rounded-sm"
                                         >
-                                            Remarks
+                                            Lead Details
                                         </button>
                                         </Tippy>
                                     )}
