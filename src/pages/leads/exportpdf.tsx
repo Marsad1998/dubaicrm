@@ -57,7 +57,7 @@ const ExportPdf = () => {
     const [bulkSelectedIds, setBulkSelectedIds] = useState<Set<string>>(new Set());
     const [allSelected, setAllSelected] = useState(false);
     const [selectedCampaignSource, setSelectedCampaignSource] = useState<string | null>(null);
-    const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
+    const [selectedCampaign, setSelectedCampaign] = useState<string[]>([]);
     const [campaigns, setCampaigns] = useState<any[]>([]);
     const [loadingCampaigns, setLoadingCampaigns] = useState(false);
 
@@ -119,7 +119,7 @@ const ExportPdf = () => {
           search: searchTerm,
           date_range: selectionRange.startDate && selectionRange.endDate ? JSON.stringify(selectionRange) : '',
           agent_id: agentId,
-          campaign_id: selectedCampaign
+          campaign_id: selectedCampaign.length > 0 ? selectedCampaign : undefined
         }));
       }
 
@@ -132,7 +132,7 @@ const ExportPdf = () => {
       
       const fetchCampaigns = async (source: string) => {
         setLoadingCampaigns(true);
-        setSelectedCampaign(null); 
+        setSelectedCampaign([]); 
         setCampaigns([]);
         
         try {
@@ -173,7 +173,7 @@ const ExportPdf = () => {
       const SelectCampaignSource = async (option: any) => {
         const source = option?.value;
         setSelectedCampaignSource(source);
-        setSelectedCampaign(null); 
+        setSelectedCampaign([]); 
         
         if (source) {
           await fetchCampaigns(source);
@@ -204,10 +204,12 @@ const ExportPdf = () => {
         }
       };
 
-      const SelectCampaign = async (campaign: any) => {
-        console.log(campaign);
-        setSelectedCampaign(campaign.value);
+      const SelectCampaign = async (selectedOptions: any) => {
+        const campaignIds = selectedOptions ? selectedOptions.map((opt: any) => opt.value) : [];
+        setSelectedCampaign(campaignIds);
         
+        // Get campaign labels for the API if needed
+        const campaignLabels = selectedOptions ? selectedOptions.map((opt: any) => opt.label) : [];
         
         dispatch(allLeads({ 
           page: 1, 
@@ -218,7 +220,7 @@ const ExportPdf = () => {
           date_range: selectionRange.startDate && selectionRange.endDate ? JSON.stringify(selectionRange) : '',
           agent_id: selectedAgent,
           status_id: selectedStatus,
-          campaign_id: campaign.label
+          campaign_id: campaignLabels.length > 0 ? campaignLabels : undefined
         }));
       }
       const SelectStatus = async (status:any) => {
@@ -240,8 +242,14 @@ const ExportPdf = () => {
         const formData = new FormData();
         formData.append('lead_status', selectedStatus ?? '');
         formData.append('agent_id', selectedAgent?.toString() ?? '');
-        if (selectedCampaign) {
-          formData.append('campaign_id', selectedCampaign.toString());
+        if (selectedCampaign.length > 0) {
+          // Get campaign names from IDs
+          const campaignNames = selectedCampaign
+            .map(id => campaigns.find(c => c.value === id)?.label)
+            .filter(Boolean);
+          campaignNames.forEach((campaignName) => {
+            formData.append('campaign_id[]', campaignName);
+          });
         }
         if (selectionRange.startDate && selectionRange.endDate) {
           formData.append('date_range', JSON.stringify(selectionRange));
@@ -506,8 +514,14 @@ const ExportPdf = () => {
     const handleLeadCampaignReport = async () => {
         const formData = new FormData();
         formData.append('agent_id', selectedAgent?.toString() ?? '');
-        if (selectedCampaign) {
-          formData.append('campaign_id', selectedCampaign.toString());
+        if (selectedCampaign.length > 0) {
+          // Get campaign names from IDs
+          const campaignNames = selectedCampaign
+            .map(id => campaigns.find(c => c.value === id)?.label)
+            .filter(Boolean);
+          campaignNames.forEach((campaignName) => {
+            formData.append('campaign_id[]', campaignName);
+          });
         }        
         
         if (selectionRange.startDate && selectionRange.endDate) {
@@ -546,8 +560,14 @@ const ExportPdf = () => {
     const LeadsSummaryReport = async () => {
         const formData = new FormData();
         formData.append('agent_id', selectedAgent?.toString() ?? '');
-        if (selectedCampaign) {
-          formData.append('campaign_id', selectedCampaign.toString());
+        if (selectedCampaign.length > 0) {
+          // Get campaign names from IDs
+          const campaignNames = selectedCampaign
+            .map(id => campaigns.find(c => c.value === id)?.label)
+            .filter(Boolean);
+          campaignNames.forEach((campaignName) => {
+            formData.append('campaign_id[]', campaignName);
+          });
         }
         if (selectionRange.startDate && selectionRange.endDate) {
           formData.append('date_range', JSON.stringify(selectionRange));
@@ -628,17 +648,18 @@ const ExportPdf = () => {
                         {selectedCampaignSource && (
                             <div className="w-full sm:w-[250px]">
                                 <Select 
-                                    placeholder={loadingCampaigns ? "Loading campaigns..." : "Select Campaign"} 
+                                    placeholder={loadingCampaigns ? "Loading campaigns..." : "Select Campaign(s)"} 
                                     options={campaigns} 
                                     classNamePrefix="custom-select" 
                                     className="custom-multiselect z-10" 
-                                    onChange={(selectedOption) => { 
-                                        SelectCampaign(selectedOption); 
+                                    onChange={(selectedOptions) => { 
+                                        SelectCampaign(selectedOptions); 
                                     }}
-                                    value={selectedCampaign ? campaigns.find(opt => opt.value === selectedCampaign) : null}
+                                    value={campaigns.filter(opt => selectedCampaign.includes(opt.value))}
                                     isLoading={loadingCampaigns}
                                     isDisabled={loadingCampaigns}
                                     isClearable={true}
+                                    isMulti={true}
                                 />
                             </div>
                         )}
