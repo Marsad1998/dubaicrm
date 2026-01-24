@@ -256,6 +256,7 @@ const Assign = () => {
                     case 'Reshuffle': return <span className="badge bg-primary">Reshuffle</span>;
                     case 'Walk-in': return <span className="badge bg-danger">Walk-in</span>;
                     case 'Marketing': return <span className="badge bg-success">Marketing</span>;
+                    case 'LandingPage': return <span className="badge bg-success">LandingPage</span>;
                     case 'Other': return <span className="badge bg-secondary">Other</span>;
                     default: return <span className="badge bg-secondary">Unknown</span>;
                 }
