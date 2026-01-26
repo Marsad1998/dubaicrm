@@ -347,7 +347,7 @@ const LeadsAnalysis = () => {
                                         <div>
                                             <h5 className="font-semibold dark:text-white-light"> {comment.lead_comment} </h5>
                                             <p className="text-white-dark text-xs">
-                                                Lead : {comment.lead.lead_title} | {comment.created_at}
+                                                Lead : {comment?.lead?.lead_title} | {comment.created_at}
                                             </p>
                                             <span className="badge bg-success text-white">
                                                 {comment.agent_id ? (
