@@ -467,7 +467,7 @@ const DashboardBox = () => {
                                     <h4 className="text-base md:text-lg font-medium ltr:mr-2 rtl:ml-2"> {selectedLead?.lead_title} </h4>
                                 </div>
                                 <div className="flex gap-2">
-                                    { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram") && (
+                                    { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram" || selectedLead.lead_source == "AI Chat Bot") && (
                                         <Tippy content="Lead Details">
                                         <button
                                             type="button"
