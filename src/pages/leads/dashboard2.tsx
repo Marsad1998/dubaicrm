@@ -440,28 +440,6 @@ const DashboardBox2 = () => {
                                                         <tr key={lead.lead_id} className="cursor-pointer" onClick={() => setSelectedLead(lead)}>
                                                             <td>
                                                                 <div className="flex items-center whitespace-nowrap">
-                                                                    <div className="ltr:mr-3 rtl:ml-3">
-                                                                        <Tippy content="Important">
-                                                                            <button type="button" className={`enabled:hover:text-primary disabled:opacity-60 rotate-90 flex items-center ${ lead.isImportant ? 'text-primary' : ''
-                                                                                }`}>
-                                                                                <IconBookmark bookmark={false} className={`w-4.5 h-4.5 ${lead.isImportant && 'fill-primary'}`} />
-                                                                            </button>
-                                                                        </Tippy>
-                                                                    </div>
-                                                                    <div className={`dark:text-gray-300 whitespace-nowrap font-semibold ${ !lead.isUnread ? 'text-gray-500 dark:text-gray-500 font-normal' : ''}`}
-                                                                    > {lead?.lead_title || 'Not Found'}
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div className="flex items-center whitespace-nowrap">
-                                                                    <div className={`dark:text-gray-300 whitespace-nowrap font-semibold ${!lead.isUnread ? 'text-gray-500 dark:text-gray-500 font-normal' : ''}`}>
-                                                                        { lead.agents?.client_user_name || 'Not Found' }
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div className="flex items-center whitespace-nowrap">
                                                                     <div className="ltr:mr-1 rtl:ml-1">
                                                                         <Tippy content="Important">
                                                                             <button
@@ -493,7 +471,29 @@ const DashboardBox2 = () => {
                                                                     > {lead?.customer_phone || 'Not Found'}
                                                                     </div>
                                                                 </div>
-                                                            </td>                      
+                                                            </td>
+                                                            <td>
+                                                                <div className="flex items-center whitespace-nowrap">
+                                                                    <div className="ltr:mr-3 rtl:ml-3">
+                                                                        <Tippy content="Important">
+                                                                            <button type="button" className={`enabled:hover:text-primary disabled:opacity-60 rotate-90 flex items-center ${ lead.isImportant ? 'text-primary' : ''
+                                                                                }`}>
+                                                                                <IconBookmark bookmark={false} className={`w-4.5 h-4.5 ${lead.isImportant && 'fill-primary'}`} />
+                                                                            </button>
+                                                                        </Tippy>
+                                                                    </div>
+                                                                    <div className={`dark:text-gray-300 whitespace-nowrap font-semibold ${ !lead.isUnread ? 'text-gray-500 dark:text-gray-500 font-normal' : ''}`}
+                                                                    > {lead?.lead_title || 'Not Found'}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div className="flex items-center whitespace-nowrap">
+                                                                    <div className={`dark:text-gray-300 whitespace-nowrap font-semibold ${!lead.isUnread ? 'text-gray-500 dark:text-gray-500 font-normal' : ''}`}>
+                                                                        { lead.agents?.client_user_name || 'Not Found' }
+                                                                    </div>
+                                                                </div>
+                                                            </td>
                                                             <td>
                                                                 <div className="flex items-center">
                                                                     {colorsarray.find((data) => data.value == lead?.lead_status) && (
