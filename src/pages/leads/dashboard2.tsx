@@ -74,24 +74,6 @@ const DashboardBox2 = () => {
         }
     }, [leads]);
 
-    // const getNotesByLeadStatus = (leadStatus:number) => { 
-    //     const option = all_statuses.find(
-    //         (opt: any) => Number(opt.value) === Number(leadStatus)
-    //     );
-
-    //     console.log('option', all_statuses);
-    //     return option;
-    // };
-    
-    // const getNotes2ByLeadStatus = (leadStatus:number) => {
-    //     const option = all_statuses.find(
-    //         (opt: any) => Number(opt.value) === Number(leadStatus)
-    //     );
-
-    //     console.log('option', all_statuses);
-    //     return option;
-    // }
-
     const getStatusById = (id: number): any => {
         return (all_statuses as any[]).find(
             (s: any) => Number(s.value) === Number(id)
