@@ -527,6 +527,18 @@ const DashboardBox2 = () => {
                                     <h4 className="text-base md:text-lg font-medium ltr:mr-2 rtl:ml-2"> {selectedLead?.lead_title} </h4>
                                 </div>
                                 <div className="flex gap-2">
+                                    { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram" || selectedLead.lead_source == "AI Chat Bot") && (
+                                        <Tippy content="Lead Details">
+                                        <button
+                                            type="button"
+                                            onClick={() => RemarkHistory(selectedLead?.field_data)}
+                                            className="btn btn-success btn-sm rounded-sm"
+                                        >
+                                            Lead Details
+                                        </button>
+                                        </Tippy>
+                                    )}
+
                                     <Tippy content="Show Call Logs">
                                         <button
                                             type="button"
@@ -551,6 +563,59 @@ const DashboardBox2 = () => {
                                 {loading && loader2}
                                 <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-5">
                                     <div className="panel xl:col-span-2 md:col-span-2">
+                                        {/* <div className="flex items-center mb-5">
+                                            {loginuser?.roles[0].name === 'HR' ? (
+                                                <>
+                                                   <h5 className="font-semibold text-lg dark:text-white-light"> Job Seeker Detail</h5>
+                                                    &nbsp; &nbsp;
+                                                    <button type="button" className="btn btn-success" onClick={triggerFileInput}>
+                                                        <IconFile className="w-4 h-4" />
+                                                        <input type="file" multiple ref={fileInputRef} className="hidden" onChange={handleFileChange} accept=".pdf,.doc,.docx,.jpg,.png,.jpeg,.webp,.txt"
+                                                        />
+                                                    </button>
+                                                    &nbsp; &nbsp;
+                                                    <button type="button" className="btn btn-secondary" onClick={() => selectedLead && viewFiles(selectedLead?.lead_id)}
+                                                    > <IconEye className="w-4 h-4" />
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                <h5 className="font-semibold text-lg dark:text-white-light">Client Detail</h5>
+                                                    &nbsp; &nbsp;
+
+                                                    {loginuser?.roles[0].name === 'super admin' && (
+                                                        <div className="relative inline-block">
+                                                            <div style={{ backgroundColor: '#198754',  padding: '1px', borderRadius: '6px',
+                                                                clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}>
+                                                                <button
+                                                                type="button"
+                                                                onClick={() => selectedLead && AssignToAgent(selectedLead?.lead_id)}
+                                                                className="flex items-center justify-center px-4 py-1.5 text-[12px] font-medium transition-all duration-200 select-none rounded"
+                                                                style={{ backgroundColor: '#198754',  color: '#fff', clipPath:
+                                                                    'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
+                                                                }}
+                                                                > Transfer Lead 
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+
+                                                     { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram" || selectedLead.lead_source == "AI Chat Bot") && (
+                                                        <Tippy content="Lead Details">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => RemarkHistory(selectedLead?.field_data)}
+                                                            className="btn btn-success btn-sm rounded-sm"
+                                                        >
+                                                            Lead Details
+                                                        </button>
+                                                        </Tippy>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div> */}
+
                                         <div className="flex items-center justify-between mb-5">
                                             {loginuser?.roles[0].name === 'HR' ? (
                                                 <>
@@ -569,18 +634,18 @@ const DashboardBox2 = () => {
                                                 </>
                                             ) : (
                                                 <>
-                                                <div className="flex items-center">
+                                                    <div className="flex items-center">
                                                         <h5 className="font-semibold text-lg dark:text-white-light">Client Detail</h5>
                                                         &nbsp; &nbsp;
                                                         {loginuser?.roles[0].name === 'super admin' && (
                                                             <div className="relative inline-block">
-                                                                <div style={{ backgroundColor: '#805dca',  padding: '1px', borderRadius: '6px',
+                                                                <div style={{ backgroundColor: '#198754',  padding: '1px', borderRadius: '6px',
                                                                     clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}>
                                                                     <button
                                                                     type="button"
                                                                     onClick={() => selectedLead && AssignToAgent(selectedLead?.lead_id)}
                                                                     className="flex items-center justify-center px-4 py-1.5 text-[12px] font-medium transition-all duration-200 select-none rounded"
-                                                                    style={{ backgroundColor: '#805dca',  color: '#fff', clipPath:
+                                                                    style={{ backgroundColor: '#198754',  color: '#fff', clipPath:
                                                                         'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
                                                                     }}
                                                                     > Transfer Lead 
@@ -589,45 +654,22 @@ const DashboardBox2 = () => {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram" || selectedLead.lead_source == "AI Chat Bot") && (
-                                                            <>
-                                                                {loginuser?.roles[0].name === 'super admin' && (
-                                                                    <div className="relative inline-block">
-                                                                        <div style={{ backgroundColor: '#198754',  padding: '1px', borderRadius: '6px',
-                                                                            clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}>
-                                                                            <Tippy content="Lead Details">
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() => RemarkHistory(selectedLead?.field_data)}
-                                                                                    className="flex items-center justify-center px-4 py-1.5 text-[12px] font-medium transition-all duration-200 select-none rounded"
-                                                                                    style={{ backgroundColor: '#198754',  color: '#fff', clipPath:
-                                                                                        'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
-                                                                                    }}
-                                                                                >
-                                                                                    Lead Details
-                                                                                </button>
-                                                                            </Tippy>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                                {loginuser?.roles[0].name !== 'super admin' && (
-                                                                    <Tippy content="Lead Details">
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => RemarkHistory(selectedLead?.field_data)}
-                                                                            className="btn btn-success btn-sm rounded-sm"
-                                                                        >
-                                                                            Lead Details
-                                                                        </button>
-                                                                    </Tippy>
-                                                                )}
-                                                            </>
-                                                        )}
-                                                    </div>
+                                                    
+                                                    { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram" || selectedLead.lead_source == "AI Chat Bot") && (
+                                                        <Tippy content="Lead Details">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => RemarkHistory(selectedLead?.field_data)}
+                                                                className="btn btn-success btn-sm rounded-sm"
+                                                            >
+                                                                Lead Details
+                                                            </button>
+                                                        </Tippy>
+                                                    )}
                                                 </>
                                             )}
                                         </div>
+
                                         <div className="data">
                                             <ul className="mt-5 m-auto space-y-4 font-semibold text-white-dark">
                                                 <li className="flex items-center gap-2 text-dark">
