@@ -65,7 +65,7 @@ const routes = [
     {
         path: 'pages/leads/:dashboardType',
         type: 'protected',
-        element: <DashboardBox key="dashboard" />,
+        element: <Dashboard2 key="dashboard" />,
     },
 
     {

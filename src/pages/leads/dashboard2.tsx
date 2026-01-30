@@ -30,6 +30,7 @@ import { IconOption } from '../../components/Icon';
 import { useTwilioDevice } from '../../hooks/useTwilioDevice';
 import Dialer from '../../components/Dialer';
 import AiCallModal from '../../components/AiCallModal';
+import { set } from 'date-fns';
 
 const DashboardBox2 = () => {
     const { dashboardType } = useParams();
@@ -50,7 +51,13 @@ const DashboardBox2 = () => {
      const [showDialer, setShowDialer] = useState(false);
      const [isAiCallModal, setIsAiCallModal] = useState(false);
      const [aiCallData, setAiCallData] = useState<any[]>([]);
+     const [selectedOption, setSelectedOption] = useState<any>(null);
+     const [showComments, setShowComments] = useState(false);
+
     useEffect(() => {    
+
+        console.log('Dashboard Type:', hrdropdownOption);
+
         dispatch(setPageTitle('Dashboard'));
         if (loginuser?.client_user_id && !combinedRef.current.fetched) {
             dispatch(DashboardLeadslist({search: searchText, dashboardType: dashboardType || 'all'}));
@@ -129,12 +136,15 @@ const DashboardBox2 = () => {
         setIsModalOpen(true);
     } 
     const handleSelectChange = (e:any) => {
+         setDate(null);
+        setSelectedOption(e);
         if((e.value == 7 || e.value === 7) || (e.value == 19 || e.value === 19)){
             setIsDisable(false);
             setsColor('');
         }else{
             setIsDisable(true);
             setsColor('hsl(0, 0%, 95%)');
+            // setDate('');
         }
     }
     const Refresh = () => {
@@ -570,9 +580,10 @@ const DashboardBox2 = () => {
                                             ) : (
                                                 <>
                                                 <div className="flex items-center">
-                                                        <h5 className="font-semibold text-lg dark:text-white-light">Client Detail</h5>
+                                                       <h5 className="font-semibold text-lg dark:text-white-light">
+                                                        {dashboardType === 'hr' ? 'Employee Detail' : 'Client Detail'}</h5>
                                                         &nbsp; &nbsp;
-                                                        {loginuser?.roles[0].name === 'super admin' && (
+                                                        {/* {loginuser?.roles[0].name === 'super admin' && (
                                                             <div className="relative inline-block">
                                                                 <div style={{ backgroundColor: '#805dca',  padding: '1px', borderRadius: '6px',
                                                                     clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}>
@@ -587,7 +598,37 @@ const DashboardBox2 = () => {
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                        )}
+                                                        )} */}
+
+                                                        {loginuser?.roles[0].name === 'super admin' && dashboardType !== 'hr' && (
+                                                            <div className="relative inline-block">
+                                                                <div
+                                                                style={{
+                                                                    backgroundColor: '#805dca',
+                                                                    padding: '1px',
+                                                                    borderRadius: '6px',
+                                                                    clipPath:
+                                                                    'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)',
+                                                                }}
+                                                                >
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                    selectedLead && AssignToAgent(selectedLead?.lead_id)
+                                                                    }
+                                                                    className="flex items-center justify-center px-4 py-1.5 text-[12px] font-medium transition-all duration-200 select-none rounded"
+                                                                    style={{
+                                                                    backgroundColor: '#805dca',
+                                                                    color: '#fff',
+                                                                    clipPath:
+                                                                        'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)',
+                                                                    }}
+                                                                >
+                                                                    Transfer Lead
+                                                                </button>
+                                                                </div>
+                                                            </div>
+                                                            )}
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram" || selectedLead.lead_source == "AI Chat Bot") && (
@@ -664,37 +705,88 @@ const DashboardBox2 = () => {
                                             <div className="mt-1">
                                                 <div className="flex flex-col justify-between lg:flex-row">
                                                     <div className="w-full cursor-pointer">
-                                                        <div className="mt-3 items-center">
-                                                        {/* <Select placeholder="Move Lead...." options={ 
-                                                        loginuser?.roles[0].name === 'HR' ? Object.values(hrdropdownOption) : uniqueDropdownList }  name="lead_status" className="cursor-pointer" onChange={handleSelectChange} /> */}
-                                                        <Select placeholder="Move Lead...." 
-                                                            options={ loginuser?.roles[0].name === 'HR' ? Object.values(hrdropdownOption || {}) : Object.values(uniqueDropdownList || {}) }  
-                                                            name="lead_status" 
-                                                            className="cursor-pointer" 
-                                                            onChange={handleSelectChange} 
-                                                            />
-                                                        <input type="hidden" name="lead_id" className="form-input" defaultValue={selectedLead?.lead_id} />
-                                                        <input type="hidden" name="agent_id" className="form-input" defaultValue={selectedLead?.agent_id} />
-                                                        <input type="hidden" name="login_user_id" className="form-input" defaultValue={loginuser?.client_user_id}/>
-                                                        {errors?.lead_status && <p className="text-danger error">{errors.lead_status[0]}</p>}
+                                                        <div className="mt-3">
+                                                            <label className="block text-sm font-semibold mb-3 text-dark dark:text-white-light">Move Lead to:</label>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {(loginuser?.roles[0].name == 'HR' || dashboardType == 'hr' ? Object.values(hrdropdownOption || {}) : Object.values(uniqueDropdownList || {})).map((option: any) => {
+                                                                    const colorStyle = option.color || '#d1d5db';
+                                                                    const isSelected = selectedOption?.value === option.value;
+                                                                    return (
+                                                                        <label key={option.value} className="cursor-pointer relative">
+                                                                            <input 
+                                                                                type="radio" 
+                                                                                name="lead_status" 
+                                                                                value={option.value}
+                                                                                onChange={(e) => handleSelectChange(option)}
+                                                                                className="sr-only"
+                                                                            />
+                                                                            <span 
+                                                                                className="inline-flex items-center px-4 py-2 rounded-sm border text-sm font-medium transition-all hover:shadow-md"
+                                                                                style={{
+                                                                                    borderColor: colorStyle,
+                                                                                    backgroundColor: isSelected ? colorStyle : '#fff',
+                                                                                    color: isSelected ? '#fff' : colorStyle
+                                                                                }}
+                                                                            >
+                                                                                {option.label}
+                                                                            </span>
+                                                                        </label>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                            <input type="hidden" name="lead_id" className="form-input" defaultValue={selectedLead?.lead_id} />
+                                                            <input type="hidden" name="agent_id" className="form-input" defaultValue={selectedLead?.agent_id} />
+                                                            <input type="hidden" name="login_user_id" className="form-input" defaultValue={loginuser?.client_user_id}/>
+                                                            {errors?.lead_status && <p className="text-danger error mt-2">{errors.lead_status[0]}</p>}
                                                         </div>
                                                         {loginuser?.roles[0].name !== 'HR' && (
-                                                            <div className={`mt-4`}>
-                                                                <Flatpickr value={date} disabled={IsDisable} name="meeting_date" options={{ enableTime:true, dateFormat: 'Y-m-d H:i'}} className="form-input" placeholder='Confrimed Meeting Date'  style={{ background: IsColor }}/> 
+                                                            <div className={`mt-4 ${selectedOption?.value == 7 || selectedOption?.value == 19 ? '' : 'hidden'}`}>
+                                                                <Flatpickr 
+                                                                    value={selectedOption?.value == 7 || selectedOption?.value == 19 ? date : ''} 
+                                                                    name="meeting_date" 
+                                                                    options={{ enableTime:true, dateFormat: 'Y-m-d H:i'}} 
+                                                                    className="form-input" 
+                                                                    placeholder='Confirmed Meeting Date'  
+                                                                /> 
                                                                 {errors?.meeting_date && <p className="text-danger error">{errors.meeting_date[0]}</p>}
                                                             </div>
                                                         )}
-                                                        <div className="mt-3 items-center cursor-pointer">
-                                                        <textarea id="description" className="form-textarea min-h-[130px]" name="lead_comment" placeholder="Comments"></textarea>
-                                                        {errors?.lead_comment && <p className="text-danger error">{errors.lead_comment[0]}</p>}
-                                                        </div>   
+
+                                                        <div className="mt-4">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <label className="block text-sm font-semibold mb-2 text-dark dark:text-white-light">Comments:</label>
+                                                                <button 
+                                                                    type="button" 
+                                                                    onClick={() => setShowComments(!showComments)}
+                                                                    className="text-xs text-primary hover:text-primary-dark flex items-center gap-1"
+                                                                >
+                                                                    {showComments ? '✏️ Hide comments' : '✏️ Click to add comments'}
+                                                                </button>
+                                                            </div>
+                                                            {showComments && (
+                                                                <textarea 
+                                                                    id="description" 
+                                                                    className="form-textarea min-h-[130px] bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 mt-2" 
+                                                                    name="lead_comment" 
+                                                                    placeholder="Type your comments here..."
+                                                                    autoFocus
+                                                                ></textarea>
+                                                            )}
+                                                            {errors?.lead_comment && <p className="text-danger error">{errors.lead_comment[0]}</p>}
+                                                        </div>
+
                                                         <div className="mt-4">
                                                             <button className="btn btn-success w-full rounded-sm">Save</button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> 
                                         </form>
+
+                                        
+   
+
+                                        
                                     </div>
                                     <div className="panel xl:col-span-3 md:col-span-3 lg:col-span-2">
                                         <div className="mb-5">
@@ -705,16 +797,12 @@ const DashboardBox2 = () => {
                                                 <div className="max-w-[900px] mx-auto">
                                                 {selectedLead?.comments?.map((comment: any, i: number) => {
                                                     const currentStatus = getStatusById(comment.lead_status);
-
                                                     const prevComment = i > 0 ? selectedLead.comments[i - 1] : null;
                                                     const prevStatus = prevComment ? getStatusById(prevComment.lead_status) : null;
-
                                                     const fromLabel = prevStatus ? prevStatus.label : "New Lead";
                                                     const fromColor = prevStatus ? prevStatus.color : "#5dc66e";
-
                                                     return (
                                                     <div className="flex" key={i}>
-                                                        {/* Date */}
                                                         <p className="text-[#3b3f5c] dark:text-white-light min-w-[180px] max-w-[150px] text-sm font-semibold py-2.5">
                                                         {comment?.created_at || "Invalid Time"}
                                                         </p>
@@ -735,12 +823,9 @@ const DashboardBox2 = () => {
                                                                         "before:border-warning after:border-warning"}
                                                         `}
                                                         />
-
-                                                        {/* Content */}
                                                         <div className="p-2.5 self-center ltr:ml-2.5 rtl:mr-2.5 w-full">
                                                         <div className="flex flex-wrap items-center gap-2 mb-1">
 
-                                                            {/* User */}
                                                             <span className="text-[#3b3f5c] dark:text-white-light font-semibold text-[13px]">
                                                             {comment?.user_id
                                                                 ? comment.user_name

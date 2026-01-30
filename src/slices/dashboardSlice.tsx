@@ -240,9 +240,6 @@ import apiClient from '../utils/apiClient';
                     state.loading = true;
                 })
                 .addCase(DashboardLeadslist.fulfilled, (state, action) => {
-
-                    console.log(action.payload.dropdownstatus);
-
                     state.loading = false;
                     state.leads = action.payload.leadsdata;
                     state.agents = action.payload.agents;

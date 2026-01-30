@@ -519,7 +519,9 @@ const DashboardBox = () => {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <h5 className="font-semibold text-lg dark:text-white-light">Client Detail</h5>
+                                                    {/* <h5 className="font-semibold text-lg dark:text-white-light">Client Detail</h5> */}
+                                                    <h5 className="font-semibold text-lg dark:text-white-light">
+                                                        {dashboardType === 'hr' ? 'Employee Detail' : 'Client Detail'}</h5>
                                                     &nbsp; &nbsp;
                                                     {loginuser?.roles[0].name === 'super admin' && (
                                                         <button type="button" className="btn btn-secondary btn-sm" onClick={() => selectedLead && AssignToAgent(selectedLead?.lead_id)}> Transfer Lead  {selectedLead?.lead_id} </button>

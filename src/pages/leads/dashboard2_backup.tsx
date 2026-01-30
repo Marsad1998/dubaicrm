@@ -707,8 +707,7 @@ const DashboardBox2 = () => {
                                                 <div className="flex flex-col justify-between lg:flex-row">
                                                     <div className="w-full cursor-pointer">
                                                         <div className="mt-3 items-center">
-                                                        {/* <Select placeholder="Move Lead...." options={ 
-                                                        loginuser?.roles[0].name === 'HR' ? Object.values(hrdropdownOption) : uniqueDropdownList }  name="lead_status" className="cursor-pointer" onChange={handleSelectChange} /> */}
+                                                    
                                                         <Select placeholder="Move Lead...." 
                                                             options={ loginuser?.roles[0].name === 'HR' ? Object.values(hrdropdownOption || {}) : Object.values(uniqueDropdownList || {}) }  
                                                             name="lead_status" 
