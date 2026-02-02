@@ -599,7 +599,6 @@ const DashboardBox2 = () => {
                                                                 </div>
                                                             </div>
                                                         )} */}
-
                                                         {loginuser?.roles[0].name === 'super admin' && dashboardType !== 'hr' && (
                                                             <div className="relative inline-block">
                                                                 <div
@@ -708,7 +707,7 @@ const DashboardBox2 = () => {
                                                         <div className="mt-3">
                                                             <label className="block text-sm font-semibold mb-3 text-dark dark:text-white-light">Move Lead to:</label>
                                                             <div className="flex flex-wrap gap-2">
-                                                                {(loginuser?.roles[0].name == 'HR' || dashboardType == 'hr' ? Object.values(hrdropdownOption || {}) : Object.values(uniqueDropdownList || {})).map((option: any) => {
+                                                                {(loginuser?.roles[0].name == 'HR' || dashboardType == 'hr' ? Object.values(hrdropdownOption || {}) : Object.values(uniqueDropdownList || {})).filter((option: any) => option.value !== 'No Answer').map((option: any) => {
                                                                     const colorStyle = option.color || '#d1d5db';
                                                                     const isSelected = selectedOption?.value === option.value;
                                                                     return (
@@ -721,7 +720,7 @@ const DashboardBox2 = () => {
                                                                                 className="sr-only"
                                                                             />
                                                                             <span 
-                                                                                className="inline-flex items-center px-4 py-2 rounded-sm border text-sm font-medium transition-all hover:shadow-md"
+                                                                                className="badge"
                                                                                 style={{
                                                                                     borderColor: colorStyle,
                                                                                     backgroundColor: isSelected ? colorStyle : '#fff',
@@ -758,7 +757,7 @@ const DashboardBox2 = () => {
                                                                 <button 
                                                                     type="button" 
                                                                     onClick={() => setShowComments(!showComments)}
-                                                                    className="text-xs text-primary hover:text-primary-dark flex items-center gap-1"
+                                                                    className="text-xs text-secondary hover:text-secondary flex items-center gap-1"
                                                                 >
                                                                     {showComments ? '✏️ Hide comments' : '✏️ Click to add comments'}
                                                                 </button>
@@ -774,7 +773,6 @@ const DashboardBox2 = () => {
                                                             )}
                                                             {errors?.lead_comment && <p className="text-danger error">{errors.lead_comment[0]}</p>}
                                                         </div>
-
                                                         <div className="mt-4">
                                                             <button className="btn btn-success w-full rounded-sm">Save</button>
                                                         </div>
@@ -782,11 +780,6 @@ const DashboardBox2 = () => {
                                                 </div>
                                             </div> 
                                         </form>
-
-                                        
-   
-
-                                        
                                     </div>
                                     <div className="panel xl:col-span-3 md:col-span-3 lg:col-span-2">
                                         <div className="mb-5">

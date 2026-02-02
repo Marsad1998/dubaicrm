@@ -503,7 +503,7 @@ const DashboardBox = () => {
                                 <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-5">
                                     <div className="panel xl:col-span-2 md:col-span-2">
                                         <div className="flex items-center mb-5">
-                                            {loginuser?.roles[0].name === 'HR' ? (
+                                            {loginuser?.roles[0].name === 'HR' && dashboardType === 'hr' ? (
                                                 <>
                                                    <h5 className="font-semibold text-lg dark:text-white-light"> Job Seeker Detail</h5>
                                                     &nbsp; &nbsp;
@@ -669,7 +669,8 @@ const DashboardBox = () => {
                 onClose={() => setCallLog(false)}
                 data={IsCallLogData} 
             />
-            <FileViewerModal isOpen={isFileViewerOpen} onClose={() => setIsFileViewerOpen(false)} files={files} />    
+            <FileViewerModal isOpen={isFileViewerOpen} onClose={() => setIsFileViewerOpen(false)} files={files} />   
+
             <CustomSideNav
                 isOpen={isCustomizerOpen}
                 leadId={selectedLead?.lead_id}
