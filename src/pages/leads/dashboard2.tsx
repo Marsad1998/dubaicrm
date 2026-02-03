@@ -653,11 +653,7 @@ const DashboardBox2 = () => {
                                                                 )}
                                                                 {loginuser?.roles[0].name !== 'super admin' && (
                                                                     <Tippy content="Lead Details">
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => RemarkHistory(selectedLead?.field_data)}
-                                                                            className="btn btn-success btn-sm rounded-sm"
-                                                                        >
+                                                                        <button type="button" onClick={() => RemarkHistory(selectedLead?.field_data)} className="btn btn-success btn-sm rounded-sm">
                                                                             Lead Details
                                                                         </button>
                                                                     </Tippy>
