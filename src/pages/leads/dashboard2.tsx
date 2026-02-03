@@ -511,6 +511,15 @@ const DashboardBox2 = () => {
                                                         > <IconEye className="w-4 h-4" />
                                                         </button>
                                                     </div>
+                                                    { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram" || selectedLead.lead_source == "AI Chat Bot") && (
+                                                        <>
+                                                            <Tippy content="Lead Details">
+                                                                <button type="button" onClick={() => RemarkHistory(selectedLead?.field_data)} className="btn btn-success btn-sm rounded-sm">
+                                                                    Lead Details
+                                                                </button>
+                                                            </Tippy>
+                                                        </>
+                                                   )}
                                                 </>
                                             ) : (
                                                 <>
