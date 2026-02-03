@@ -317,7 +317,7 @@ const DashboardBox2 = () => {
 
                                          &nbsp; &nbsp;
                                         <div className="relative flex-1 sm:flex-none">
-                                            <input type="text" className="form-input w-full sm:w-[200px] pr-8" placeholder="Search Lead" value={searchText} onChange={(e) => setSearchText(e.target.value)} />
+                                            <input type="text" className="form-input w-full sm:w-[200px] pr-8 rounded-sm" placeholder="Search Lead" value={searchText} onChange={(e) => setSearchText(e.target.value)} />
                                             <div className="absolute right-2 top-1/2 -translate-y-1/2 peer-focus:text-primary"> <IconSearch className="w-4 h-4"/> </div>
                                         </div>
                                     </div>
@@ -332,113 +332,48 @@ const DashboardBox2 = () => {
                                 </div>
                             </div> 
                             <div className="h-px border-b border-white-light dark:border-[#1b2e4b]"></div>
-                            <div className="flex flex-wrap flex-col md:flex-row xl:w-auto justify-between items-center px-2 sm:px-4 pb-4">
-                                
-                            <div className="w-full mt-4 overflow-visible"
-                                style={{
-                                    display:
-                                    (loginuser?.roles[0].name === 'HR' || dashboardType === 'hr'
-                                    ? HrTopBarStatus
-                                    : TopbarStatuses
-                                    ).length > 12
-                                    ? 'flex'
-                                    : 'grid',
-                                    gap: '8px',
-                                    overflowX:
-                                    (loginuser?.roles[0].name === 'HR' || dashboardType === 'hr'
-                                    ? HrTopBarStatus
-                                    : TopbarStatuses
-                                    ).length > 12
-                                    ? 'auto'
-                                    : 'hidden',
-                                    gridTemplateColumns:
-                                    (loginuser?.roles[0].name === 'HR' || dashboardType === 'hr'
-                                    ? HrTopBarStatus
-                                    : TopbarStatuses
-                                    ).length > 12
-                                    ? undefined
-                                    : `repeat(${
-                                        (loginuser?.roles[0].name === 'HR' || dashboardType === 'hr'
+                            <div className="flex flex-wrap flex-col md:flex-row xl:w-auto justify-between items-center px-2 sm:px-4">
+                             <div className="w-full">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {(loginuser?.roles[0].name === 'HR' || dashboardType === 'hr'
                                         ? HrTopBarStatus
                                         : TopbarStatuses
-                                        ).length
-                                        }, minmax(0, 1fr))`,
-                                    paddingBottom:
-                                    (loginuser?.roles[0].name === 'HR' || dashboardType === 'hr'
-                                    ? HrTopBarStatus
-                                    : TopbarStatuses
-                                    ).length > 12
-                                    ? '12px'
-                                    : undefined
-                                }}
-                                >
-                                {(loginuser?.roles[0].name === 'HR' || dashboardType === 'hr'
-                                    ? HrTopBarStatus
-                                    : TopbarStatuses
-                                ).map((status: any) => {
-                                    const topcounter = counters[status.id] || 0;
-                                    const isActive = selectedTab === status.id;
-                                    const isScrollable =
-                                    (loginuser?.roles[0].name === 'HR' || dashboardType === 'hr'
-                                    ? HrTopBarStatus
-                                    : TopbarStatuses
-                                    ).length > 12;
+                                    ).map((status: any) => {
+                                        const topcounter = counters[status.id] || 0;
+                                        const isActive = selectedTab === status.id;
 
-                                    return (
-                                    <div
-                                        key={status.id}
-                                        className="relative"
-                                        style={{
-                                        minWidth: isScrollable ? '150px' : 'auto',
-                                        flexShrink: isScrollable ? 0 : undefined
-                                        }}
-                                    >
-                                        {/* BORDER */}
-                                        <div
-                                        style={{
-                                            backgroundColor: status.color,
-                                            padding: '1px',
-                                            borderRadius: '6px',
-                                            clipPath:
-                                            'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 16px 50%)'
-                                        }}
-                                        >
-                                        {/* BUTTON */}
-                                        <button
-                                            onClick={() => LeadsTabs(status.id)}
-                                            type="button"
-                                            className="w-full flex items-center justify-center px-3 py-2 text-[12px] font-medium whitespace-nowrap transition-all"
-                                            style={{
-                                            backgroundColor: isActive ? status.color : '#f9fafb',
-                                            color: isActive ? '#fff' : status.color,
-                                            clipPath:
-                                                'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 16px 50%)'
-                                            }}
-                                        >
-                                            <div className="flex items-center gap-2 truncate">
-                                            <div className="w-4 h-4 flex items-center justify-center">
-                                                {IconOption.find((icon) => icon.value == status.icon)?.label}
-                                            </div>
-                                            <span className="truncate">{status.name}</span>
-                                            </div>
-                                        </button>
-                                        </div>
-                                        {topcounter >= 0 && (
-                                            <div className="absolute -top-[1.5px] -right-[1.5px] min-w-[18px] h-[18px] px-1  flex items-center justify-center text-[9px] rounded-full text-white font-semibold shadow-sm z-30"
-                                                style={{ 
-                                                backgroundColor: status.color,
-                                                border: isActive ? '0.5px solid white' : 'none',
-                                                boxShadow: isActive ? '0 0 0 0.5px white' : 'none'
-                                                }}
+                                        return (
+                                            <button
+                                                key={status.id}
+                                                onClick={() => LeadsTabs(status.id)}
+                                                type="button"
+                                                className="hover:text-primary flex items-center p-1"
                                             >
-                                                {topcounter}
-                                            </div>
-                                        )}
-                                    </div>
-                                    );
-                                })}
-                            </div>
-                            </div>
+                                                <span 
+                                                    className={`badge rounded-sm ${isActive ? 'ring-2 ring-primary/30' : ''}`}
+                                                    style={{
+                                                        backgroundColor: isActive ? status.color : `${status.color}20`,
+                                                        color: isActive ? 'white' : status.color,
+                                                    }}
+                                                >
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="w-4 h-4 flex items-center justify-center">
+                                                            {IconOption.find((icon) => icon.value == status.icon)?.label}
+                                                        </span>
+                                                        <span className="whitespace-nowrap">{status.name}</span>
+                                                        {topcounter >= 0 && (
+                                                            <span className="ml-1 text-xs font-bold px-1 bg-white/20 rounded">
+                                                                {topcounter}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div> 
+                          </div>
                             <div className="h-px border-b border-white-light dark:border-[#1b2e4b]"></div>
                                 {loading ? (
                                     <Loader3 />
@@ -716,7 +651,7 @@ const DashboardBox2 = () => {
                                                                                 className="sr-only"
                                                                             />
                                                                             <span 
-                                                                                className="badge"
+                                                                                className="badge rounded-sm"
                                                                                 style={{
                                                                                     borderColor: colorStyle,
                                                                                     backgroundColor: isSelected ? colorStyle : '#fff',
