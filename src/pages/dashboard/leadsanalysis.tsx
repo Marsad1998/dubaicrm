@@ -630,6 +630,7 @@ const LeadsAnalysis = () => {
                             </Link>
                         </div>
                     </div>
+                    
                     {Object.entries(leadsData.percentages).map(([statusNumber, percentage], index) => {
                         const statusNum = Number(statusNumber);
                         const status = statues().find(s => s.value == statusNum);
