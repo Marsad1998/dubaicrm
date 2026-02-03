@@ -518,22 +518,6 @@ const DashboardBox2 = () => {
                                                        <h5 className="font-semibold text-lg dark:text-white-light">
                                                         {dashboardType === 'hr' ? 'Employee Detail' : 'Client Detail'}</h5>
                                                         &nbsp; &nbsp;
-                                                        {/* {loginuser?.roles[0].name === 'super admin' && (
-                                                            <div className="relative inline-block">
-                                                                <div style={{ backgroundColor: '#805dca',  padding: '1px', borderRadius: '6px',
-                                                                    clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}>
-                                                                    <button
-                                                                    type="button"
-                                                                    onClick={() => selectedLead && AssignToAgent(selectedLead?.lead_id)}
-                                                                    className="flex items-center justify-center px-4 py-1.5 text-[12px] font-medium transition-all duration-200 select-none rounded"
-                                                                    style={{ backgroundColor: '#805dca',  color: '#fff', clipPath:
-                                                                        'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
-                                                                    }}
-                                                                    > Transfer Lead 
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        )} */}
                                                         {loginuser?.roles[0].name === 'super admin' && dashboardType !== 'hr' && (
                                                             <div className="relative inline-block">
                                                                 <div
@@ -567,32 +551,11 @@ const DashboardBox2 = () => {
                                                     <div className="flex items-center gap-2">
                                                         { (selectedLead.lead_source == "Facebook" || selectedLead.lead_source == "Instagram" || selectedLead.lead_source == "AI Chat Bot") && (
                                                             <>
-                                                                {loginuser?.roles[0].name === 'super admin' && (
-                                                                    <div className="relative inline-block">
-                                                                        <div style={{ backgroundColor: '#198754',  padding: '1px', borderRadius: '6px',
-                                                                            clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}>
-                                                                            <Tippy content="Lead Details">
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() => RemarkHistory(selectedLead?.field_data)}
-                                                                                    className="flex items-center justify-center px-4 py-1.5 text-[12px] font-medium transition-all duration-200 select-none rounded"
-                                                                                    style={{ backgroundColor: '#198754',  color: '#fff', clipPath:
-                                                                                        'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)'
-                                                                                    }}
-                                                                                >
-                                                                                    Lead Details
-                                                                                </button>
-                                                                            </Tippy>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                                {loginuser?.roles[0].name !== 'super admin' && (
-                                                                    <Tippy content="Lead Details">
-                                                                        <button type="button" onClick={() => RemarkHistory(selectedLead?.field_data)} className="btn btn-success btn-sm rounded-sm">
-                                                                            Lead Details
-                                                                        </button>
-                                                                    </Tippy>
-                                                                )}
+                                                                <Tippy content="Lead Details">
+                                                                    <button type="button" onClick={() => RemarkHistory(selectedLead?.field_data)} className="btn btn-success btn-sm rounded-sm">
+                                                                        Lead Details
+                                                                    </button>
+                                                                </Tippy>
                                                             </>
                                                         )}
                                                     </div>
