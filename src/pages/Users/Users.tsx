@@ -6,7 +6,7 @@ import { getBaseUrl } from '../../components/BaseUrl';
 import apiClient from '../../utils/apiClient';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import Loader from '../../services/loader';
-import { options, employeeType, documentTypes } from '../../services/status';
+import { options, employeeType, documentTypes, languagesDropdown } from '../../services/status';
 import Select from 'react-select';
 import IconTrashLines from '../../components/Icon/IconTrashLines';
 import IconPencil from '../../components/Icon/IconPencil';
@@ -20,6 +20,7 @@ import '../../../src/assets/css/file-upload-preview.css';
 import { set, setDate } from 'date-fns';
 import IconEye from '../../components/Icon/IconEye';
 import UserDetailModal from '../../components/UserDetailModal';
+
 
 const endpoints = {
     createApi: `${getBaseUrl()}/users/create_user`,
@@ -54,6 +55,8 @@ const Users = () => {
     const [joindate, SetJoingDate] = useState<any | null>(null);
     const [photo, setPhoto] = useState<any>(null);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+    const [languages, setLanguages] = useState<any[]>([]);
+
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -127,6 +130,10 @@ const Users = () => {
         try {
             if (combinedRef.current.userformRef) {
                 const formData = new FormData(combinedRef.current.userformRef);
+                if (languages && languages.length > 0) {
+                    languages.forEach((lang: any) => { if (lang && lang.value) { formData.append('languages[]', lang.value); } });
+                }
+
                 if (photo) {
                     formData.append("profile_photo", photo);
                 }
@@ -218,6 +225,16 @@ const Users = () => {
                 headOptions = [{ value: null, label: 'No Team Head', }];
             }
             setHeadId(headOptions); 
+
+            if (user.languages && Array.isArray(user.languages)) {
+             const userLanguages = user.languages.map((lang: any) => {
+                if (lang.value && lang.label) { return lang; }
+                return languagesDropdown.find((option) => option.value === Number(lang) || option.label === lang) || { value: lang, label: String(lang) }; }).filter(Boolean); 
+             setLanguages(userLanguages);
+            } else {
+                setLanguages([]);
+            }
+
 
         }
     };
@@ -512,7 +529,6 @@ const Users = () => {
 
                                 <div className="form-group sm:col-span-3 mt-2">
                                     <label htmlFor="profile_photo">Profile Photo</label>
-
                                     <input
                                         type="file"
                                         name="profile_photo"
@@ -535,6 +551,27 @@ const Users = () => {
                                         <span className="text-red-500 text-sm">{errors.profile_photo}</span>
                                     )}
                                 </div>
+
+                                <div className="form-group sm:col-span-3 mt-2">
+                                    <label htmlFor="languages">Languages</label>
+                                    <Select
+                                        name="languages"
+                                        options={languagesDropdown}
+                                        value={languages}
+                                        isMulti
+                                        placeholder="Select Languages"
+                                        onChange={(selected) => setLanguages(Array.isArray(selected) ? [...selected] : [])}
+                                        getOptionValue={(option) => option.value}
+                                        getOptionLabel={(option) => option.label}
+                                    />
+                                    {errors.languages && (
+                                        <span className="text-red-500 text-sm">
+                                            {errors.languages}
+                                        </span>
+                                    )}
+                                </div>
+
+
 
 
                               </div>
@@ -564,7 +601,7 @@ const Users = () => {
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <div className="relative z-[100]">
+                                                                <div className="relative">
                                                                     <Select placeholder="Document Type" options={documentTypes} value={documentTypes.find(opt => opt.value === item.documentType)}
                                                                         onChange={(selected) => setItems(items.map((itm: any) => 
                                                                             itm.id === item.id 

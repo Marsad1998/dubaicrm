@@ -314,7 +314,6 @@ const DashboardBox2 = () => {
                                             </div>
                                             )}
                                         </div> */}
-
                                          &nbsp; &nbsp;
                                         <div className="relative flex-1 sm:flex-none">
                                             <input type="text" className="form-input w-full sm:w-[200px] pr-8 rounded-sm" placeholder="Search Lead" value={searchText} onChange={(e) => setSearchText(e.target.value)} />

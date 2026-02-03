@@ -479,6 +479,14 @@ export const approvalStatusOptions = [
     { value: 3, label: 'Leave Rejected' },
 ];
 
+export const languagesDropdown = [
+  { value: 1, label: 'English' },
+  { value: 2, label: 'Russian' },
+  { value: 3, label: 'Spanish' },
+  { value: 4, label: 'Arabic' },
+  { value: 5, label: 'French' }, 
+];
+
 
 
 
