@@ -707,7 +707,7 @@ const DashboardBox2 = () => {
                                                         <div className="mt-3">
                                                             <label className="block text-sm font-semibold mb-3 text-dark dark:text-white-light">Move Lead to:</label>
                                                             <div className="flex flex-wrap gap-2">
-                                                                {(loginuser?.roles[0].name == 'HR' || dashboardType == 'hr' ? Object.values(hrdropdownOption || {}) : Object.values(uniqueDropdownList || {})).filter((option: any) => option.value !== 'No Answer').map((option: any) => {
+                                                                {(loginuser?.roles[0].name == 'HR' || dashboardType == 'hr' ? Object.values(hrdropdownOption || {}) : Object.values(uniqueDropdownList || {})).filter((option: any) => option.value !== 9).map((option: any) => {
                                                                     const colorStyle = option.color || '#d1d5db';
                                                                     const isSelected = selectedOption?.value === option.value;
                                                                     return (
