@@ -131,7 +131,7 @@ const Users = () => {
             if (combinedRef.current.userformRef) {
                 const formData = new FormData(combinedRef.current.userformRef);
                 if (languages && languages.length > 0) {
-                    languages.forEach((lang: any) => { if (lang && lang.value) { formData.append('languages[]', lang.value); } });
+                    languages.forEach((lang: any) => { if (lang && lang.value) { formData.append('client_user_languages[]', lang.value); } });
                 }
 
                 if (photo) {
@@ -155,6 +155,7 @@ const Users = () => {
                     setDateOfBirthday(null);
                     SetJoingDate(null);
                     setType(null);
+                    setLanguages([]);
 
                 }
             }
@@ -226,11 +227,23 @@ const Users = () => {
             }
             setHeadId(headOptions); 
 
-            if (user.languages && Array.isArray(user.languages)) {
-             const userLanguages = user.languages.map((lang: any) => {
-                if (lang.value && lang.label) { return lang; }
-                return languagesDropdown.find((option) => option.value === Number(lang) || option.label === lang) || { value: lang, label: String(lang) }; }).filter(Boolean); 
-             setLanguages(userLanguages);
+            if (user.client_user_languages) {
+                // Convert comma-separated string to array
+                let langsArray: any[] = [];
+
+                if (typeof user.client_user_languages === 'string') {
+                    langsArray = user.client_user_languages.split(',').map((l: any) => l.trim());
+                } else if (Array.isArray(user.client_user_languages)) {
+                    langsArray = user.client_user_languages;
+                }
+
+                const userLanguages = langsArray.map((lang) => {
+                    // Find the option in your languagesDropdown
+                    const option = languagesDropdown.find((o) => o.value === Number(lang) || o.value === lang);
+                    return option || { value: lang, label: String(lang) };
+                });
+
+                setLanguages(userLanguages);
             } else {
                 setLanguages([]);
             }
@@ -553,9 +566,9 @@ const Users = () => {
                                 </div>
 
                                 <div className="form-group sm:col-span-3 mt-2">
-                                    <label htmlFor="languages">Languages</label>
+                                    <label htmlFor="client_user_languages">Languages</label>
                                     <Select
-                                        name="languages"
+
                                         options={languagesDropdown}
                                         value={languages}
                                         isMulti
@@ -570,10 +583,6 @@ const Users = () => {
                                         </span>
                                     )}
                                 </div>
-
-
-
-
                               </div>
                                 <div className="mt-8">
                                     <div className="table-responsive">
