@@ -121,7 +121,6 @@ const Users = () => {
             if (error.response?.status === 403) {
                 window.location.href = '/error';
             }
-            // showServerError();
         }
     };
 
