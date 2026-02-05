@@ -92,15 +92,10 @@ const NavBar = () => {
           )}
         </li>
       )}
-
-      {/* DROPDOWN 2 — LEAD TOOLS */}
+      
       {(permissions.includes('roadshow leads') || role === 'super admin') && (
         <li className="menu nav-item relative">
-          <button
-            type="button"
-            className={`nav-link ${isVertical && currentMenu === 'leadtools' ? 'active' : ''}`}
-            onClick={() => isVertical && toggleMenu('leadtools')}
-          >
+          <button type="button" className={`nav-link ${isVertical && currentMenu === 'leadtools' ? 'active' : ''}`} onClick={() => isVertical && toggleMenu('leadtools')}>
             <div className="flex items-center">
               <IconMenuDashboard className="shrink-0" />
               <span className="px-1">{t('Lead Tools')}</span>
@@ -109,14 +104,12 @@ const NavBar = () => {
               <IconCaretDown />
             </div>
           </button>
-
           {renderSubMenu(
             'leadtools',
             <>
               {(permissions.includes('view pdf') || role === 'super admin') && (
                 <li><NavLink to="/pages/leads/exportpdf">{t('Export Pdf')}</NavLink></li>
               )}
-
               <li><NavLink to="/pages/leads/roadshow">{t('Road-Show Leads')}</NavLink></li>
               <li><NavLink to="/pages/leads/reports">{t('Agent Reports')}</NavLink></li>
               <li><NavLink to="/pages/leads/poll-leads">{t('Poll Leads')}</NavLink></li>
@@ -125,9 +118,6 @@ const NavBar = () => {
         </li>
       )}
 
-
-
-      {/* Manage Employee */}
       {(permissions.includes('create user') || role === 'super admin') && (
         <li className="menu nav-item relative">
           <button
@@ -163,8 +153,8 @@ const NavBar = () => {
         </li>
       )}
 
-      {/* Agent Diary */}
-      {(permissions.includes('create activities') || role === 'super admin') && (
+      
+      {/* {(permissions.includes('create activities') || role === 'super admin') && (
         <li className="menu nav-item relative">
           <button
             type="button"
@@ -187,10 +177,10 @@ const NavBar = () => {
             </>
           )}
         </li>
-      )}
+      )} */}
 
-      {/* Listing */}
-      {/* {(permissions.includes('create subscriber') || role === 'super admin') && (
+      
+       {(permissions.includes('create subscriber') || role === 'super admin') && (
         <li className="menu nav-item relative">
           <button
             type="button"
@@ -210,7 +200,7 @@ const NavBar = () => {
             <li><NavLink to="/pages/listing/create-listing">{t('Create Listing')}</NavLink></li>
           )}
         </li>
-      )} */}
+      )} 
       
       {/* Announcements */}
       <li className="menu nav-item relative">

@@ -484,12 +484,18 @@ export const languagesDropdown = [
   { value: 2, label: 'Russian' },
   { value: 3, label: 'Spanish' },
   { value: 4, label: 'Arabic' },
-  { value: 5, label: 'French' }, 
+  { value: 5, label: 'French' },
+  { value: 6, label: 'Urdu' },
+  { value: 7, label: 'Hindi' },
+  { value: 8, label: 'Uzbek' },
+  { value: 9, label: 'Dutch' },
+  { value: 10, label: 'Farsi' },
+  { value: 11, label: 'Swedish' },
+  { value: 12, label: 'Afrikaans' },
+  { value: 13, label: 'German' },
+  { value: 14, label: 'Indonesian' },
+  { value: 15, label: 'Persian' },
 ];
-
-
-
-
 
 
 

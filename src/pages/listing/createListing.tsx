@@ -1,64 +1,161 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../slices/themeConfigSlice';
-import Swal from 'sweetalert2';
 import { getBaseUrl } from '../../components/BaseUrl';
 import apiClient from '../../utils/apiClient';
-import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import Loader from '../../services/loader';
-import { Rentoptions, Saleoptions, RentalPeriodOption } from '../../services/status';
 import Select from 'react-select';
-import IconTrashLines from '../../components/Icon/IconTrashLines';
-import IconPencil from '../../components/Icon/IconPencil';
-import Table from '../../components/Table';
-import { AppDispatch } from '../../store';
-import '../dashboard/dashboard.css';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import Toast from '../../services/toast';
 
 const endpoints = {
     listApi: `${getBaseUrl()}/listing/get_users`,
-    
 };
 
-const createListing = () => {
-    const dispatch = useDispatch<AppDispatch>();
+const categoryOptions = [
+    { value: '1', label: 'Residential' },
+    { value: '2', label: 'Commercial' },
+];
+
+const subCategoryOptions = [
+    { value: '1', label: 'Apartment' },
+    { value: '2', label: 'Villa' },
+    { value: '3', label: 'Townhouse' },
+    { value: '4', label: 'Penthouse' },
+    { value: '5', label: 'Hotel Apartment' }
+];
+
+const purposeOptions = [
+    { value: 'rent', label: 'For Rent' },
+    { value: 'sale', label: 'For Sale' }
+];
+
+const completionStatusOptions = [
+    { value: 'ready', label: 'Ready' },
+    { value: 'off_plan', label: 'Off Plan' },
+    { value: 'under_construction', label: 'Under Construction' }
+];
+
+const bedroomsOptions = [
+    { value: '0', label: 'Studio' },
+    { value: '1', label: '1' },
+    { value: '2', label: '2' },
+    { value: '3', label: '3' },
+    { value: '4', label: '4' },
+    { value: '5', label: '5' },
+    { value: '6', label: '6+' }
+];
+
+const bathroomsOptions = [
+    { value: '1', label: '1' },
+    { value: '2', label: '2' },
+    { value: '3', label: '3' },
+    { value: '4', label: '4' },
+    { value: '5', label: '5' },
+    { value: '6', label: '6+' }
+];
+
+const occupancyStatusOptions = [
+    { value: 'vacant', label: 'Vacant' },
+    { value: 'occupied', label: 'Occupied' }
+];
+
+const ownershipStatusOptions = [
+    { value: 'freehold', label: 'Freehold' },
+    { value: 'leasehold', label: 'Leasehold' }
+];
+
+const rentFrequencyOptions = [
+    { value: 'yearly', label: 'Yearly' },
+    { value: 'monthly', label: 'Monthly' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'daily', label: 'Daily' }
+];
+
+const maintenanceFeePayerOptions = [
+    { value: 'tenant', label: 'Tenant' },
+    { value: 'owner', label: 'Owner' }
+];
+
+const amenitiesList = [
+    { id: 'pool', label: 'Swimming Pool' },
+    { id: 'gym', label: 'Gym' },
+    { id: 'parking', label: 'Parking' },
+    { id: 'security', label: '24/7 Security' },
+    { id: 'balcony', label: 'Balcony' },
+    { id: 'garden', label: 'Garden' },
+    { id: 'elevator', label: 'Elevator' },
+    { id: 'ac', label: 'Central A/C' },
+    { id: 'maid_room', label: "Maid's Room" },
+    { id: 'storage', label: 'Storage Room' },
+    { id: 'pets', label: 'Pets Allowed' },
+    { id: 'concierge', label: 'Concierge' },
+    { id: 'spa', label: 'Spa' },
+    { id: 'jacuzzi', label: 'Jacuzzi' },
+    { id: 'bbq', label: 'BBQ Area' },
+    { id: 'kids_play', label: 'Kids Play Area' },
+    { id: 'lobby', label: 'Lobby' },
+    { id: 'study', label: 'Study Room' },
+];
+
+const CreateListing = () => {
+    const dispatch = useDispatch();
     const loader = Loader();
-    const toast = Toast();
     const combinedRef = useRef<any>({ userformRef: null });
     const [users, setUsers] = useState([]);
-    const [status, setStatus] = useState<any | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [urole, setRoles] = useState<any | null>(null);
-    const [selectedRole, setSelectedRole] = useState<any | null>(null);
     const requestMade = useRef(false);
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [totalRecords, setTotalRecords] = useState(0);
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'client_user_id', direction: 'asc' });
-    const [searchQuery, setSearchQuery] = useState('');
-    const [occupancy, setoccupancy] = useState<any>({ disabled : true, occupancyoption: {} });
-    const [selectedOccupancy, setselectedOccupancy] = useState<any | null>(null);
-    const [rentalPeriod, setRentalPeriod] = useState<any>({ disabled : true, rentalperiodOption: {} });
-    const [selectedRentalPeriod, setSelectedRentalPeriod] = useState<any | null>(null);
+    const [currentStep, setCurrentStep] = useState(1);
+
+    // Form state
+    const [selectedCategory, setSelectedCategory] = useState<any>(null);
+    const [selectedSubCategory, setSelectedSubCategory] = useState<any>(null);
+    const [selectedPurpose, setSelectedPurpose] = useState<any>(null);
+    const [selectedCompletionStatus, setSelectedCompletionStatus] = useState<any>(null);
+    const [selectedBedrooms, setSelectedBedrooms] = useState<any>(null);
+    const [selectedBathrooms, setSelectedBathrooms] = useState<any>(null);
+    const [selectedOccupancyStatus, setSelectedOccupancyStatus] = useState<any>(null);
+    const [selectedOwnershipStatus, setSelectedOwnershipStatus] = useState<any>(null);
+    const [selectedRentFrequency, setSelectedRentFrequency] = useState<any>(null);
+    const [selectedMaintenanceFeePayer, setSelectedMaintenanceFeePayer] = useState<any>(null);
+    const [selectedAgent, setSelectedAgent] = useState<any>(null);
+    const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+
+    // Text states
+    const [englishTitle, setEnglishTitle] = useState('');
+    const [arabicTitle, setArabicTitle] = useState('');
+    const [englishDescription, setEnglishDescription] = useState('');
+    const [arabicDescription, setArabicDescription] = useState('');
+    const [selectedAgentData, setSelectedAgentData] = useState(null);
+    const [referenceNumber, setReferenceNumber] = useState('');
+
+    // Upload states
+    const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+    const [uploadedFloorPlan, setUploadedFloorPlan] = useState<File | null>(null);
+    const [uploadedVideo, setUploadedVideo] = useState<File | null>(null);
+
+    const steps = [
+        { number: 1, title: 'Details' },
+        { number: 2, title: 'Amenities' },
+        { number: 3, title: 'Uploads' }
+    ];
 
     useEffect(() => {
         if (!requestMade.current) {
-            dispatch(setPageTitle('Create User')); 
+            dispatch(setPageTitle('Create Listing'));
             fetchUserLists();
             requestMade.current = true;
         }
     }, [dispatch]);
 
-
     const fetchUserLists = async () => {
         try {
             const response = await apiClient.get(endpoints.listApi);
-            if (response.data) { 
+            if (response.data) {
                 const options = response.data.map((user: any) => ({
                     value: user.client_user_id,
                     label: user.client_user_name,
+                    data: user
                 }));
                 setUsers(options);
             }
@@ -66,216 +163,624 @@ const createListing = () => {
             if (error.response?.status === 403) {
                 window.location.href = '/error';
             }
-            
+        }
+    };
+    
+    const handleAgentChange = (selectedOption: any) => {
+        setSelectedAgent(selectedOption);
+        if (selectedOption) {
+            setSelectedAgentData(selectedOption.data);
+        } else {
+            setSelectedAgentData(null);
         }
     };
 
-    // const handleSubmit = async (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     try {
-    //         if (combinedRef.current.userformRef) {
-    //             const formData = new FormData(combinedRef.current.userformRef);
-    //             const userId = formData.get('client_user_id');
-    //             const response = userId ? await apiClient.post(`${endpoints.updateApi}/${userId}`, formData) : await apiClient.post(endpoints.createApi, formData);
-    //             if (response.status === 200 || response.status === 201) {
-    //                 showSuccessToast(response.data.message);
-    //                 fetchUserLists();
-    //                 setErrors({});
-    //                 combinedRef.current.userformRef.reset();
-    //                 setSelectedRole(null);
-    //                 setStatus(null);
-    //             }
-    //         }
-    //     } catch (error: any) {
-    //         if (error.response?.data?.errors) {
-    //             setErrors(error.response.data.errors);
-    //         } else if (error.response?.status === 403) {
-    //             window.location.href = '/error';
-    //         } else {
-    //             showServerError();
-    //         }
-    //     }
-    // };
-    
-    // const showSuccessToast = (message: string) => {
-    //     Swal.fire({
-    //         toast: true,
-    //         position: 'top-end',
-    //         showConfirmButton: false,
-    //         timer: 3000,
-    //         timerProgressBar: true,
-    //         title: message,
-    //         icon: 'success',
-    //     });
-    // };
+    const handleAmenityToggle = (amenityId: string) => {
+        setSelectedAmenities(prev => 
+            prev.includes(amenityId) 
+                ? prev.filter(id => id !== amenityId)
+                : [...prev, amenityId]
+        );
+    };
 
-    // const showServerError = () => {
-    //     Swal.fire({
-    //         text: 'Something went wrong on the server',
-    //         icon: 'error',
-    //         title: 'Server Error',
-    //     });
-    // };
-
-    
-
-   
-
-
-    
-
-    const HandleCategory = (e:any) => {
-        const optionValue = e.target.value ? e.target.value : '0';
-        setselectedOccupancy(null);   //always reset occupancy selection
-        setSelectedRentalPeriod(null); // always reset rental period selection
-        if (!optionValue || optionValue == 0) {
-            setoccupancy({ disabled: true, occupancyoption: {} });
-            setRentalPeriod({ disabled: true, rentalperiodOption: {} });
-            return;
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const newFiles = Array.from(e.target.files);
+            setUploadedImages(prev => [...prev, ...newFiles]);
         }
-        const isRent = optionValue == 1 || optionValue == 2;
-        const isSale = optionValue == 3 || optionValue == 4;
-        if (isRent) {
-            setRentalPeriod({ disabled: false, rentalperiodOption: RentalPeriodOption });
-            setoccupancy({ disabled: false, occupancyoption: Rentoptions });
-        } else if (isSale) {
-            setRentalPeriod({ disabled: true, rentalperiodOption: {}  });
-            setoccupancy({ disabled: false, occupancyoption: Saleoptions });
-        }
-    }
+    };
 
-    return (
-        <form ref={(el) => (combinedRef.current.userformRef = el)}  className="space-y-5">
-            <div className="flex flex-wrap -mx-4">
-                <div className="w-full lg:w-1/3 px-4">
-                    <div className="panel">
-                        <div className="panel-body">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="form-group">
-                                    <label htmlFor="listing_category_id">Listing Type</label>
-                                    <select id="listing_category_id" className="form-input" onChange={HandleCategory}>
-                                        <option value="">Select Listing Type</option>
-                                        <option value="1">Residential (Rent)</option>
-                                        <option value="2">Commercial (Rent)</option>
-                                        <option value="3">Residential (Sale)</option>
-                                        <option value="4">Commercial (Sale)</option>
-                                    </select>
-                                    <input type="hidden" name="listing_id" id="listing_id" />
-                                    {errors.listing_category_id && <span className="text-red-500 text-sm"> {errors.listing_category_id} </span>}
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="listing_slug">Slug</label>
-                                    <input name="listing_slug" type="text" placeholder="Slug" className="form-input" />
-                                    {errors.listing_slug && <span className="text-red-500 text-sm"> {errors.listing_slug} </span>}
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="listing_meta_description">Meta Designation</label>
-                                    <input name="listing_meta_description" type="text" placeholder="Meta Designation" className="form-input" />
-                                    {errors.listing_meta_description && <span className="text-red-500 text-sm">{errors.listing_meta_description}</span>}
-                                </div>
-                                 <div className="form-group">
-                                    <div className="form-group">
-                                        <label htmlFor="rental_period">Rental Period</label>
-                                        <Select name="rental_period" placeholder="Select rental period" options={rentalPeriod.rentalperiodOption} isDisabled={rentalPeriod.disabled} value={selectedRentalPeriod} onChange={(selectedOption) => setSelectedRentalPeriod(selectedOption)} />
-                                    </div>
-                                    {errors.rental_period && <span className="text-red-500 text-sm">{errors.rental_period}</span>}
-                                </div>
+    const removeImage = (index: number) => {
+        setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    };
 
-                                 <div className="form-group sm:col-span-2">
-                                    <label htmlFor="price">Price</label>
-                                    <input name="price" type="text" placeholder="Price" className="form-input" />
-                                    {errors.price && <span className="text-red-500 text-sm">{errors.price}</span>}
-                                </div>
-                                 <div className="form-group sm:col-span-2">
-                                    <label htmlFor="listing_meta_description">Designation</label>
-                                    <ReactQuill theme="snow" placeholder="Description" modules={{ toolbar: [   [{ 'header': [1, 2, false] }], ['bold', 'italic', 'underline','strike', 'blockquote'],  [{'list': 'ordered'}, {'list': 'bullet'}],  ['link', 'image'], ] }} />
-                                </div> 
-                            </div>
-                            <div className="flex justify-end mt-4">
-                                <button type="submit" className="btn btn-primary">{' '}Submit{' '}</button>
-                            </div>
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log('Form submitted');
+    };
+
+    const quillModules = {
+        toolbar: [
+            [{ 'header': [1, 2, false] }],
+            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['link', 'image'],
+            ['clean']
+        ]
+    };
+
+    const generateReferenceNumber = () => {
+        const prefix = 'REF';
+        const timestamp = Date.now().toString(36);
+        const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const generatedRef = `${prefix}-${timestamp}-${randomChars}`;
+        setReferenceNumber(generatedRef);
+    };
+
+    const nextStep = () => {
+        if (currentStep < 3) setCurrentStep(currentStep + 1);
+    };
+
+    const prevStep = () => {
+        if (currentStep > 1) setCurrentStep(currentStep - 1);
+    };
+    
+    const renderStepIndicator = () => (
+        <div className="flex items-center justify-center mb-6">
+            {steps.map((step, index) => (
+                <div key={step.number} className="flex items-center">
+                    <div className="flex items-center">
+                        <div 
+                            className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
+                                currentStep >= step.number  ? 'bg-green-600 text-white'  : 'bg-gray-200 text-gray-500' }`}>
+                            {currentStep > step.number ? (
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                            ) : step.number}
                         </div>
+                        <span className={`ml-2 text-sm font-medium ${currentStep >= step.number ? 'text-green-600' : 'text-gray-500'}`}>
+                            {step.title}
+                        </span>
+                    </div>
+                    {index < steps.length - 1 && (
+                        <div className={`w-16 h-0.5 mx-3 transition-all ${
+                            currentStep > step.number ? 'bg-green-600' : 'bg-gray-200'
+                        }`} />
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+
+    const renderStep1 = () => (
+        <div className="space-y-5">
+            <div>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Category *</label>
+                        <Select
+                            options={categoryOptions}
+                            value={selectedCategory}
+                            onChange={setSelectedCategory}
+                            placeholder="Select Category"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Sub Category *</label>
+                        <Select
+                            options={subCategoryOptions}
+                            value={selectedSubCategory}
+                            onChange={setSelectedSubCategory}
+                            placeholder="Select Sub Category"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Purpose *</label>
+                        <Select
+                            options={purposeOptions}
+                            value={selectedPurpose}
+                            onChange={setSelectedPurpose}
+                            placeholder="Select Purpose"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Location *</label>
+                        <Select
+                            options={[]}
+                            placeholder="Choose Area..."
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                            isSearchable
+                        />
                     </div>
                 </div>
-                 <div className="w-full lg:w-1/3 px-4">
-                    <div className="panel">
-                        <div className="panel-body">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div className="form-group">
-                                        <label htmlFor="listing_reference">Reference #</label>
-                                        <input name="listing_reference" type="number" placeholder="Reference Number" className="form-input"/>
-                                        {errors.listing_reference && ( <span className="text-red-500 text-sm"> {errors.listing_reference} </span> )}
-                                    </div> 
-                                <div className="form-group">
-                                    <label htmlFor="listing_type_id">Property Type</label>
-                                    <input name="listing_type_id" type="text" placeholder="Slug" className="form-input" />
-                                    {errors.listing_type_id && <span className="text-red-500 text-sm"> {errors.listing_type_id} </span>}
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="listing_size">Size (Sqft)</label>
-                                    <input name="listing_size" type="text" placeholder="Size" className="form-input" />
-                                    {errors.listing_size && <span className="text-red-500 text-sm">{errors.listing_size}</span>}
-                                </div>
-                                <div className="form-group">
-                                        <label htmlFor="listing_built_up_area">Built-up area (Sqft): #</label>
-                                        <input name="listing_built_up_area" type="number" placeholder="Built-up Area" className="form-input"/>
-                                        {errors.listing_built_up_area && ( <span className="text-red-500 text-sm"> {errors.listing_built_up_area} </span> )}
-                                </div> 
-                                <div className="form-group">
-                                    <label htmlFor="listing_bedrooms"># of Bedrooms:</label>
-                                    <input name="listing_bedrooms" type="number" placeholder="Bedrooms..." className="form-input"/>
-                                    {errors.listing_bedrooms && ( <span className="text-red-500 text-sm"> {errors.listing_bedrooms} </span> )}
-                                </div> 
-                                <div className="form-group">
-                                    <label htmlFor="listing_bathrooms"># of Bathrooms:</label>
-                                    <input name="listing_bathrooms" type="number" placeholder="Bathrooms.." className="form-input"/>
-                                    {errors.listing_bathrooms && ( <span className="text-red-500 text-sm"> {errors.listing_bathrooms} </span> )}
-                                </div> 
-                                 <div className="form-group">
-                                    <label htmlFor="listing_furnished_type">Furnished Type</label>
-                                    <select id="listing_furnished_type" className="form-input">
-                                        <option value="">Select Furnished Type</option>
-                                        <option value="1">Furnished</option>
-                                        <option value="2">Sami-Furnished</option>
-                                        <option value="3">unFurnished</option>
-                                    </select>
-                                    {errors.listing_furnished_type && <span className="text-red-500 text-sm"> {errors.listing_furnished_type} </span>}
-                                </div>  
-                                <div className="form-group">
-                                    <label htmlFor="listing_parking_space"># of Parking</label>
-                                    <input name="listing_parking_space" type="number" placeholder="Parking" className="form-input"/>
-                                    {errors.listing_parking_space && ( <span className="text-red-500 text-sm"> {errors.listing_parking_space} </span> )}
-                                </div>
-                                <div className="form-group">
-                                <label htmlFor="occupancy_status">Occupancy</label>
-                                <Select name="occupancy_status" placeholder="Select occupancy" options={occupancy.occupancyoption} isDisabled={occupancy.disabled} value={selectedOccupancy} onChange={(selectedOption) => setselectedOccupancy(selectedOption)} />
+            </div>
+            <div>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Address</label>
+                        <input
+                            type="text"
+                            name="address"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter address"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Unit No.</label>
+                        <input
+                            type="text"
+                            name="unitNumber"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter unit number"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Permit Number</label>
+                        <input
+                            type="text"
+                            name="permitNumber"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter permit number"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Completion Status *</label>
+                        <Select
+                            options={completionStatusOptions}
+                            value={selectedCompletionStatus}
+                            onChange={setSelectedCompletionStatus}
+                            placeholder="Select status"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Reference Number *</label>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={referenceNumber}
+                                onChange={(e) => setReferenceNumber(e.target.value)}
+                                className="form-input flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                                placeholder="Enter reference"
+                            />
+                            <button 
+                                type="button" 
+                                className="px-3 py-2 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap bg-secondary text-white"
+                                onClick={generateReferenceNumber}
+                            >
+                                Generate
+                            </button>
+                        </div>
+                    </div>
 
-                                {errors.occupancy_status && (
-                                    <span className="text-red-500 text-sm">{errors.occupancy_status}</span>
-                                )}
-                                </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Area (sq ft) *</label>
+                        <input
+                            type="number"
+                            name="area"
+                            min="0"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter area"
+                        />
+                    </div>
 
-                                <div className="form-group">
-                                    <label htmlFor="listing_permit">Property Permit</label>
-                                    <select id="listing_permit" className="form-input">
-                                        <option value="">Property Permit</option>
-                                        <option value="1">RERA</option>
-                                        <option value="2">DTCM</option>
-                                    </select>
-                                    {errors.listing_permit && <span className="text-red-500 text-sm"> {errors.listing_permit} </span>}
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Bedrooms *</label>
+                        <Select
+                            options={bedroomsOptions}
+                            value={selectedBedrooms}
+                            onChange={setSelectedBedrooms}
+                            placeholder="Select"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Bathrooms *</label>
+                        <Select
+                            options={bathroomsOptions}
+                            value={selectedBathrooms}
+                            onChange={setSelectedBathrooms}
+                            placeholder="Select"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Occupancy Status</label>
+                        <Select
+                            options={occupancyStatusOptions}
+                            value={selectedOccupancyStatus}
+                            onChange={setSelectedOccupancyStatus}
+                            placeholder="Select"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Ownership Status</label>
+                        <Select
+                            options={ownershipStatusOptions}
+                            value={selectedOwnershipStatus}
+                            onChange={setSelectedOwnershipStatus}
+                            placeholder="Select"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Title (English) *</label>
+                        <input
+                            type="text"
+                            value={englishTitle}
+                            onChange={(e) => setEnglishTitle(e.target.value)}
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Please enter title"
+                            maxLength={150}
+                            dir="ltr"
+                        />
+                        <div className="text-xs text-gray-500 mt-1">{englishTitle.length}/150</div>
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Title (Arabic)</label>
+                        <input
+                            type="text"
+                            value={arabicTitle}
+                            onChange={(e) => setArabicTitle(e.target.value)}
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="آدخل العنوان هنا"
+                            maxLength={150}
+                            dir="rtl"
+                        />
+                        <div className="text-xs text-gray-500 mt-1">{arabicTitle.length}/150</div>
+                    </div>
+
+                    <div className="form-group lg:col-span-2">
+                        <label className="block mb-1 text-xs  text-gray-600">Description (English) *</label>
+                        <ReactQuill
+                            theme="snow"
+                            value={englishDescription}
+                            onChange={setEnglishDescription}
+                            placeholder="Description will come here"
+                            modules={quillModules}
+                            className="h-28 mb-10"
+                        />
+                    </div>
+
+                    <div className="form-group lg:col-span-2">
+                        <label className="block mb-1 text-xs  text-gray-600">Description (Arabic)</label>
+                        <ReactQuill
+                            theme="snow"
+                            value={arabicDescription}
+                            onChange={setArabicDescription}
+                            placeholder="الوصف سيأتي هنا"
+                            modules={quillModules}
+                            className="h-28 mb-10"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Rent (AED) *</label>
+                        <input
+                            type="number"
+                            name="rentPrice"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter rent"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Rent Frequency *</label>
+                        <Select
+                            options={rentFrequencyOptions}
+                            value={selectedRentFrequency}
+                            onChange={setSelectedRentFrequency}
+                            placeholder="Select"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Min. Contract Period</label>
+                        <input
+                            type="number"
+                            name="minContractPeriod"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Months"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Notice Period</label>
+                        <input
+                            type="number"
+                            name="noticePeriod"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Months"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Maintenance Fee</label>
+                        <input
+                            type="number"
+                            name="maintenanceFee"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="AED"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs  text-gray-600">Paid By</label>
+                        <Select
+                            options={maintenanceFeePayerOptions}
+                            value={selectedMaintenanceFeePayer}
+                            onChange={setSelectedMaintenanceFeePayer}
+                            placeholder="Select"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+
+                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div className="form-group lg:col-span-3">
+                        <label className="block mb-1 text-xs  text-gray-600">Listing Owner</label>
+                        <Select
+                            options={users}
+                            value={selectedAgent}
+                            onChange={handleAgentChange}
+                            placeholder="Select agent"
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                            isSearchable
+                        />
+                    </div>
+                    {selectedAgentData && (
+                        <div className="lg:col-span-3">
+                            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                                <div className="text-sm text-blue-900 font-medium mb-2">
+                                    Owner Information
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="listing_permit_number">Permit Number</label>
-                                    <input name="listing_permit_number" type="number" placeholder="Permit Number" className="form-input"/>
-                                    {errors.listing_permit_number && ( <span className="text-red-500 text-sm"> {errors.listing_permit_number} </span> )}
-                                </div>
-                                {/*  onChange={handleRoleChange}  value={selectedRole}  */}
-                                 <div className="form-group">
-                                    <label htmlFor="client_uslisting_agent_ider_id">Agent</label>
-                                    <Select name="listing_agent_id" placeholder="Select an Agent" options={users || []} />
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+                                    <div><span className="text-gray-600">Name:</span> <span className="font-medium">{(selectedAgentData as any)?.client_user_name || 'N/A'}</span></div>
+                                    <div><span className="text-gray-600">Email:</span> <span className="font-medium">{(selectedAgentData as any)?.email || 'N/A'}</span></div>
+                                    <div><span className="text-gray-600">Phone:</span> <span className="font-medium">{(selectedAgentData as any)?.phone || 'N/A'}</span></div>
+                                    <div><span className="text-gray-600">Mobile:</span> <span className="font-medium">{(selectedAgentData as any)?.mobile || 'N/A'}</span></div>
                                 </div>
                             </div>
                         </div>
+                    )}
+                </div> 
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderStep2 = () => (
+        <div className="space-y-4">
+            <div>
+                <h5 className="text-base font-semibold mb-2 text-gray-700">Choose Amenities</h5>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {amenitiesList.map((amenity) => (
+                    <div
+                        key={amenity.id}
+                        onClick={() => handleAmenityToggle(amenity.id)}
+                        className={`p-3 rounded-md border cursor-pointer transition-all text-center ${
+                            selectedAmenities.includes(amenity.id)
+                                ? 'border-green-600 bg-green-50'
+                                : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                    >
+                        <div className={`w-7 h-7 mx-auto mb-1.5 rounded-full flex items-center justify-center ${
+                            selectedAmenities.includes(amenity.id)
+                                ? 'bg-green-600 text-white'
+                                : 'bg-gray-100 text-gray-400'
+                        }`}>
+                            {selectedAmenities.includes(amenity.id) ? (
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                            ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            )}
+                        </div>
+                        <span className="text-xs font-medium text-gray-700">{amenity.label}</span>
+                    </div>
+                ))}
+            </div>
+
+            <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+                <p className="text-xs text-gray-600">
+                    <span className="font-medium">{selectedAmenities.length}</span> amenities selected
+                </p>
+            </div>
+        </div>
+    );
+
+    const renderStep3 = () => (
+        <div className="space-y-5">
+            <div>
+                <h5 className="text-base font-semibold mb-2 text-gray-700">Property Images</h5>
+                <p className="text-sm text-gray-500 mb-3">Upload property images (max 20)</p>
+                <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:border-green-500 transition-colors bg-gray-50">
+                    <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="image-upload"
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                        <div className="flex flex-col items-center">
+                            <svg className="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-sm font-medium text-gray-700">Click to upload images</span>
+                            <span className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB each</span>
+                        </div>
+                    </label>
+                </div>
+                {uploadedImages.length > 0 && (
+                    <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-2 mt-3">
+                        {uploadedImages.map((file, index) => (
+                            <div key={index} className="relative group">
+                                <img
+                                    src={URL.createObjectURL(file)}
+                                    alt={`Upload ${index + 1}`}
+                                    className="w-full h-20 object-cover rounded-md border border-gray-200"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeImage(index)}
+                                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
+                    <h5 className="text-base font-semibold mb-2 text-gray-700">Floor Plan</h5>
+                    <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:border-green-500 transition-colors bg-gray-50">
+                        <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => e.target.files && setUploadedFloorPlan(e.target.files[0])}
+                            className="hidden"
+                            id="floorplan-upload"
+                        />
+                        <label htmlFor="floorplan-upload" className="cursor-pointer">
+                            <div className="flex flex-col items-center">
+                                <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span className="text-sm font-medium text-gray-700">
+                                    {uploadedFloorPlan ? uploadedFloorPlan.name : 'Upload floor plan'}
+                                </span>
+                                <span className="text-xs text-gray-500 mt-1">PDF, PNG, JPG</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h5 className="text-base font-semibold mb-2 text-gray-700">Video Tour</h5>
+                    <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:border-green-500 transition-colors bg-gray-50">
+                        <input
+                            type="file"
+                            accept="video/*"
+                            onChange={(e) => e.target.files && setUploadedVideo(e.target.files[0])}
+                            className="hidden"
+                            id="video-upload"
+                        />
+                        <label htmlFor="video-upload" className="cursor-pointer">
+                            <div className="flex flex-col items-center">
+                                <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                <span className="text-sm font-medium text-gray-700">
+                                    {uploadedVideo ? uploadedVideo.name : 'Upload video'}
+                                </span>
+                                <span className="text-xs text-gray-500 mt-1">MP4, MOV</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h5 className="text-base font-semibold mb-2 text-gray-700">Virtual Tour</h5>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div className="lg:col-span-3">
+                        <label className="block mb-1 text-xs  text-gray-600">Virtual Tour URL</label>
+                        <input
+                            type="url"
+                            name="virtualTourUrl"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="https://example.com/virtual-tour"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Add a link to your 360° virtual tour</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <form ref={(el) => (combinedRef.current.userformRef = el)} onSubmit={handleSubmit}>
+            <div className="panel bg-white rounded-lg shadow-sm">
+                {renderStepIndicator()}
+                <div className="min-h-[450px] py-4">
+                    {currentStep === 1 && renderStep1()}
+                    {currentStep === 2 && renderStep2()}
+                    {currentStep === 3 && renderStep3()}
+                </div>
+                <div className="border-t pt-4 mt-5">
+                    <div className="flex justify-between items-center">
+                        <button
+                            type="button"
+                            onClick={prevStep}
+                            disabled={currentStep === 1}
+                            className={`px-5 py-2 text-sm font-medium border rounded-md transition-colors flex items-center gap-1.5 ${
+                                currentStep === 1
+                                    ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
+                                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Previous
+                        </button>
+                        {currentStep < 3 ? (
+                            <button
+                                type="button"
+                                onClick={nextStep}
+                                className="px-5 py-2 text-sm font-medium bg-green-600 text-white border border-green-600 rounded-md hover:bg-green-700 transition-colors flex items-center gap-1.5"
+                            >
+                                Next
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        ) : (
+                            <button
+                                type="submit"
+                                className="px-6 py-2 text-sm font-medium bg-green-600 text-white border border-green-600 rounded-md hover:bg-green-700 transition-colors flex items-center gap-1.5"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Submit Listing
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -283,4 +788,4 @@ const createListing = () => {
     );
 };
 
-export default createListing;
+export default CreateListing;
