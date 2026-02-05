@@ -748,7 +748,7 @@ const CreateListing = () => {
                             type="button"
                             onClick={prevStep}
                             disabled={currentStep === 1}
-                            className={`px-5 py-2 text-sm font-medium border rounded-md transition-colors flex items-center gap-1.5 ${
+                            className={`px-3 py-2 text-sm font-medium border rounded-md transition-colors flex items-center gap-1.5 ${
                                 currentStep === 1
                                     ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
                                     : 'border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -760,11 +760,8 @@ const CreateListing = () => {
                             Previous
                         </button>
                         {currentStep < 3 ? (
-                            <button
-                                type="button"
-                                onClick={nextStep}
-                                className="px-5 py-2 text-sm font-medium bg-green-600 text-white border border-green-600 rounded-md hover:bg-green-700 transition-colors flex items-center gap-1.5"
-                            >
+                            <button type="button" onClick={nextStep}
+                                className="px-3 py-2 text-sm font-medium bg-secondary text-white border border-secondary-600 rounded-md hover:bg-secondary-700 transition-colors flex items-center gap-1.5">
                                 Next
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
