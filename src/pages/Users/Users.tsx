@@ -384,7 +384,6 @@ const Users = () => {
                     >
                         <IconEye />
                     </button>
-
                     <button
                         type="button"
                         onClick={() => handleEdit(item)}

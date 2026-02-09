@@ -182,11 +182,7 @@ const NavBar = () => {
       
        {(permissions.includes('create subscriber') || role === 'super admin') && (
         <li className="menu nav-item relative">
-          <button
-            type="button"
-            className={`nav-link ${isVertical && currentMenu === 'listing' ? 'active' : ''}`}
-            onClick={() => isVertical && toggleMenu('listing')}
-          >
+          <button type="button" className={`nav-link ${isVertical && currentMenu === 'listing' ? 'active' : ''}`} onClick={() => isVertical && toggleMenu('listing')}>
             <div className="flex items-center">
               <IconMenuDashboard className="shrink-0" />
               <span className="px-1">{t('Listing')}</span>
@@ -197,7 +193,12 @@ const NavBar = () => {
           </button>
           {renderSubMenu(
             'listing',
-            <li><NavLink to="/pages/listing/create-listing">{t('Create Listing')}</NavLink></li>
+            <>
+              <li><NavLink to="/pages/listing/create-listing">{t('Create Listing')}</NavLink></li>
+              <li><NavLink to="/pages/listing/create-category">{t('Create Category')}</NavLink></li>
+              <li><NavLink to="/pages/listing/create-subcategory">{t('Create Sub Category')}</NavLink></li>
+
+             </>
           )}
         </li>
       )} 

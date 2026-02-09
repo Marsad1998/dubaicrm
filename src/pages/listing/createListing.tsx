@@ -7,95 +7,87 @@ import Loader from '../../services/loader';
 import Select from 'react-select';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import './listing.css';
 
 const endpoints = {
-    listApi: `${getBaseUrl()}/listing/get_users`,
+    getCombineData: `${getBaseUrl()}/listing/get_combine_data`,
+    getSubCategories: `${getBaseUrl()}/listing/get_subcategories`,
+    storeApi: `${getBaseUrl()}/listing/store`,
 };
 
-const categoryOptions = [
-    { value: '1', label: 'Residential' },
-    { value: '2', label: 'Commercial' },
-];
 
-const subCategoryOptions = [
-    { value: '1', label: 'Apartment' },
-    { value: '2', label: 'Villa' },
-    { value: '3', label: 'Townhouse' },
-    { value: '4', label: 'Penthouse' },
-    { value: '5', label: 'Hotel Apartment' }
-];
 
 const purposeOptions = [
-    { value: 'rent', label: 'For Rent' },
-    { value: 'sale', label: 'For Sale' }
+    { value: 1, label: 'For Rent' },
+    { value: 2, label: 'For Sale' }
 ];
 
 const completionStatusOptions = [
-    { value: 'ready', label: 'Ready' },
-    { value: 'off_plan', label: 'Off Plan' },
-    { value: 'under_construction', label: 'Under Construction' }
+    { value: 1, label: 'Ready' },
+    { value: 2, label: 'Off Plan' },
+    { value: 3, label: 'Under Construction' }
 ];
 
 const bedroomsOptions = [
-    { value: '0', label: 'Studio' },
-    { value: '1', label: '1' },
-    { value: '2', label: '2' },
-    { value: '3', label: '3' },
-    { value: '4', label: '4' },
-    { value: '5', label: '5' },
-    { value: '6', label: '6+' }
+    { value: 0, label: 'Studio' },
+    { value: 1, label: '1' },
+    { value: 2, label: '2' },
+    { value: 3, label: '3' },
+    { value: 4, label: '4' },
+    { value: 5, label: '5' },
+    { value: 6, label: '6+' }
 ];
 
 const bathroomsOptions = [
-    { value: '1', label: '1' },
-    { value: '2', label: '2' },
-    { value: '3', label: '3' },
-    { value: '4', label: '4' },
-    { value: '5', label: '5' },
-    { value: '6', label: '6+' }
+    { value: 1, label: '1' },
+    { value: 2, label: '2' },
+    { value: 3, label: '3' },
+    { value: 4, label: '4' },
+    { value: 5, label: '5' },
+    { value: 6, label: '6+' }
 ];
 
 const occupancyStatusOptions = [
-    { value: 'vacant', label: 'Vacant' },
-    { value: 'occupied', label: 'Occupied' }
+    { value: 1, label: 'Vacant' },
+    { value: 2, label: 'Occupied' }
 ];
 
 const ownershipStatusOptions = [
-    { value: 'freehold', label: 'Freehold' },
-    { value: 'leasehold', label: 'Leasehold' }
+    { value: 1, label: 'Freehold' },
+    { value: 2, label: 'Leasehold' }
 ];
 
 const rentFrequencyOptions = [
-    { value: 'yearly', label: 'Yearly' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'daily', label: 'Daily' }
+    { value: 1, label: 'Yearly' },
+    { value: 2, label: 'Monthly' },
+    { value: 3, label: 'Weekly' },
+    { value: 4, label: 'Daily' }
 ];
 
 const maintenanceFeePayerOptions = [
-    { value: 'tenant', label: 'Tenant' },
-    { value: 'owner', label: 'Owner' }
+    { value: 1, label: 'Tenant' },
+    { value: 2, label: 'Owner' }
 ];
 
 const amenitiesList = [
-    { id: 'pool', label: 'Swimming Pool' },
-    { id: 'gym', label: 'Gym' },
-    { id: 'parking', label: 'Parking' },
-    { id: 'security', label: '24/7 Security' },
-    { id: 'balcony', label: 'Balcony' },
-    { id: 'garden', label: 'Garden' },
-    { id: 'elevator', label: 'Elevator' },
-    { id: 'ac', label: 'Central A/C' },
-    { id: 'maid_room', label: "Maid's Room" },
-    { id: 'storage', label: 'Storage Room' },
-    { id: 'pets', label: 'Pets Allowed' },
-    { id: 'concierge', label: 'Concierge' },
-    { id: 'spa', label: 'Spa' },
-    { id: 'jacuzzi', label: 'Jacuzzi' },
-    { id: 'bbq', label: 'BBQ Area' },
-    { id: 'kids_play', label: 'Kids Play Area' },
-    { id: 'lobby', label: 'Lobby' },
-    { id: 'study', label: 'Study Room' },
+    { id: 1, label: 'Swimming Pool' },
+    { id: 2, label: 'Gym' },
+    { id: 3, label: 'Parking' },
+    { id: 4, label: '24/7 Security' },
+    { id: 5, label: 'Balcony' },
+    { id: 6, label: 'Garden' },
+    { id: 7, label: 'Elevator' },
+    { id: 8, label: 'Central A/C' },
+    { id: 9, label: "Maid's Room" },
+    { id: 10, label: 'Storage Room' },
+    { id: 11, label: 'Pets Allowed' },
+    { id: 12, label: 'Concierge' },
+    { id: 13, label: 'Spa' },
+    { id: 14, label: 'Jacuzzi' },
+    { id: 15, label: 'BBQ Area' },
+    { id: 16, label: 'Kids Play Area' },
+    { id: 17, label: 'Lobby' },
+    { id: 18, label: 'Study Room' },
 ];
 
 const CreateListing = () => {
@@ -107,9 +99,9 @@ const CreateListing = () => {
     const requestMade = useRef(false);
     const [currentStep, setCurrentStep] = useState(1);
 
-    // Form state
-    const [selectedCategory, setSelectedCategory] = useState<any>(null);
-    const [selectedSubCategory, setSelectedSubCategory] = useState<any>(null);
+
+    const [isSubCategoryDisabled, setIsSubCategoryDisabled] = useState(true);
+
     const [selectedPurpose, setSelectedPurpose] = useState<any>(null);
     const [selectedCompletionStatus, setSelectedCompletionStatus] = useState<any>(null);
     const [selectedBedrooms, setSelectedBedrooms] = useState<any>(null);
@@ -119,7 +111,7 @@ const CreateListing = () => {
     const [selectedRentFrequency, setSelectedRentFrequency] = useState<any>(null);
     const [selectedMaintenanceFeePayer, setSelectedMaintenanceFeePayer] = useState<any>(null);
     const [selectedAgent, setSelectedAgent] = useState<any>(null);
-    const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+    const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
 
     // Text states
     const [englishTitle, setEnglishTitle] = useState('');
@@ -129,10 +121,16 @@ const CreateListing = () => {
     const [selectedAgentData, setSelectedAgentData] = useState(null);
     const [referenceNumber, setReferenceNumber] = useState('');
 
-    // Upload states
     const [uploadedImages, setUploadedImages] = useState<File[]>([]);
     const [uploadedFloorPlan, setUploadedFloorPlan] = useState<File | null>(null);
     const [uploadedVideo, setUploadedVideo] = useState<File | null>(null);
+    
+    const [categories, setCategories] = useState<any[]>([]);
+    const [subCategories, setSubCategories] = useState<any[]>([]);
+    const [areaSqft, setAreaSqft] = useState('');
+    const [price, setPrice] = useState('');
+
+
 
     const steps = [
         { number: 1, title: 'Details' },
@@ -143,22 +141,17 @@ const CreateListing = () => {
     useEffect(() => {
         if (!requestMade.current) {
             dispatch(setPageTitle('Create Listing'));
-            fetchUserLists();
+            fetchCombineData();
             requestMade.current = true;
         }
     }, [dispatch]);
 
-    const fetchUserLists = async () => {
+    const fetchCombineData = async () => {
         try {
-            const response = await apiClient.get(endpoints.listApi);
-            if (response.data) {
-                const options = response.data.map((user: any) => ({
-                    value: user.client_user_id,
-                    label: user.client_user_name,
-                    data: user
-                }));
-                setUsers(options);
-            }
+            const response = await apiClient.get(endpoints.getCombineData);
+            setUsers(response.data.users || []);
+            setCategories(response.data.categories || []);
+
         } catch (error: any) {
             if (error.response?.status === 403) {
                 window.location.href = '/error';
@@ -175,7 +168,7 @@ const CreateListing = () => {
         }
     };
 
-    const handleAmenityToggle = (amenityId: string) => {
+    const handleAmenityToggle = (amenityId: number) => {
         setSelectedAmenities(prev => 
             prev.includes(amenityId) 
                 ? prev.filter(id => id !== amenityId)
@@ -194,9 +187,84 @@ const CreateListing = () => {
         setUploadedImages(prev => prev.filter((_, i) => i !== index));
     };
 
+    const handlePriceChange = (value:any) => {
+        const clean = value.replace(/,/g, '');
+        if (!/^\d*$/.test(clean)) return;
+        const formatted = clean.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        setPrice(formatted);
+    }
+    const formatPriceShort = (val:any) => {
+    const num = Number(val.replace(/,/g, ''));
+
+    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+
+    return num;
+};
+
+
+    
+
+
+
+
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form submitted');
+        const formData = new FormData();
+
+        const listingData = {
+            category_id: combinedRef.current.userformRef?.category_id?.value,
+            subcategory_id: combinedRef.current.userformRef?.subcategory_id?.value,
+            purpose: selectedPurpose?.value,
+            completion_status: selectedCompletionStatus?.value,
+            bedrooms: selectedBedrooms?.value,
+            bathrooms: selectedBathrooms?.value,
+            occupancy_status: selectedOccupancyStatus?.value,
+            ownership_status: selectedOwnershipStatus?.value,
+            reference_number: referenceNumber,
+            address: combinedRef.current.userformRef?.address?.value,
+            unit_number: combinedRef.current.userformRef?.unit_number?.value,
+            permit_number: combinedRef.current.userformRef?.permit_number?.value,
+            // area_sqft: combinedRef.current.userformRef?.area_sqft?.value,
+            area_sqft: areaSqft,
+            english_title: englishTitle,
+            arabic_title: arabicTitle,
+            english_description: englishDescription,
+            arabic_description: arabicDescription,
+            rent_price: combinedRef.current.userformRef?.rentPrice?.value,
+            rent_frequency: selectedRentFrequency?.value,
+            min_contract_period: combinedRef.current.userformRef?.min_contractperiod?.value,
+            notice_period: combinedRef.current.userformRef?.notice_period?.value,
+            maintenance_fee: combinedRef.current.userformRef?.maintenance_fee?.value,
+            maintenance_fee_payer: selectedMaintenanceFeePayer?.value,
+            agent_id: selectedAgent?.value,
+            amenities: selectedAmenities,
+            virtual_tour_url: combinedRef.current.userformRef?.virtualTourUrl?.value
+        };
+        
+        // 2. Add JSON data as a field
+        formData.append('listing_data', JSON.stringify(listingData));
+        
+        // 3. Add files
+        uploadedImages.forEach((file, index) => {
+            formData.append(`images[${index}]`, file);
+        });
+        
+        if (uploadedFloorPlan) {
+            formData.append('floor_plan', uploadedFloorPlan);
+        }
+
+        if (uploadedVideo) {
+            formData.append('video', uploadedVideo);
+        }
+        try {
+            const response = await apiClient.post(endpoints.storeApi, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            console.log('Form submitted successfully:', response.data);
+        } catch (error) {
+            console.error('Error submitting form:', error);
+        }
     };
 
     const quillModules = {
@@ -224,6 +292,24 @@ const CreateListing = () => {
     const prevStep = () => {
         if (currentStep > 1) setCurrentStep(currentStep - 1);
     };
+
+    const handleCategory = async (selectedOption: any) => {
+    if (selectedOption) {
+        try {
+            const response = await apiClient.get(`${endpoints.getSubCategories}/${selectedOption.value}`);
+            setSubCategories(response.data); 
+            setIsSubCategoryDisabled(false); 
+        } catch (error) {
+            console.error('Error fetching subcategories:', error);
+            setSubCategories([]);
+            setIsSubCategoryDisabled(true); 
+        }
+    } else {
+        setSubCategories([]);
+        setIsSubCategoryDisabled(true);
+    }
+};
+
     
     const renderStepIndicator = () => (
         <div className="flex items-center justify-center mb-6">
@@ -252,53 +338,25 @@ const CreateListing = () => {
             ))}
         </div>
     );
-
     const renderStep1 = () => (
         <div className="space-y-5">
             <div>
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                     <div className="form-group">
-                        <label className="block mb-1 text-xs  text-gray-600">Category *</label>
-                        <Select
-                            options={categoryOptions}
-                            value={selectedCategory}
-                            onChange={setSelectedCategory}
-                            placeholder="Select Category"
-                            className="react-select-container"
-                            classNamePrefix="react-select"
-                        />
+                        <label className="block mb-1 text-xs text-gray-600">Category *</label>
+                        <Select options={categories} onChange={handleCategory} placeholder="Select Category" className="react-select-container" classNamePrefix="react-select rounderd-sm" name="category_id"/>
                     </div>
                     <div className="form-group">
                         <label className="block mb-1 text-xs  text-gray-600">Sub Category *</label>
-                        <Select
-                            options={subCategoryOptions}
-                            value={selectedSubCategory}
-                            onChange={setSelectedSubCategory}
-                            placeholder="Select Sub Category"
-                            className="react-select-container"
-                            classNamePrefix="react-select"
-                        />
+                        <Select options={subCategories} placeholder="Sub Category" className="react-select-container" classNamePrefix="react-select rounderd-sm" name="subcategory_id" isDisabled={isSubCategoryDisabled}/>
                     </div>
                     <div className="form-group">
                         <label className="block mb-1 text-xs  text-gray-600">Purpose *</label>
-                        <Select
-                            options={purposeOptions}
-                            value={selectedPurpose}
-                            onChange={setSelectedPurpose}
-                            placeholder="Select Purpose"
-                            className="react-select-container"
-                            classNamePrefix="react-select"
-                        />
+                        <Select options={purposeOptions} value={selectedPurpose} onChange={setSelectedPurpose} placeholder="Select Purpose" className="react-select-container" classNamePrefix="react-select"/>
                     </div>
                     <div className="form-group">
                         <label className="block mb-1 text-xs  text-gray-600">Location *</label>
-                        <Select
-                            options={[]}
-                            placeholder="Choose Area..."
-                            className="react-select-container"
-                            classNamePrefix="react-select"
-                            isSearchable
-                        />
+                        <Select options={[]} placeholder="Choose Area..." className="react-select-container" classNamePrefix="react-select" isSearchable/>
                     </div>
                 </div>
             </div>
@@ -309,7 +367,7 @@ const CreateListing = () => {
                         <input
                             type="text"
                             name="address"
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
                             placeholder="Enter address"
                         />
                     </div>
@@ -317,8 +375,8 @@ const CreateListing = () => {
                         <label className="block mb-1 text-xs  text-gray-600">Unit No.</label>
                         <input
                             type="text"
-                            name="unitNumber"
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            name="unit_number"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
                             placeholder="Enter unit number"
                         />
                     </div>
@@ -326,21 +384,14 @@ const CreateListing = () => {
                         <label className="block mb-1 text-xs  text-gray-600">Permit Number</label>
                         <input
                             type="text"
-                            name="permitNumber"
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            name="permit_number"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
                             placeholder="Enter permit number"
                         />
                     </div>
                     <div className="form-group">
                         <label className="block mb-1 text-xs  text-gray-600">Completion Status *</label>
-                        <Select
-                            options={completionStatusOptions}
-                            value={selectedCompletionStatus}
-                            onChange={setSelectedCompletionStatus}
-                            placeholder="Select status"
-                            className="react-select-container"
-                            classNamePrefix="react-select"
-                        />
+                        <Select options={completionStatusOptions} value={selectedCompletionStatus} onChange={setSelectedCompletionStatus} placeholder="Select status" className="react-select-container" classNamePrefix="react-select" name="completion_status" />
                     </div>
                 </div>
             </div>
@@ -353,28 +404,20 @@ const CreateListing = () => {
                                 type="text"
                                 value={referenceNumber}
                                 onChange={(e) => setReferenceNumber(e.target.value)}
-                                className="form-input flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
-                                placeholder="Enter reference"
+                                className="form-input flex-1 px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                                placeholder="Enter reference" name="reference_number"
                             />
-                            <button 
-                                type="button" 
-                                className="px-3 py-2 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap bg-secondary text-white"
-                                onClick={generateReferenceNumber}
-                            >
-                                Generate
-                            </button>
+                            <button type="button"  className="px-3 py-2 text-xs font-medium border border-gray-300 rounded-sm hover:bg-gray-50 transition-colors whitespace-nowrap bg-secondary text-white" onClick={generateReferenceNumber}> Generate </button>
                         </div>
                     </div>
-
                     <div className="form-group">
-                        <label className="block mb-1 text-xs  text-gray-600">Area (sq ft) *</label>
-                        <input
-                            type="number"
-                            name="area"
-                            min="0"
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
-                            placeholder="Enter area"
-                        />
+                        <label className="block mb-1 text-xs  text-gray-600">Area (Square Feet) *</label>
+                        <input type="number" name="area_sqft" min="0" value={areaSqft} onChange={(e) => setAreaSqft(e.target.value)} className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" placeholder="Enter area"/>
+                        {areaSqft && (
+                            <p className="text-xs text-gray-500 mt-1">
+                                {(Number(areaSqft) * 0.092903).toFixed(2)} Square Meters / {(Number(areaSqft) * 0.111111).toFixed(2)} Square Yards
+                            </p>
+                        )}
                     </div>
 
                     <div className="form-group">
@@ -386,6 +429,7 @@ const CreateListing = () => {
                             placeholder="Select"
                             className="react-select-container"
                             classNamePrefix="react-select"
+                            name="bedrooms"
                         />
                     </div>
 
@@ -398,6 +442,7 @@ const CreateListing = () => {
                             placeholder="Select"
                             className="react-select-container"
                             classNamePrefix="react-select"
+                            name="bathrooms"
                         />
                     </div>
 
@@ -410,6 +455,7 @@ const CreateListing = () => {
                             placeholder="Select"
                             className="react-select-container"
                             classNamePrefix="react-select"
+                            name="occupancy_status"
                         />
                     </div>
 
@@ -422,6 +468,7 @@ const CreateListing = () => {
                             placeholder="Select"
                             className="react-select-container"
                             classNamePrefix="react-select"
+                            name="ownership_status"
                         />
                     </div>
                     <div className="form-group">
@@ -430,23 +477,25 @@ const CreateListing = () => {
                             type="text"
                             value={englishTitle}
                             onChange={(e) => setEnglishTitle(e.target.value)}
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
                             placeholder="Please enter title"
                             maxLength={150}
                             dir="ltr"
+                            name="title_en"
                         />
                         <div className="text-xs text-gray-500 mt-1">{englishTitle.length}/150</div>
                     </div>
                     <div className="form-group">
-                        <label className="block mb-1 text-xs  text-gray-600">Title (Arabic)</label>
+                        <label className="block mb-1 text-xs text-gray-600">Title (Arabic)</label>
                         <input
                             type="text"
                             value={arabicTitle}
                             onChange={(e) => setArabicTitle(e.target.value)}
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
                             placeholder="آدخل العنوان هنا"
                             maxLength={150}
                             dir="rtl"
+                            name="title_ar"
                         />
                         <div className="text-xs text-gray-500 mt-1">{arabicTitle.length}/150</div>
                     </div>
@@ -459,10 +508,10 @@ const CreateListing = () => {
                             onChange={setEnglishDescription}
                             placeholder="Description will come here"
                             modules={quillModules}
-                            className="h-28 mb-10"
+                            className="mb-10"
                         />
+                        <input type="hidden" name="description_en" value={englishDescription} />
                     </div>
-
                     <div className="form-group lg:col-span-2">
                         <label className="block mb-1 text-xs  text-gray-600">Description (Arabic)</label>
                         <ReactQuill
@@ -471,21 +520,30 @@ const CreateListing = () => {
                             onChange={setArabicDescription}
                             placeholder="الوصف سيأتي هنا"
                             modules={quillModules}
-                            className="h-28 mb-10"
+                            className="mb-10"
                         />
+                        <input type="hidden" name="description_ar" value={arabicDescription} />
                     </div>
                 </div>
             </div>
             <div>
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                     <div className="form-group">
-                        <label className="block mb-1 text-xs  text-gray-600">Rent (AED) *</label>
+                        <label className="block mb-1 text-xs text-gray-600">Rent (AED) *</label>
                         <input
-                            type="number"
+                            type="text"
                             name="rentPrice"
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
-                            placeholder="Enter rent"
+                            value={price}
+                            onChange={(e) => handlePriceChange(e.target.value)}
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter price"
                         />
+                        {price && (
+                        <p className="text-xs text-gray-500 mt-1">
+                            {formatPriceShort(price)}
+                        </p>
+                    )}
+                        
                     </div>
 
                     <div className="form-group">
@@ -497,6 +555,7 @@ const CreateListing = () => {
                             placeholder="Select"
                             className="react-select-container"
                             classNamePrefix="react-select"
+                            name="rent_frequency"
                         />
                     </div>
 
@@ -504,9 +563,10 @@ const CreateListing = () => {
                         <label className="block mb-1 text-xs  text-gray-600">Min. Contract Period</label>
                         <input
                             type="number"
-                            name="minContractPeriod"
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            name="min_contractperiod"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
                             placeholder="Months"
+
                         />
                     </div>
 
@@ -514,8 +574,8 @@ const CreateListing = () => {
                         <label className="block mb-1 text-xs  text-gray-600">Notice Period</label>
                         <input
                             type="number"
-                            name="noticePeriod"
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            name="notice_period"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
                             placeholder="Months"
                         />
                     </div>
@@ -524,8 +584,8 @@ const CreateListing = () => {
                         <label className="block mb-1 text-xs  text-gray-600">Maintenance Fee</label>
                         <input
                             type="number"
-                            name="maintenanceFee"
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            name="maintenance_fee"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
                             placeholder="AED"
                         />
                     </div>
@@ -539,12 +599,13 @@ const CreateListing = () => {
                             placeholder="Select"
                             className="react-select-container"
                             classNamePrefix="react-select"
+                            name='paid_by'
                         />
                     </div>
 
                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <div className="form-group lg:col-span-3">
-                        <label className="block mb-1 text-xs  text-gray-600">Listing Owner</label>
+                        <label className="block mb-1 text-xs text-gray-600">Listing Owner</label>
                         <Select
                             options={users}
                             value={selectedAgent}
@@ -553,6 +614,7 @@ const CreateListing = () => {
                             className="react-select-container"
                             classNamePrefix="react-select"
                             isSearchable
+                            name="agent_id"
                         />
                     </div>
                     {selectedAgentData && (
@@ -625,7 +687,7 @@ const CreateListing = () => {
             <div>
                 <h5 className="text-base font-semibold mb-2 text-gray-700">Property Images</h5>
                 <p className="text-sm text-gray-500 mb-3">Upload property images (max 20)</p>
-                <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:border-green-500 transition-colors bg-gray-50">
+                <div className="border-2 border-dashed border-gray-300 rounded-sm p-6 text-center hover:border-green-500 transition-colors bg-gray-50">
                     <input
                         type="file"
                         multiple
@@ -670,7 +732,7 @@ const CreateListing = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2">
                     <h5 className="text-base font-semibold mb-2 text-gray-700">Floor Plan</h5>
-                    <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:border-green-500 transition-colors bg-gray-50">
+                    <div className="border-2 border-dashed border-gray-300 rounded-sm p-6 text-center hover:border-green-500 transition-colors bg-gray-50">
                         <input
                             type="file"
                             accept="image/*,.pdf"
@@ -693,7 +755,7 @@ const CreateListing = () => {
                 </div>
                 <div>
                     <h5 className="text-base font-semibold mb-2 text-gray-700">Video Tour</h5>
-                    <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:border-green-500 transition-colors bg-gray-50">
+                    <div className="border-2 border-dashed border-gray-300 rounded-sm p-6 text-center hover:border-green-500 transition-colors bg-gray-50">
                         <input
                             type="file"
                             accept="video/*"
@@ -723,7 +785,7 @@ const CreateListing = () => {
                         <input
                             type="url"
                             name="virtualTourUrl"
-                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
                             placeholder="https://example.com/virtual-tour"
                         />
                         <p className="text-xs text-gray-500 mt-1">Add a link to your 360° virtual tour</p>

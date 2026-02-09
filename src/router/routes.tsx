@@ -45,12 +45,15 @@ const Kpi = lazy(() => import('../pages/kpi/create'));
 const KPIDashboard = lazy(() => import('../pages/kpi/kpidashboard'));
 const PermissionRouter = lazy(() => import('../pages/PermissionRouter/PermissionRouter'));
 const Templates = lazy(() => import('../pages/whatsapp/templates'));
-
 const RunCampaigns = lazy(() => import('../pages/whatsapp/runcampaign'));
 const CampaignDashboard = lazy(() => import('../pages/whatsapp/campaigndashboard'));
-
 const Chat = lazy(() => import('../pages/whatsapp/chat'));
 const Dashboard2 = lazy(() => import('../pages/leads/dashboard2'));
+const CreateCategory = lazy(() => import('../pages/listing/Category'));
+
+const CreateSubCategory = lazy(() => import('../pages/listing/SubCategory'));
+
+
 
 
 
@@ -185,6 +188,20 @@ const routes = [
         element: <CreateListing />, 
         layout: 'default',
     }, 
+
+     {
+        path: 'pages/listing/create-category',
+        type: 'protected',
+        element: <CreateCategory />, 
+        layout: 'default',
+    },
+    
+     {
+        path: 'pages/listing/create-subcategory',
+        type: 'protected',
+        element: <CreateSubCategory />, 
+        layout: 'default',
+    },
 
     {
         path: 'pages/statuses/create',
