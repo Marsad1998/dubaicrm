@@ -7,6 +7,8 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './listing.css';
 import Toast from '../../services/toast';
+import { options } from '../../services/status';
+import { Select } from '@mantine/core';
 
 const endpoints = {
     getCombineData: `${getBaseUrl()}/listing/get_combine_data`,
@@ -55,6 +57,7 @@ const CreateListing = () => {
     const [uploadedImages, setUploadedImages] = useState<File[]>([]);
     const [uploadedFloorPlan, setUploadedFloorPlan] = useState<File | null>(null);
     const [uploadedVideo, setUploadedVideo] = useState<File | null>(null);
+    const [status, setStatus] = useState<any | null>(null);
 
     const [formData, setFormData] = useState({
         category_id: '',
@@ -80,7 +83,8 @@ const CreateListing = () => {
         maintenance_fee: '',
         maintenance_fee_payer: '',
         agent_id: '',
-        virtualTourUrl: ''
+        virtualTourUrl: '',
+        status : ''
     });
 
     const steps = [
@@ -317,7 +321,8 @@ const CreateListing = () => {
                     maintenance_fee: '',
                     maintenance_fee_payer: '',
                     agent_id: '',
-                    virtualTourUrl: ''
+                    virtualTourUrl: '',
+                    status : ''
                 });
                 setEnglishDescription('');
                 setArabicDescription('');
@@ -736,6 +741,12 @@ const CreateListing = () => {
                         <option value="2">Owner</option>
                     </select>
                 </div>
+               {/* <div className="form-group">
+                    <label className="block mb-1 text-xs text-gray-600">Status</label>
+                    <Select placeholder="Select an option" name="status" options={options} value={options.find((option) => option.value === status)} onChange={(selectedOption: any) => { setStatus(selectedOption.value); }}
+                    />
+                    {errors?.status && <p className="text-danger error">{errors.status[0]}</p>}
+                </div> */}
                 <div className="form-group lg:col-span-3">
                     <label className="block mb-1 text-xs text-gray-600">Listing Owner *</label>
                     <select 
