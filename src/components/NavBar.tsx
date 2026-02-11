@@ -195,6 +195,7 @@ const NavBar = () => {
             'listing',
             <>
               <li><NavLink to="/pages/listing/create-listing">{t('Create Listing')}</NavLink></li>
+              <li><NavLink to="/pages/listing/view-listing">{t('View Listing')}</NavLink></li>
               <li><NavLink to="/pages/listing/create-category">{t('Create Category')}</NavLink></li>
               <li><NavLink to="/pages/listing/create-subcategory">{t('Create Sub Category')}</NavLink></li>
 
@@ -350,7 +351,6 @@ const NavBar = () => {
               <NavLink to="/pages/whatsapp/run-campaign">{t('Start Campaign')}</NavLink>
               <NavLink to="/pages/whatsapp/templates">{t('Whatsapp Templates')}</NavLink>
               <NavLink to="/pages/whatsapp/chat">{t('Messages Chat')}</NavLink>
-
             </>
           )}
         </li>

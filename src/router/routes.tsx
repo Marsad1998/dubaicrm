@@ -40,6 +40,8 @@ const EmailReportList = lazy(() => import('../pages/emails/email-report'));
 const Createannouncements = lazy(() => import('../pages/announcements/create'));
 const Viewannouncements = lazy(() => import('../pages/announcements/view'));
 const CreateListing = lazy(() => import('../pages/listing/createListing'));
+const ViewListing = lazy(() => import('../pages/listing/ViewListing'));
+
 const Statuses = lazy(() => import('../pages/statuses/create'));
 const Kpi = lazy(() => import('../pages/kpi/create'));
 const KPIDashboard = lazy(() => import('../pages/kpi/kpidashboard'));
@@ -186,6 +188,14 @@ const routes = [
         path: 'pages/listing/create-listing',
         type: 'protected',
         element: <CreateListing />, 
+        layout: 'default',
+    }, 
+
+
+     {
+        path: 'pages/listing/view-listing',
+        type: 'protected',
+        element: <ViewListing />, 
         layout: 'default',
     }, 
 
