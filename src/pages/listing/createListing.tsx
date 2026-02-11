@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import { useParams, useNavigate } from 'react-router-dom';
 import { setPageTitle } from '../../slices/themeConfigSlice';
 import { getBaseUrl } from '../../components/BaseUrl';
 import apiClient from '../../utils/apiClient';
@@ -14,6 +15,8 @@ const endpoints = {
     getCombineData: `${getBaseUrl()}/listing/get_combine_data`,
     getSubCategories: `${getBaseUrl()}/listing/get_subcategories`,
     storeApi: `${getBaseUrl()}/listing/store`,
+    getSingleListing: `${getBaseUrl()}/listing/get_single_listing`,
+    updateApi: `${getBaseUrl()}/listing/update_listing`,
 };
 
 const amenitiesList = [
@@ -39,12 +42,17 @@ const amenitiesList = [
 
 const CreateListing = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
     const formRef = useRef<HTMLFormElement>(null);
     const toast = Toast();
     const [errors, setErrors] = useState<Record<string, string[]>>({});
     const requestMade = useRef(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [listingId, setListingId] = useState<string | null>(null);
+    const [isLoadingData, setIsLoadingData] = useState(false);
     
     const [users, setUsers] = useState([]);
     const [categories, setCategories] = useState<any[]>([]);
@@ -93,13 +101,32 @@ const CreateListing = () => {
         { number: 3, title: 'Uploads' }
     ];
 
+    const statusList = [
+        { number: 1, title: 'Active' },
+        { number: 2, title: 'Inactive' },
+    ]
+
     useEffect(() => {
         if (!requestMade.current) {
-            dispatch(setPageTitle('Create Listing'));
+            // Check if we're in edit mode
+            if (id) {
+                setIsEditMode(true);
+                setListingId(id);
+                dispatch(setPageTitle('Edit Listing'));
+            } else {
+                dispatch(setPageTitle('Create Listing'));
+            }
             fetchCombineData();
             requestMade.current = true;
         }
-    }, [dispatch]);
+    }, [dispatch, id]);
+
+    useEffect(() => {
+        // Fetch listing data if in edit mode
+        if (isEditMode && listingId && users.length > 0 && categories.length > 0) {
+            fetchListingData(listingId);
+        }
+    }, [isEditMode, listingId, users, categories]);
 
     const fetchCombineData = async () => {
         try {
@@ -110,6 +137,82 @@ const CreateListing = () => {
             if (error.response?.status === 403) {
                 window.location.href = '/error';
             }
+        }
+    };
+
+    const fetchListingData = async (listingId: string) => {
+        setIsLoadingData(true);
+        try {
+            const response = await apiClient.get(`${endpoints.getSingleListing}/${listingId}`);
+            
+            if (response.data.status === 'success' && response.data.signlelist) {
+                const listing = response.data.signlelist;
+                
+                // Populate form data
+                setFormData({
+                    category_id: listing.category_id?.toString() || '',
+                    subcategory_id: listing.subcategory_id?.toString() || '',
+                    purpose: listing.purpose?.toString() || '',
+                    location_id: listing.location_id?.toString() || '',
+                    address: listing.address || '',
+                    unit_number: listing.unit_number || '',
+                    permit_number: listing.permit_number || '',
+                    completion_status: listing.completion_status?.toString() || '',
+                    reference_number: listing.reference_number || '',
+                    area_sqft: listing.area_sqft?.toString() || '',
+                    bedrooms: listing.bedrooms?.toString() || '',
+                    bathrooms: listing.bathrooms?.toString() || '',
+                    occupancy_status: listing.occupancy_status?.toString() || '',
+                    ownership_status: listing.ownership_status?.toString() || '',
+                    title_en: listing.title_en || '',
+                    title_ar: listing.title_ar || '',
+                    price: listing.price?.toString() || '',
+                    rent_frequency: listing.rent_frequency?.toString() || '',
+                    min_contractperiod: listing.min_contract_period?.toString() || '',
+                    notice_period: listing.notice_period?.toString() || '',
+                    maintenance_fee: listing.maintenance_fee?.toString() || '',
+                    maintenance_fee_payer: listing.maintenance_fee_payer?.toString() || '',
+                    agent_id: listing.agent_id?.toString() || '',
+                    virtualTourUrl: listing.virtual_tour_url || '',
+                    status: listing.status?.toString() || ''
+                });
+
+                // Set descriptions
+                setEnglishDescription(listing.description_en || '');
+                setArabicDescription(listing.description_ar || '');
+
+                // Set amenities if available
+                if (listing.amenities) {
+                    // The amenities come as a JSON string like "[\"1\",\"2\",\"8\"]"
+                    try {
+                        const amenityIds = JSON.parse(listing.amenities).map((id: string) => parseInt(id)).filter((id: number) => !isNaN(id));
+                        setSelectedAmenities(amenityIds);
+                    } catch (error) {
+                        console.error('Error parsing amenities:', error);
+                    }
+                }
+
+                // Fetch subcategories for the selected category
+                if (listing.category_id) {
+                    try {
+                        const subCatResponse = await apiClient.get(`${endpoints.getSubCategories}/${listing.category_id}`);
+                        setSubCategories(subCatResponse.data);
+                    } catch (error) {
+                        console.error('Error fetching subcategories:', error);
+                    }
+                }
+
+                toast.success('Listing data loaded successfully');
+            } else {
+                toast.error('Failed to load listing data');
+                navigate('/pages/listing/view-listing');
+            }
+        } catch (error: any) {
+            console.error('Error fetching listing data:', error);
+            toast.error(error.response?.data?.message || 'Failed to load listing data');
+            navigate('/pages/listing/view-listing');
+        } finally {
+            setIsLoadingData(false);
         }
     };
 
@@ -262,6 +365,11 @@ const CreateListing = () => {
     const submitFinalForm = async () => {
         const finalFormData = new FormData();
         
+        // If in edit mode, append the listing ID
+        if (isEditMode && listingId) {
+            finalFormData.append('listing_id', listingId);
+        }
+        
         // Append all form data
         Object.keys(formData).forEach(key => {
             finalFormData.append(key, formData[key as keyof typeof formData]);
@@ -276,7 +384,7 @@ const CreateListing = () => {
             finalFormData.append('amenities[]', String(id));
         });
         
-        // Append files
+        // Append files (only if new files are uploaded)
         uploadedImages.forEach((file, i) => {
             finalFormData.append(`images[${i}]`, file);
         });
@@ -290,48 +398,19 @@ const CreateListing = () => {
         }
 
         try {
-            const response = await apiClient.post(endpoints.storeApi, finalFormData, {
+            // Use update endpoint if in edit mode, otherwise use store endpoint
+            const endpoint = isEditMode ? endpoints.updateApi : endpoints.storeApi;
+            const response = await apiClient.post(endpoint, finalFormData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             
             if (response.data.status) {
-                toast.success(response.data.message || 'Listing created successfully');
-                // Reset form
-                setFormData({
-                    category_id: '',
-                    subcategory_id: '',
-                    purpose: '',
-                    location_id: '',
-                    address: '',
-                    unit_number: '',
-                    permit_number: '',
-                    completion_status: '',
-                    reference_number: '',
-                    area_sqft: '',
-                    bedrooms: '',
-                    bathrooms: '',
-                    occupancy_status: '',
-                    ownership_status: '',
-                    title_en: '',
-                    title_ar: '',
-                    price: '',
-                    rent_frequency: '',
-                    min_contractperiod: '',
-                    notice_period: '',
-                    maintenance_fee: '',
-                    maintenance_fee_payer: '',
-                    agent_id: '',
-                    virtualTourUrl: '',
-                    status : ''
-                });
-                setEnglishDescription('');
-                setArabicDescription('');
-                setSelectedAmenities([]);
-                setUploadedImages([]);
-                setUploadedFloorPlan(null);
-                setUploadedVideo(null);
-                setCurrentStep(1);
-                setErrors({});
+                toast.success(response.data.message || (isEditMode ? 'Listing updated successfully' : 'Listing created successfully'));
+                
+                // Navigate back to view listing page after success
+                setTimeout(() => {
+                    navigate('/pages/listing/view-listing');
+                }, 1500);
             }
         } catch (error: any) {
             if (error.response?.status === 422) {
@@ -741,12 +820,16 @@ const CreateListing = () => {
                         <option value="2">Owner</option>
                     </select>
                 </div>
-               {/* <div className="form-group">
+                <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Status</label>
-                    <Select placeholder="Select an option" name="status" options={options} value={options.find((option) => option.value === status)} onChange={(selectedOption: any) => { setStatus(selectedOption.value); }}
-                    />
+                    <select name="status" value={formData.status} onChange={handleInputChange} className="form-select">
+                        <option value="">Select</option>
+                        {statusList.map((option) => (
+                            <option key={option.number} value={option.number}>{option.title}</option>
+                        ))}
+                    </select>
                     {errors?.status && <p className="text-danger error">{errors.status[0]}</p>}
-                </div> */}
+                </div>
                 <div className="form-group lg:col-span-3">
                     <label className="block mb-1 text-xs text-gray-600">Listing Owner *</label>
                     <select 
@@ -902,12 +985,26 @@ const CreateListing = () => {
     return (
         <form ref={formRef}>
             <div className="panel bg-white rounded-lg shadow-sm">
-                {renderStepIndicator()}
-                <div className="min-h-[450px] py-4">
-                    {currentStep === 1 && renderStep1()}
-                    {currentStep === 2 && renderStep2()}
-                    {currentStep === 3 && renderStep3()}
-                </div>
+                {isLoadingData ? (
+                    <div className="flex items-center justify-center min-h-[450px]">
+                        <div className="text-center">
+                            <svg className="animate-spin h-10 w-10 text-primary mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p className="text-gray-600">Loading listing data...</p>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        {renderStepIndicator()}
+                        <div className="min-h-[450px] py-4">
+                            {currentStep === 1 && renderStep1()}
+                            {currentStep === 2 && renderStep2()}
+                            {currentStep === 3 && renderStep3()}
+                        </div>
+                    </>
+                )}
                 <div className="border-t pt-4 mt-5">
                     <div className="flex justify-between items-center">
                         <button 
@@ -949,7 +1046,7 @@ const CreateListing = () => {
                             <button 
                                 type="button" 
                                 onClick={() => submitStep(3)} 
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isLoadingData}
                                 className="px-6 py-2 text-sm font-medium bg-green-600 text-white border border-green-600 rounded-md hover:bg-green-700 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? (
@@ -958,14 +1055,14 @@ const CreateListing = () => {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Creating...
+                                        {isEditMode ? 'Updating...' : 'Creating...'}
                                     </>
                                 ) : (
                                     <>
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                         </svg>
-                                        Submit Listing
+                                        {isEditMode ? 'Update Listing' : 'Submit Listing'}
                                     </>
                                 )}
                             </button>

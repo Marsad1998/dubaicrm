@@ -319,12 +319,13 @@ const ViewListing = () => {
             title: 'Status', 
             sortable: true,
             render: (record: any) => {
+                console.log(record.actions.status);
                 let badgeClass = 'bg-secondary';
-                switch (record.status) {
-                    case 'active': badgeClass = 'bg-success'; break;
-                    case 'inactive': badgeClass = 'bg-danger'; break;
+                switch (record.actions.status) {
+                    case 1: badgeClass = 'bg-success'; break;
+                    case 0: badgeClass = 'bg-danger'; break;
                 }
-                return <span className={`badge ${badgeClass}`}>{record.status}</span>;
+                return <span className={`badge ${badgeClass}`}>{record.actions.status == 1 ? 'Active' : 'Inactive' }</span>;
             },
         },
         { accessor: 'date', title: 'Date', sortable: true },

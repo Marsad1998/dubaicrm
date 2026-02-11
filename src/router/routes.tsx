@@ -190,6 +190,12 @@ const routes = [
         element: <CreateListing />, 
         layout: 'default',
     }, 
+    {
+        path: 'listing/edit/:id',
+        type: 'protected',
+        element: <CreateListing />, 
+        layout: 'default',
+    },
 
 
      {
