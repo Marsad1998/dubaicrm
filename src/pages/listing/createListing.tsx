@@ -775,6 +775,7 @@ const CreateListing = () => {
                         <option value="3">Weekly</option>
                         <option value="4">Daily</option>
                     </select>
+                    {errors.rent_frequency && <p className="text-xs text-red-600 mt-1">{errors.rent_frequency[0]}</p>}
                 </div>
                 
                 <div className="form-group">
@@ -787,6 +788,7 @@ const CreateListing = () => {
                         className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
                         placeholder="Months" 
                     />
+                    {errors.min_contractperiod && <p className="text-xs text-red-600 mt-1">{errors.min_contractperiod[0]}</p>}
                 </div>
                 
                 <div className="form-group">
@@ -799,6 +801,7 @@ const CreateListing = () => {
                         className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
                         placeholder="Months" 
                     />
+                    {errors.notice_period && <p className="text-xs text-red-600 mt-1">{errors.notice_period[0]}</p>}
                 </div>
                 
                 <div className="form-group">
