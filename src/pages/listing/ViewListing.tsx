@@ -12,11 +12,13 @@ import IconEye from '../../components/Icon/IconEye';
 import IconEdit from '../../components/Icon/IconEdit';
 import IconTrash from '../../components/Icon/IconTrash';
 import Swal from 'sweetalert2';
+import IconSend from '../../components/Icon/IconSend';
 
 const endpoints = {
     listApi: `${getBaseUrl()}/listing/list`,
     deleteApi: `${getBaseUrl()}/listing/destroy`,
     statusApi: `${getBaseUrl()}/listing/status`,
+    bayutSendApi: `${getBaseUrl()}/listing/bayut/send`,
 };
 
 const ViewListing = () => {
@@ -168,9 +170,7 @@ const ViewListing = () => {
                 const listingIds = selectedRecords.map((record) => record.id);
                 const formData = new FormData();
                 listingIds.forEach((id) => formData.append('ids[]', id.toString()));
-
                 const response = await apiClient.post(endpoints.deleteApi, formData);
-                
                 if (response.data.status) {
                     toast.success(response.data.message || 'Listings deleted successfully');
                     setSelectedRecords([]);
@@ -220,14 +220,14 @@ const ViewListing = () => {
 
     const handlePerPageChange = (pageSize: number) => {
         setPerPage(pageSize);
-        setCurrentPage(1); // Reset to first page
+        setCurrentPage(1); 
         setSelectedRecords([]);
         setDisable(true);
     };
 
     const handleSortChange = (status: DataTableSortStatus) => {
         setSortStatus(status);
-        setCurrentPage(1); // Reset to first page on sort
+        setCurrentPage(1); 
         setSelectedRecords([]);
         setDisable(true);
     };
@@ -235,13 +235,13 @@ const ViewListing = () => {
     const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newSearchTerm = e.target.value;
         setSearchTerm(newSearchTerm);
-        setCurrentPage(1); // Reset to first page on search
+        setCurrentPage(1); 
         setSelectedRecords([]);
         setDisable(true);
     };
 
     const handleFilterChange = (filterType: string, value: string) => {
-        setCurrentPage(1); // Reset to first page on filter
+        setCurrentPage(1); 
         
         switch (filterType) {
             case 'category':
@@ -348,10 +348,56 @@ const ViewListing = () => {
                     >
                         <IconEdit />
                     </button>
+
+                     <button 
+                        type="button" 
+                        className={`btn btn-sm ${record.actions.bayut_sync_status === 'synced' ? 'btn-success' : 'btn-warning'}`}
+                        onClick={() => sendToBayut(record.actions.id)}
+                        title={record.actions.bayut_sync_status === 'synced' ? 'Republish to Bayut' : 'Publish to Bayut'}>
+                        <IconSend />
+                        {/* {bayutSyncInProgress.includes(record.actions.id) ? ( <span className="animate-spin">⏳</span> ) : ( <IconSend /> )} */}
+                    </button>
+
+                       
+
                 </div>
             ),
         },
     ];
+
+
+     const sendToBayut = async (listingId: number) => {
+        try {
+            // setBayutSyncInProgress(prev => [...prev, listingId]);
+            
+            const result = await Swal.fire({
+                title: 'Publish to Bayut?',
+                text: 'This property will be published on Bayut portal. Continue?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, publish!',
+                cancelButtonText: 'Cancel',
+            });
+
+            if (result.isConfirmed) {
+                const response = await apiClient.post(`${endpoints.bayutSendApi}/${listingId}`);
+                
+                if (response.data.success) {
+                    toast.success('Property published to Bayut successfully!');
+                    fetchData(); // Refresh the list
+                } else {
+                    toast.error(response.data.message || 'Failed to publish to Bayut');
+                }
+            }
+        } catch (error: any) {
+            console.error('Error sending to Bayut:', error);
+            toast.error(error.response?.data?.message || 'Failed to publish to Bayut');
+        } finally {
+            // setBayutSyncInProgress(prev => prev.filter(id => id !== listingId));
+        }
+    };
 
     return (
         <div>
@@ -363,21 +409,14 @@ const ViewListing = () => {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                    <button 
-                        onClick={handleDelete} 
-                        type="button" 
-                        className="btn btn-danger btn-sm" 
-                        disabled={disable}
-                    >
+                    <button onClick={handleDelete} type="button" className="btn btn-danger btn-sm" disabled={disable}>
                         <IconTrash /> Delete Selected
                     </button>
                     <Select placeholder="Change Status" options={statusOptions} isDisabled={disable} className="w-40" onChange={(selected) => selected && handleStatusChange(selected.value)}
                     />
                 </div>
             </div>
-
-            {/* Filters Section */}
-            <div className="panel mt-4">
+            <div className="panel mt-4"> 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                     <div>
                         <label className="block text-sm font-medium mb-1">Search</label>
@@ -448,8 +487,6 @@ const ViewListing = () => {
                     </button>
                 </div>
             </div>
-
-            {/* Table Section */}
             <div className="datatables mt-6">
                 <Table 
                     title="Property Listings"

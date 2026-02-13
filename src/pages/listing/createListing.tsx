@@ -14,6 +14,7 @@ const endpoints = {
     getCombineData: `${getBaseUrl()}/listing/get_combine_data`,
     getSubCategories: `${getBaseUrl()}/listing/get_subcategories`,
     storeApi: `${getBaseUrl()}/listing/store`,
+    PortalLocationApi: `${getBaseUrl()}/listing/portal-locations`,
 };
 
 const amenitiesList = [
@@ -37,6 +38,8 @@ const amenitiesList = [
     { id: 18, label: 'Study Room' },
 ];
 
+
+
 const CreateListing = () => {
     const dispatch = useDispatch();
     const formRef = useRef<HTMLFormElement>(null);
@@ -58,12 +61,14 @@ const CreateListing = () => {
     const [uploadedFloorPlan, setUploadedFloorPlan] = useState<File | null>(null);
     const [uploadedVideo, setUploadedVideo] = useState<File | null>(null);
     const [status, setStatus] = useState<any | null>(null);
-
+    const [locations, setLocations] = useState<any[]>([]);
+    const locationSearchTimeout = useRef<any>(null);
+    const [amenitiesList, setAmenitiesList] = useState<any[]>([]);
     const [formData, setFormData] = useState({
         category_id: '',
         subcategory_id: '',
         purpose: '',
-        location_id: '',
+        portal_location_id: '',
         address: '',
         unit_number: '',
         permit_number: '',
@@ -78,7 +83,7 @@ const CreateListing = () => {
         title_ar: '',
         price: '',
         rent_frequency: '',
-        min_contractperiod: '',
+        min_contract_period: '',
         notice_period: '',
         maintenance_fee: '',
         maintenance_fee_payer: '',
@@ -106,6 +111,8 @@ const CreateListing = () => {
             const response = await apiClient.get(endpoints.getCombineData);
             setUsers(response.data.users || []);
             setCategories(response.data.categories || []);
+            setAmenitiesList(response.data.amenities || []);
+
         } catch (error: any) {
             if (error.response?.status === 403) {
                 window.location.href = '/error';
@@ -113,16 +120,40 @@ const CreateListing = () => {
         }
     };
 
+    const fetchLocations = async (search = '') => {
+        try {
+            const response = await apiClient.get(endpoints.PortalLocationApi, {
+                params: { search }
+            });
+            setLocations(response.data);
+        } catch (error) {
+            console.error('Error fetching locations:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchLocations();
+    }, []);
+
+    const handleLocationSearch = (searchValue: string) => {
+        if (locationSearchTimeout.current) {
+            clearTimeout(locationSearchTimeout.current);
+        }
+        
+        locationSearchTimeout.current = setTimeout(() => {
+            fetchLocations(searchValue);
+        }, 300);
+    };
+
     const handleCategoryChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
         const categoryId = e.target.value;
         setFormData({...formData, category_id: categoryId});
         setSubCategories([]);
-        setFormData(prev => ({...prev, subcategory_id: ''}));
-        
+        setFormData(prev => ({...prev, subcategory_id: ''})); 
         if (categoryId) {
             try {
                 const response = await apiClient.get(`${endpoints.getSubCategories}/${categoryId}`);
-                setSubCategories(response.data);
+                setSubCategories(response.data.data);
             } catch (error) {
                 console.error('Error fetching subcategories:', error);
                 setSubCategories([]);
@@ -301,7 +332,7 @@ const CreateListing = () => {
                     category_id: '',
                     subcategory_id: '',
                     purpose: '',
-                    location_id: '',
+                    portal_location_id: '',
                     address: '',
                     unit_number: '',
                     permit_number: '',
@@ -316,7 +347,7 @@ const CreateListing = () => {
                     title_ar: '',
                     price: '',
                     rent_frequency: '',
-                    min_contractperiod: '',
+                    min_contract_period: '',
                     notice_period: '',
                     maintenance_fee: '',
                     maintenance_fee_payer: '',
@@ -428,29 +459,39 @@ const CreateListing = () => {
                 
                 <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Purpose *</label>
-                    <select 
-                        name="purpose" 
-                        value={formData.purpose}
-                        onChange={handleInputChange}
-                        className="form-select"
-                    >
+                    <select name="purpose" value={formData.purpose} onChange={handleInputChange} className="form-select">
                         <option value="">Select Purpose</option>
                         <option value="1">For Rent</option>
                         <option value="2">For Sale</option>
                     </select>
                     {errors.purpose && <p className="text-xs text-red-600 mt-1">{errors.purpose[0]}</p>}
                 </div>
-                
                 <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Location *</label>
-                    <select 
-                        name="location_id" 
-                        value={formData.location_id}
-                        onChange={handleInputChange}
-                        className="form-select"
-                    >
-                        <option value="">Choose Area...</option>
-                    </select>
+                    <Select
+                        name="portal_location_id"
+                        placeholder="Search or select location..."
+                        data={locations}
+                        value={formData.portal_location_id}
+                        onChange={(value) => {
+                            setFormData({...formData, portal_location_id: value || ''});
+                            if (errors.location_id) {
+                                setErrors(prev => {
+                                    const newErrors = {...prev};
+                                    delete newErrors.portal_location_id;
+                                    return newErrors;
+                                });
+                            }
+                        }}
+                        searchable
+                        onSearchChange={handleLocationSearch}
+                        nothingFound="No locations found"
+                        limit={20}
+                        clearable
+                         autoComplete="off"
+                          autoFocus={false}
+                    />
+                    {errors.portal_location_id && ( <p className="text-xs text-red-600 mt-1">{errors.portal_location_id[0]}</p> )}
                 </div>
             </div>
 
@@ -483,25 +524,13 @@ const CreateListing = () => {
                 
                 <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Permit Number *</label>
-                    <input 
-                        type="text" 
-                        name="permit_number" 
-                        value={formData.permit_number}
-                        onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="Enter permit number" 
-                    />
+                    <input type="text" name="permit_number" value={formData.permit_number} onChange={handleInputChange}
+                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" placeholder="Enter permit number" />
                     {errors.permit_number && <p className="text-xs text-red-600 mt-1">{errors.permit_number[0]}</p>}
                 </div>
-                
                 <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Completion Status *</label>
-                    <select 
-                        name="completion_status" 
-                        value={formData.completion_status}
-                        onChange={handleInputChange}
-                        className="form-select"
-                    >
+                    <select name="completion_status" value={formData.completion_status} onChange={handleInputChange} className="form-select">
                         <option value="">Select status</option>
                         <option value="1">Ready</option>
                         <option value="2">Off Plan</option>
@@ -510,7 +539,6 @@ const CreateListing = () => {
                     {errors.completion_status && <p className="text-xs text-red-600 mt-1">{errors.completion_status[0]}</p>}
                 </div>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                 <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Reference Number *</label>
@@ -681,15 +709,11 @@ const CreateListing = () => {
                     />
                     {errors.price && <p className="text-xs text-red-600 mt-1">{errors.price[0]}</p>}
                 </div>
-                
+                {formData.purpose === '1' && ( 
+                    <>
                 <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Rent Frequency *</label>
-                    <select 
-                        name="rent_frequency" 
-                        value={formData.rent_frequency}
-                        onChange={handleInputChange}
-                        className="form-select"
-                    >
+                    <label className="block mb-1 text-xs text-gray-600">Rent Frequency</label>
+                    <select name="rent_frequency" value={formData.rent_frequency} onChange={handleInputChange} className="form-select">
                         <option value="">Select</option>
                         <option value="1">Yearly</option>
                         <option value="2">Monthly</option>
@@ -697,19 +721,17 @@ const CreateListing = () => {
                         <option value="4">Daily</option>
                     </select>
                 </div>
-                
                 <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Min. Contract Period</label>
                     <input 
                         type="number" 
-                        name="min_contractperiod" 
-                        value={formData.min_contractperiod}
+                        name="min_contract_period" 
+                        value={formData.min_contract_period}
                         onChange={handleInputChange}
                         className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
                         placeholder="Months" 
                     />
                 </div>
-                
                 <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Notice Period</label>
                     <input 
@@ -721,7 +743,6 @@ const CreateListing = () => {
                         placeholder="Months" 
                     />
                 </div>
-                
                 <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Maintenance Fee</label>
                     <input 
@@ -741,20 +762,12 @@ const CreateListing = () => {
                         <option value="2">Owner</option>
                     </select>
                 </div>
-               {/* <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Status</label>
-                    <Select placeholder="Select an option" name="status" options={options} value={options.find((option) => option.value === status)} onChange={(selectedOption: any) => { setStatus(selectedOption.value); }}
-                    />
-                    {errors?.status && <p className="text-danger error">{errors.status[0]}</p>}
-                </div> */}
-                <div className="form-group lg:col-span-3">
+                </>
+                )}
+                
+                <div className="form-group">
                     <label className="block mb-1 text-xs text-gray-600">Listing Owner *</label>
-                    <select 
-                        name="agent_id" 
-                        value={formData.agent_id}
-                        onChange={handleAgentChange}
-                        className="form-select"
-                    >
+                    <select name="agent_id"  value={formData.agent_id} onChange={handleAgentChange} className="form-select">
                         <option value="">Select agent</option>
                         {users.map((user: any) => (
                             <option key={user.value} value={user.value}>{user.label}</option>
