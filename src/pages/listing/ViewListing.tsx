@@ -46,6 +46,10 @@ const ViewListing = () => {
         direction: 'desc',
     });
 
+    const [detailModalOpen, setDetailModalOpen] = useState(false);
+    const [detailLoading, setDetailLoading] = useState(false);
+    const [detailData, setDetailData] = useState<any>(null);
+
     const loginuser = useSelector((state: IRootState) => state.auth.user || {});
     const combinedRef = useRef<any>({ fetched: false });
 
@@ -273,9 +277,24 @@ const ViewListing = () => {
         setDisable(true);
     };
 
-    const viewListing = (id: number) => {
-        // Navigate to listing detail page or open modal
-        window.open(`/listing/view/${id}`, '_blank');
+    const viewListing = async (id: number) => {
+        setDetailModalOpen(true);
+        setDetailData(null);
+        setDetailLoading(true);
+        try {
+            const response = await apiClient.get(`${endpoints.detailApi}/${id}`);
+            if (response.data.status && response.data.data) {
+                setDetailData(response.data.data);
+            } else {
+                toast.error(response.data.message || 'Failed to load listing detail');
+                setDetailModalOpen(false);
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Failed to load listing detail');
+            setDetailModalOpen(false);
+        } finally {
+            setDetailLoading(false);
+        }
     };
 
     const editListing = (id: number) => {
@@ -319,12 +338,13 @@ const ViewListing = () => {
             title: 'Status', 
             sortable: true,
             render: (record: any) => {
+                console.log(record.actions.status);
                 let badgeClass = 'bg-secondary';
-                switch (record.status) {
-                    case 'active': badgeClass = 'bg-success'; break;
-                    case 'inactive': badgeClass = 'bg-danger'; break;
+                switch (record.actions.status) {
+                    case 1: badgeClass = 'bg-success'; break;
+                    case 0: badgeClass = 'bg-danger'; break;
                 }
-                return <span className={`badge ${badgeClass}`}>{record.status}</span>;
+                return <span className={`badge ${badgeClass}`}>{record.actions.status == 1 ? 'Active' : 'Inactive' }</span>;
             },
         },
         { accessor: 'date', title: 'Date', sortable: true },
@@ -505,6 +525,144 @@ const ViewListing = () => {
                     noRecordsText="No listings found matching your criteria"
                 />
             </div>
+
+            {/* Listing Detail Modal */}
+            {detailModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setDetailModalOpen(false)}>
+                    <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-200" onClick={e => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 py-4 bg-gray-50 border-b border-gray-200 shrink-0">
+                            <h3 className="text-lg font-semibold text-gray-800">Listing Detail</h3>
+                            <button type="button" className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-200 transition-colors" onClick={() => setDetailModalOpen(false)} aria-label="Close">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <div className="overflow-y-auto flex-1 p-5">
+                            {detailLoading && (
+                                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                                    <div className="animate-spin rounded-full h-11 w-11 border-2 border-primary border-t-transparent" />
+                                    <p className="text-sm text-gray-500">Loading listing…</p>
+                                </div>
+                            )}
+                            {!detailLoading && detailData && (
+                                <div className="space-y-6">
+                                    {/* Hero: image + title + price */}
+                                    <div className="rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                                        {detailData.images && detailData.images[0] ? (
+                                            <div className="aspect-video w-full">
+                                                <img src={detailData.images[0]} alt="" className="w-full h-full object-cover" />
+                                            </div>
+                                        ) : (
+                                            <div className="aspect-video w-full flex items-center justify-center text-gray-400">
+                                                <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" /></svg>
+                                            </div>
+                                        )}
+                                        <div className="p-4 flex flex-wrap items-center justify-between gap-3">
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-sm font-medium text-gray-500">{detailData.reference_number ?? '—'}</p>
+                                                <h4 className="text-xl font-semibold text-gray-900 mt-0.5 truncate">{detailData.title_en ?? '—'}</h4>
+                                                {detailData.title_ar && <p className="text-sm text-gray-600 mt-1" dir="rtl">{detailData.title_ar}</p>}
+                                            </div>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-semibold text-lg">{detailData.price != null && detailData.price !== '' ? `AED ${detailData.price}` : '—'}</span>
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${detailData.purpose == 1 ? 'bg-blue-100 text-blue-800' : detailData.purpose == 2 ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700'}`}>
+                                                    {detailData.purpose == 1 ? 'For Rent' : detailData.purpose == 2 ? 'For Sale' : '—'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Overview card */}
+                                    <div className="rounded-xl border border-gray-200 overflow-hidden">
+                                        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                                            <h5 className="text-sm font-semibold text-gray-700">Overview</h5>
+                                        </div>
+                                        <div className="p-4">
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-4">
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Category</p><p className="mt-0.5 font-medium text-gray-900">{detailData.category?.name ?? '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Address</p><p className="mt-0.5 font-medium text-gray-900">{detailData.address ?? '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Unit No.</p><p className="mt-0.5 font-medium text-gray-900">{detailData.unit_number ?? '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Permit No.</p><p className="mt-0.5 font-medium text-gray-900">{detailData.permit_number ?? '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Completion</p><p className="mt-0.5 font-medium text-gray-900">{detailData.completion_status == 1 ? 'Ready' : detailData.completion_status == 2 ? 'Off Plan' : detailData.completion_status == 3 ? 'Under Construction' : '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Bedrooms</p><p className="mt-0.5 font-medium text-gray-900">{detailData.bedrooms ?? '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Bathrooms</p><p className="mt-0.5 font-medium text-gray-900">{detailData.bathrooms ?? '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Area (sqft)</p><p className="mt-0.5 font-medium text-gray-900">{detailData.area_sqft ?? '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Rent frequency</p><p className="mt-0.5 font-medium text-gray-900">{detailData.rent_frequency == 1 ? 'Yearly' : detailData.rent_frequency == 2 ? 'Monthly' : detailData.rent_frequency == 3 ? 'Weekly' : detailData.rent_frequency == 4 ? 'Daily' : '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Agent</p><p className="mt-0.5 font-medium text-gray-900">{detailData.agents?.client_user_name ?? '—'}</p></div>
+                                                <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Status</p><p className="mt-0.5"><span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${detailData.status == 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}>{detailData.status == 1 ? 'Active' : detailData.status == 2 ? 'Inactive' : '—'}</span></p></div>
+                                            </div>
+                                            {detailData.virtual_tour_url && (
+                                                <div className="mt-4 pt-4 border-t border-gray-100">
+                                                <a href={detailData.virtual_tour_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                    Virtual Tour
+                                                </a>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Descriptions */}
+                                    {(detailData.description_en || detailData.description_ar) && (
+                                        <div className="rounded-xl border border-gray-200 overflow-hidden">
+                                            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                                                <h5 className="text-sm font-semibold text-gray-700">Description</h5>
+                                            </div>
+                                            <div className="p-4 space-y-4">
+                                                {detailData.description_en && <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">English</p><div className="text-sm text-gray-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: detailData.description_en }} /></div>}
+                                                {detailData.description_ar && <div><p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Arabic</p><div className="text-sm text-gray-700 prose prose-sm max-w-none" dir="rtl" dangerouslySetInnerHTML={{ __html: detailData.description_ar }} /></div>}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Amenities */}
+                                    {detailData.amenities && (Array.isArray(detailData.amenities) ? detailData.amenities : []).length > 0 && (
+                                        <div className="rounded-xl border border-gray-200 overflow-hidden">
+                                            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                                                <h5 className="text-sm font-semibold text-gray-700">Amenities</h5>
+                                            </div>
+                                            <div className="p-4 flex flex-wrap gap-2">
+                                                {(Array.isArray(detailData.amenities) ? detailData.amenities : []).map((id: number) => (
+                                                    <span key={id} className="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium">{AMENITIES_LABELS[Number(id)] ?? id}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Media: images + floor plan & video */}
+                                    <div className="rounded-xl border border-gray-200 overflow-hidden">
+                                        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                                            <h5 className="text-sm font-semibold text-gray-700">Media</h5>
+                                            {(detailData.floor_plan_url || detailData.video_url) && (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {detailData.floor_plan_url && <a href={detailData.floor_plan_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">Floor Plan</a>}
+                                                    {detailData.video_url && <a href={detailData.video_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">Video</a>}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-4">
+                                            {detailData.images && detailData.images.length > 0 ? (
+                                                <>
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                                        {detailData.images.map((url: string, i: number) => (
+                                                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-gray-200 hover:border-primary/50 transition-colors focus:ring-2 focus:ring-primary/20">
+                                                                <img src={url} alt="" className="w-full aspect-[4/3] object-cover" />
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 mt-2">{detailData.images.length} image(s)</p>
+                                                </>
+                                            ) : (
+                                                <p className="text-sm text-gray-500 py-4">No images uploaded.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

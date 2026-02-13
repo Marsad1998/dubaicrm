@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import { useParams, useNavigate } from 'react-router-dom';
 import { setPageTitle } from '../../slices/themeConfigSlice';
 import { getBaseUrl } from '../../components/BaseUrl';
 import apiClient from '../../utils/apiClient';
@@ -14,40 +15,28 @@ const endpoints = {
     getCombineData: `${getBaseUrl()}/listing/get_combine_data`,
     getSubCategories: `${getBaseUrl()}/listing/get_subcategories`,
     storeApi: `${getBaseUrl()}/listing/store`,
+    getSingleListing: `${getBaseUrl()}/listing/get_single_listing`,
+    updateApi: `${getBaseUrl()}/listing/update_listing`,
     PortalLocationApi: `${getBaseUrl()}/listing/portal-locations`,
 };
 
-const amenitiesList = [
-    { id: 1, label: 'Swimming Pool' },
-    { id: 2, label: 'Gym' },
-    { id: 3, label: 'Parking' },
-    { id: 4, label: '24/7 Security' },
-    { id: 5, label: 'Balcony' },
-    { id: 6, label: 'Garden' },
-    { id: 7, label: 'Elevator' },
-    { id: 8, label: 'Central A/C' },
-    { id: 9, label: "Maid's Room" },
-    { id: 10, label: 'Storage Room' },
-    { id: 11, label: 'Pets Allowed' },
-    { id: 12, label: 'Concierge' },
-    { id: 13, label: 'Spa' },
-    { id: 14, label: 'Jacuzzi' },
-    { id: 15, label: 'BBQ Area' },
-    { id: 16, label: 'Kids Play Area' },
-    { id: 17, label: 'Lobby' },
-    { id: 18, label: 'Study Room' },
-];
+
 
 
 
 const CreateListing = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
     const formRef = useRef<HTMLFormElement>(null);
     const toast = Toast();
     const [errors, setErrors] = useState<Record<string, string[]>>({});
     const requestMade = useRef(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [listingId, setListingId] = useState<string | null>(null);
+    const [isLoadingData, setIsLoadingData] = useState(false);
     
     const [users, setUsers] = useState([]);
     const [categories, setCategories] = useState<any[]>([]);
@@ -63,7 +52,11 @@ const CreateListing = () => {
     const [status, setStatus] = useState<any | null>(null);
     const [locations, setLocations] = useState<any[]>([]);
     const locationSearchTimeout = useRef<any>(null);
-    const [amenitiesList, setAmenitiesList] = useState<any[]>([]);
+
+    // const [amenitiesList, setAmenitiesList] = useState<any[]>([]);
+
+      const [fetchedAmenities, setFetchedAmenities] = useState<any[]>([]);
+
     const [formData, setFormData] = useState({
         category_id: '',
         subcategory_id: '',
@@ -98,25 +91,120 @@ const CreateListing = () => {
         { number: 3, title: 'Uploads' }
     ];
 
+    const statusList = [
+        { number: 1, title: 'Active' },
+        { number: 2, title: 'Inactive' },
+    ]
+
     useEffect(() => {
         if (!requestMade.current) {
-            dispatch(setPageTitle('Create Listing'));
+            // Check if we're in edit mode
+            if (id) {
+                setIsEditMode(true);
+                setListingId(id);
+                dispatch(setPageTitle('Edit Listing'));
+            } else {
+                dispatch(setPageTitle('Create Listing'));
+            }
             fetchCombineData();
             requestMade.current = true;
         }
-    }, [dispatch]);
+    }, [dispatch, id]);
+
+    useEffect(() => {
+        // Fetch listing data if in edit mode
+        if (isEditMode && listingId && users.length > 0 && categories.length > 0) {
+            fetchListingData(listingId);
+        }
+    }, [isEditMode, listingId, users, categories]);
 
     const fetchCombineData = async () => {
         try {
             const response = await apiClient.get(endpoints.getCombineData);
             setUsers(response.data.users || []);
             setCategories(response.data.categories || []);
-            setAmenitiesList(response.data.amenities || []);
+            setFetchedAmenities(response.data.amenities || []);
 
         } catch (error: any) {
             if (error.response?.status === 403) {
                 window.location.href = '/error';
             }
+        }
+    };
+
+    const fetchListingData = async (listingId: string) => {
+        setIsLoadingData(true);
+        try {
+            const response = await apiClient.get(`${endpoints.getSingleListing}/${listingId}`);
+            
+            if (response.data.status === 'success' && response.data.signlelist) {
+                const listing = response.data.signlelist;
+                
+                // Populate form data
+                setFormData({
+                    category_id: listing.category_id?.toString() || '',
+                    subcategory_id: listing.subcategory_id?.toString() || '',
+                    purpose: listing.purpose?.toString() || '',
+                    portal_location_id: listing.portal_location_id?.toString() || '',
+                    address: listing.address || '',
+                    unit_number: listing.unit_number || '',
+                    permit_number: listing.permit_number || '',
+                    completion_status: listing.completion_status?.toString() || '',
+                    reference_number: listing.reference_number || '',
+                    area_sqft: listing.area_sqft?.toString() || '',
+                    bedrooms: listing.bedrooms?.toString() || '',
+                    bathrooms: listing.bathrooms?.toString() || '',
+                    occupancy_status: listing.occupancy_status?.toString() || '',
+                    ownership_status: listing.ownership_status?.toString() || '',
+                    title_en: listing.title_en || '',
+                    title_ar: listing.title_ar || '',
+                    price: listing.price?.toString() || '',
+                    rent_frequency: listing.rent_frequency?.toString() || '',
+                    min_contract_period: listing.min_contract_period?.toString() || '',
+                    notice_period: listing.notice_period?.toString() || '',
+                    maintenance_fee: listing.maintenance_fee?.toString() || '',
+                    maintenance_fee_payer: listing.maintenance_fee_payer?.toString() || '',
+                    agent_id: listing.agent_id?.toString() || '',
+                    virtualTourUrl: listing.virtual_tour_url || '',
+                    status: listing.status?.toString() || ''
+                });
+
+                // Set descriptions
+                setEnglishDescription(listing.description_en || '');
+                setArabicDescription(listing.description_ar || '');
+
+                // Set amenities if available
+                if (listing.amenities) {
+                    // The amenities come as a JSON string like "[\"1\",\"2\",\"8\"]"
+                    try {
+                        const amenityIds = JSON.parse(listing.amenities).map((id: string) => parseInt(id)).filter((id: number) => !isNaN(id));
+                        setSelectedAmenities(amenityIds);
+                    } catch (error) {
+                        console.error('Error parsing amenities:', error);
+                    }
+                }
+
+                // Fetch subcategories for the selected category
+                if (listing.category_id) {
+                    try {
+                        const subCatResponse = await apiClient.get(`${endpoints.getSubCategories}/${listing.category_id}`);
+                        setSubCategories(subCatResponse.data);
+                    } catch (error) {
+                        console.error('Error fetching subcategories:', error);
+                    }
+                }
+
+                toast.success('Listing data loaded successfully');
+            } else {
+                toast.error('Failed to load listing data');
+                navigate('/pages/listing/view-listing');
+            }
+        } catch (error: any) {
+            console.error('Error fetching listing data:', error);
+            toast.error(error.response?.data?.message || 'Failed to load listing data');
+            navigate('/pages/listing/view-listing');
+        } finally {
+            setIsLoadingData(false);
         }
     };
 
@@ -293,6 +381,11 @@ const CreateListing = () => {
     const submitFinalForm = async () => {
         const finalFormData = new FormData();
         
+        // If in edit mode, append the listing ID
+        if (isEditMode && listingId) {
+            finalFormData.append('listing_id', listingId);
+        }
+        
         // Append all form data
         Object.keys(formData).forEach(key => {
             finalFormData.append(key, formData[key as keyof typeof formData]);
@@ -307,7 +400,7 @@ const CreateListing = () => {
             finalFormData.append('amenities[]', String(id));
         });
         
-        // Append files
+        // Append files (only if new files are uploaded)
         uploadedImages.forEach((file, i) => {
             finalFormData.append(`images[${i}]`, file);
         });
@@ -321,7 +414,9 @@ const CreateListing = () => {
         }
 
         try {
-            const response = await apiClient.post(endpoints.storeApi, finalFormData, {
+            // Use update endpoint if in edit mode, otherwise use store endpoint
+            const endpoint = isEditMode ? endpoints.updateApi : endpoints.storeApi;
+            const response = await apiClient.post(endpoint, finalFormData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             
@@ -421,385 +516,782 @@ const CreateListing = () => {
         </div>
     );
 
+    // const renderStep1 = () => (
+    //     <div className="space-y-5">
+    //         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Category *</label>
+    //                 <select 
+    //                     name="category_id" 
+    //                     value={formData.category_id}
+    //                     onChange={handleCategoryChange}
+    //                     className="form-select"
+    //                 >
+    //                     <option value="">Select Category</option>
+    //                     {categories.map((cat: any) => (
+    //                         <option key={cat.value} value={cat.value}>{cat.label}</option>
+    //                     ))}
+    //                 </select>
+    //                 {errors.category_id && <p className="text-xs text-red-600 mt-1">{errors.category_id[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Sub Category *</label>
+    //                 <select 
+    //                     name="subcategory_id" 
+    //                     value={formData.subcategory_id}
+    //                     onChange={handleInputChange}
+    //                     className="form-select" 
+    //                     disabled={subCategories.length === 0}
+    //                 >
+    //                     <option value="">Sub Category</option>
+    //                     {subCategories.map((sub: any) => (
+    //                         <option key={sub.value} value={sub.value}>{sub.label}</option>
+    //                     ))}
+    //                 </select>
+    //                 {errors.subcategory_id && <p className="text-xs text-red-600 mt-1">{errors.subcategory_id[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Purpose *</label>
+    //                 <select name="purpose" value={formData.purpose} onChange={handleInputChange} className="form-select">
+    //                     <option value="">Select Purpose</option>
+    //                     <option value="1">For Rent</option>
+    //                     <option value="2">For Sale</option>
+    //                 </select>
+    //                 {errors.purpose && <p className="text-xs text-red-600 mt-1">{errors.purpose[0]}</p>}
+    //             </div>
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Location *</label>
+    //                 <Select
+    //                     name="portal_location_id"
+    //                     placeholder="Search or select location..."
+    //                     data={locations}
+    //                     value={formData.portal_location_id}
+    //                     onChange={(value) => {
+    //                         setFormData({...formData, portal_location_id: value || ''});
+    //                         if (errors.location_id) {
+    //                             setErrors(prev => {
+    //                                 const newErrors = {...prev};
+    //                                 delete newErrors.portal_location_id;
+    //                                 return newErrors;
+    //                             });
+    //                         }
+    //                     }}
+    //                     searchable
+    //                     onSearchChange={handleLocationSearch}
+    //                     nothingFound="No locations found"
+    //                     limit={20}
+    //                     clearable
+    //                      autoComplete="off"
+    //                       autoFocus={false}
+    //                 />
+    //                 {errors.portal_location_id && ( <p className="text-xs text-red-600 mt-1">{errors.portal_location_id[0]}</p> )}
+    //             </div>
+    //             </div>
+    //         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Address *</label>
+    //                 <input 
+    //                     type="text" 
+    //                     name="address" 
+    //                     value={formData.address}
+    //                     onChange={handleInputChange}
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                     placeholder="Enter address" 
+    //                 />
+    //                 {errors.address && <p className="text-xs text-red-600 mt-1">{errors.address[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Unit No. *</label>
+    //                 <input 
+    //                     type="text" 
+    //                     name="unit_number" 
+    //                     value={formData.unit_number}
+    //                     onChange={handleInputChange}
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                     placeholder="Enter unit number" 
+    //                 />
+    //                 {errors.unit_number && <p className="text-xs text-red-600 mt-1">{errors.unit_number[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Permit Number *</label>
+    //                 <input type="text" name="permit_number" value={formData.permit_number} onChange={handleInputChange}
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" placeholder="Enter permit number" />
+    //                 {errors.permit_number && <p className="text-xs text-red-600 mt-1">{errors.permit_number[0]}</p>}
+    //             </div>
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Completion Status *</label>
+    //                 <select name="completion_status" value={formData.completion_status} onChange={handleInputChange} className="form-select">
+    //                     <option value="">Select status</option>
+    //                     <option value="1">Ready</option>
+    //                     <option value="2">Off Plan</option>
+    //                     <option value="3">Under Construction</option>
+    //                 </select>
+    //                 {errors.completion_status && <p className="text-xs text-red-600 mt-1">{errors.completion_status[0]}</p>}
+    //             </div>
+    //         </div>
+    //         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Reference Number *</label>
+    //                 <div className="flex gap-2">
+    //                     <input 
+    //                         type="text" 
+    //                         name="reference_number" 
+    //                         value={formData.reference_number}
+    //                         onChange={handleInputChange}
+    //                         className="form-input flex-1 px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                         placeholder="Enter reference" 
+    //                     />
+    //                     <button 
+    //                         type="button" 
+    //                         className="px-3 py-2 text-xs font-medium border border-gray-300 rounded-sm hover:bg-gray-50 transition-colors whitespace-nowrap bg-secondary text-white" 
+    //                         onClick={generateReferenceNumber}
+    //                     >
+    //                         Generate
+    //                     </button>
+    //                 </div>
+    //                 {errors.reference_number && <p className="text-xs text-red-600 mt-1">{errors.reference_number[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Area (Square Feet)</label>
+    //                 <input 
+    //                     type="number" 
+    //                     name="area_sqft" 
+    //                     value={formData.area_sqft}
+    //                     onChange={handleInputChange}
+    //                     min="0" 
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                     placeholder="Enter area" 
+    //                 />
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Bedrooms *</label>
+    //                 <select 
+    //                     name="bedrooms" 
+    //                     value={formData.bedrooms}
+    //                     onChange={handleInputChange}
+    //                     className="form-select"
+    //                 >
+    //                     <option value="">Select</option>
+    //                     <option value="0">Studio</option>
+    //                     <option value="1">1</option>
+    //                     <option value="2">2</option>
+    //                     <option value="3">3</option>
+    //                     <option value="4">4</option>
+    //                     <option value="5">5</option>
+    //                     <option value="6">6+</option>
+    //                 </select>
+    //                 {errors.bedrooms && <p className="text-xs text-red-600 mt-1">{errors.bedrooms[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Bathrooms *</label>
+    //                 <select 
+    //                     name="bathrooms" 
+    //                     value={formData.bathrooms}
+    //                     onChange={handleInputChange}
+    //                     className="form-select"
+    //                 >
+    //                     <option value="">Select</option>
+    //                     <option value="1">1</option>
+    //                     <option value="2">2</option>
+    //                     <option value="3">3</option>
+    //                     <option value="4">4</option>
+    //                     <option value="5">5</option>
+    //                     <option value="6">6+</option>
+    //                 </select>
+    //                 {errors.bathrooms && <p className="text-xs text-red-600 mt-1">{errors.bathrooms[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Occupancy Status</label>
+    //                 <select name="occupancy_status" value={formData.occupancy_status}onChange={handleInputChange} className="form-select">
+    //                     <option value="">Select</option>
+    //                     <option value="1">Vacant</option>
+    //                     <option value="2">Occupied</option>
+    //                 </select>
+    //             </div>
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Ownership Status</label>
+    //                 <select name="ownership_status" value={formData.ownership_status} onChange={handleInputChange} className="form-select">
+    //                     <option value="">Select</option>
+    //                     <option value="1">Freehold</option>
+    //                     <option value="2">Leasehold</option>
+    //                 </select>
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Title (EN) *</label>
+    //                 <input 
+    //                     type="text" 
+    //                     name="title_en" 
+    //                     value={formData.title_en}
+    //                     onChange={handleInputChange}
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                     placeholder="Please enter title" 
+    //                     maxLength={150} 
+    //                     dir="ltr" 
+    //                 />
+    //                 {errors.title_en && <p className="text-xs text-red-600 mt-1">{errors.title_en[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Title (AR)</label>
+    //                 <input 
+    //                     type="text" 
+    //                     name="title_ar" 
+    //                     value={formData.title_ar}
+    //                     onChange={handleInputChange}
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                     placeholder="آدخل العنوان هنا" 
+    //                     maxLength={150} 
+    //                     dir="rtl" 
+    //                 />
+    //                 {errors.title_ar && <p className="text-xs text-red-600 mt-1">{errors.title_ar[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group lg:col-span-2">
+    //                 <label className="block mb-1 text-xs text-gray-600">Description (EN) *</label>
+    //                 <ReactQuill 
+    //                     theme="snow" 
+    //                     value={englishDescription} 
+    //                     onChange={(value) => {
+    //                         setEnglishDescription(value);
+    //                         if (errors.description_en) {
+    //                             setErrors(prev => {
+    //                                 const newErrors = {...prev};
+    //                                 delete newErrors.description_en;
+    //                                 return newErrors;
+    //                             });
+    //                         }
+    //                     }} 
+    //                     placeholder="Description will come here" 
+    //                     modules={quillModules} 
+    //                     className="mb-10" 
+    //                 />
+    //                 {errors.description_en && <p className="text-xs text-red-600 mt-1">{errors.description_en[0]}</p>}
+    //             </div>
+                
+    //             <div className="form-group lg:col-span-2">
+    //                 <label className="block mb-1 text-xs text-gray-600">Description (AR)</label>
+    //                 <ReactQuill 
+    //                     theme="snow" 
+    //                     value={arabicDescription} 
+    //                     onChange={setArabicDescription} 
+    //                     placeholder="الوصف سيأتي هنا" 
+    //                     modules={quillModules} 
+    //                     className="mb-10" 
+    //                 />
+    //             </div>
+    //         </div>
+
+    //         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Price (AED) *</label>
+    //                 <input 
+    //                     type="text" 
+    //                     name="price" 
+    //                     value={formData.price}
+    //                     onChange={handleInputChange}
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                     placeholder="Enter price" 
+    //                 />
+    //                 {errors.price && <p className="text-xs text-red-600 mt-1">{errors.price[0]}</p>}
+    //             </div>
+    //             {formData.purpose === '1' && ( 
+    //                 <>
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Rent Frequency</label>
+    //                 <select name="rent_frequency" value={formData.rent_frequency} onChange={handleInputChange} className="form-select">
+    //                     <option value="">Select</option>
+    //                     <option value="1">Yearly</option>
+    //                     <option value="2">Monthly</option>
+    //                     <option value="3">Weekly</option>
+    //                     <option value="4">Daily</option>
+    //                 </select>
+    //                 {errors.rent_frequency && <p className="text-xs text-red-600 mt-1">{errors.rent_frequency[0]}</p>}
+    //             </div>
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Min. Contract Period</label>
+    //                 <input 
+    //                     type="number" 
+    //                     name="min_contract_period" 
+    //                     value={formData.min_contract_period}
+    //                     onChange={handleInputChange}
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                     placeholder="Months" 
+    //                 />
+    //                 {errors.min_contract_period &&  <p className="text-xs text-red-600 mt-1"> {errors.min_contract_period[0]}</p> }
+    //             </div>
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Notice Period</label>
+    //                 <input 
+    //                     type="number" 
+    //                     name="notice_period" 
+    //                     value={formData.notice_period}
+    //                     onChange={handleInputChange}
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                     placeholder="Months" 
+    //                 />
+    //                 {errors.notice_period && <p className="text-xs text-red-600 mt-1">{errors.notice_period[0]}</p>}
+    //             </div>
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Maintenance Fee</label>
+    //                 <input 
+    //                     type="number" 
+    //                     name="maintenance_fee" 
+    //                     value={formData.maintenance_fee}
+    //                     onChange={handleInputChange}
+    //                     className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+    //                     placeholder="AED" 
+    //                 />
+    //             </div>
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Paid By</label>
+    //                 <select name="maintenance_fee_payer" value={formData.maintenance_fee_payer} onChange={handleInputChange} className="form-select">
+    //                     <option value="">Select</option>
+    //                     <option value="1">Tenant</option>
+    //                     <option value="2">Owner</option>
+    //                 </select>
+    //             </div>
+    //             <div className="form-group">
+    //                 <label className="block mb-1 text-xs text-gray-600">Status</label>
+    //                 <select name="status" value={formData.status} onChange={handleInputChange} className="form-select">
+    //                     <option value="">Select</option>
+    //                     {statusList.map((option) => (
+    //                         <option key={option.number} value={option.number}>{option.title}</option>
+    //                     ))}
+    //                 </select>
+    //                 {errors?.status && <p className="text-danger error">{errors.status[0]}</p>}
+    //             </div>
+    //             <div className="form-group lg:col-span-3">
+    //                 <label className="block mb-1 text-xs text-gray-600">Listing Owner *</label>
+    //                 <select name="agent_id"  value={formData.agent_id} onChange={handleAgentChange} className="form-select">
+    //                     <option value="">Select agent</option>
+    //                     {users.map((user: any) => (
+    //                         <option key={user.value} value={user.value}>{user.label}</option>
+    //                     ))}
+    //                 </select>
+    //                 {errors.agent_id && <p className="text-xs text-red-600 mt-1">{errors.agent_id[0]}</p>}
+    //             </div>
+                
+    //             {selectedAgentData && (
+    //                 <div className="lg:col-span-3">
+    //                     <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+    //                         <div className="text-sm text-blue-900 font-medium mb-2">Owner Information</div>
+    //                         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+    //                             <div><span className="text-gray-600">Name:</span> <span className="font-medium">{selectedAgentData?.client_user_name || 'N/A'}</span></div>
+    //                             <div><span className="text-gray-600">Email:</span> <span className="font-medium">{selectedAgentData?.email || 'N/A'}</span></div>
+    //                             <div><span className="text-gray-600">Phone:</span> <span className="font-medium">{selectedAgentData?.phone || 'N/A'}</span></div>
+    //                             <div><span className="text-gray-600">Mobile:</span> <span className="font-medium">{selectedAgentData?.mobile || 'N/A'}</span></div>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //             )}
+    //         </div>
+    //       </div>
+    //       </div>
+    // );
+
+
     const renderStep1 = () => (
-        <div className="space-y-5">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Category *</label>
-                    <select 
-                        name="category_id" 
-                        value={formData.category_id}
-                        onChange={handleCategoryChange}
-                        className="form-select"
-                    >
-                        <option value="">Select Category</option>
-                        {categories.map((cat: any) => (
-                            <option key={cat.value} value={cat.value}>{cat.label}</option>
-                        ))}
-                    </select>
-                    {errors.category_id && <p className="text-xs text-red-600 mt-1">{errors.category_id[0]}</p>}
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Sub Category *</label>
-                    <select 
-                        name="subcategory_id" 
-                        value={formData.subcategory_id}
-                        onChange={handleInputChange}
-                        className="form-select" 
-                        disabled={subCategories.length === 0}
-                    >
-                        <option value="">Sub Category</option>
-                        {subCategories.map((sub: any) => (
-                            <option key={sub.value} value={sub.value}>{sub.label}</option>
-                        ))}
-                    </select>
-                    {errors.subcategory_id && <p className="text-xs text-red-600 mt-1">{errors.subcategory_id[0]}</p>}
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Purpose *</label>
-                    <select name="purpose" value={formData.purpose} onChange={handleInputChange} className="form-select">
-                        <option value="">Select Purpose</option>
-                        <option value="1">For Rent</option>
-                        <option value="2">For Sale</option>
-                    </select>
-                    {errors.purpose && <p className="text-xs text-red-600 mt-1">{errors.purpose[0]}</p>}
-                </div>
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Location *</label>
-                    <Select
-                        name="portal_location_id"
-                        placeholder="Search or select location..."
-                        data={locations}
-                        value={formData.portal_location_id}
-                        onChange={(value) => {
-                            setFormData({...formData, portal_location_id: value || ''});
-                            if (errors.location_id) {
-                                setErrors(prev => {
-                                    const newErrors = {...prev};
-                                    delete newErrors.portal_location_id;
-                                    return newErrors;
-                                });
-                            }
-                        }}
-                        searchable
-                        onSearchChange={handleLocationSearch}
-                        nothingFound="No locations found"
-                        limit={20}
-                        clearable
-                         autoComplete="off"
-                          autoFocus={false}
-                    />
-                    {errors.portal_location_id && ( <p className="text-xs text-red-600 mt-1">{errors.portal_location_id[0]}</p> )}
-                </div>
+    <div className="space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Category *</label>
+                <select 
+                    name="category_id" 
+                    value={formData.category_id}
+                    onChange={handleCategoryChange}
+                    className="form-select"
+                >
+                    <option value="">Select Category</option>
+                    {categories.map((cat: any) => (
+                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                    ))}
+                </select>
+                {errors.category_id && <p className="text-xs text-red-600 mt-1">{errors.category_id[0]}</p>}
             </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Sub Category *</label>
+                <select 
+                    name="subcategory_id" 
+                    value={formData.subcategory_id}
+                    onChange={handleInputChange}
+                    className="form-select" 
+                    disabled={subCategories.length === 0}
+                >
+                    <option value="">Sub Category</option>
+                    {subCategories.map((sub: any) => (
+                        <option key={sub.value} value={sub.value}>{sub.label}</option>
+                    ))}
+                </select>
+                {errors.subcategory_id && <p className="text-xs text-red-600 mt-1">{errors.subcategory_id[0]}</p>}
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Purpose *</label>
+                <select name="purpose" value={formData.purpose} onChange={handleInputChange} className="form-select">
+                    <option value="">Select Purpose</option>
+                    <option value="1">For Rent</option>
+                    <option value="2">For Sale</option>
+                </select>
+                {errors.purpose && <p className="text-xs text-red-600 mt-1">{errors.purpose[0]}</p>}
+            </div>
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Location *</label>
+                <Select
+                    name="portal_location_id"
+                    placeholder="Search or select location..."
+                    data={locations}
+                    value={formData.portal_location_id}
+                    onChange={(value) => {
+                        setFormData({...formData, portal_location_id: value || ''});
+                        if (errors.location_id) {
+                            setErrors(prev => {
+                                const newErrors = {...prev};
+                                delete newErrors.portal_location_id;
+                                return newErrors;
+                            });
+                        }
+                    }}
+                    searchable
+                    onSearchChange={handleLocationSearch}
+                    nothingFound="No locations found"
+                    limit={20}
+                    clearable
+                    autoComplete="off"
+                    autoFocus={false}
+                />
+                {errors.portal_location_id && ( <p className="text-xs text-red-600 mt-1">{errors.portal_location_id[0]}</p> )}
+            </div>
+        </div> {/* ✅ Closed properly */}
+        
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Address *</label>
+                <input 
+                    type="text" 
+                    name="address" 
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                    placeholder="Enter address" 
+                />
+                {errors.address && <p className="text-xs text-red-600 mt-1">{errors.address[0]}</p>}
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Unit No. *</label>
+                <input 
+                    type="text" 
+                    name="unit_number" 
+                    value={formData.unit_number}
+                    onChange={handleInputChange}
+                    className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                    placeholder="Enter unit number" 
+                />
+                {errors.unit_number && <p className="text-xs text-red-600 mt-1">{errors.unit_number[0]}</p>}
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Permit Number *</label>
+                <input type="text" name="permit_number" value={formData.permit_number} onChange={handleInputChange}
+                    className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" placeholder="Enter permit number" />
+                {errors.permit_number && <p className="text-xs text-red-600 mt-1">{errors.permit_number[0]}</p>}
+            </div>
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Completion Status *</label>
+                <select name="completion_status" value={formData.completion_status} onChange={handleInputChange} className="form-select">
+                    <option value="">Select status</option>
+                    <option value="1">Ready</option>
+                    <option value="2">Off Plan</option>
+                    <option value="3">Under Construction</option>
+                </select>
+                {errors.completion_status && <p className="text-xs text-red-600 mt-1">{errors.completion_status[0]}</p>}
+            </div>
+        </div> {/* ✅ Closed properly */}
+        
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Reference Number *</label>
+                <div className="flex gap-2">
+                    <input 
+                        type="text" 
+                        name="reference_number" 
+                        value={formData.reference_number}
+                        onChange={handleInputChange}
+                        className="form-input flex-1 px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                        placeholder="Enter reference" 
+                    />
+                    <button 
+                        type="button" 
+                        className="px-3 py-2 text-xs font-medium border border-gray-300 rounded-sm hover:bg-gray-50 transition-colors whitespace-nowrap bg-secondary text-white" 
+                        onClick={generateReferenceNumber}
+                    >
+                        Generate
+                    </button>
+                </div>
+                {errors.reference_number && <p className="text-xs text-red-600 mt-1">{errors.reference_number[0]}</p>}
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Area (Square Feet)</label>
+                <input 
+                    type="number" 
+                    name="area_sqft" 
+                    value={formData.area_sqft}
+                    onChange={handleInputChange}
+                    min="0" 
+                    className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                    placeholder="Enter area" 
+                />
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Bedrooms *</label>
+                <select 
+                    name="bedrooms" 
+                    value={formData.bedrooms}
+                    onChange={handleInputChange}
+                    className="form-select"
+                >
+                    <option value="">Select</option>
+                    <option value="0">Studio</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6+</option>
+                </select>
+                {errors.bedrooms && <p className="text-xs text-red-600 mt-1">{errors.bedrooms[0]}</p>}
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Bathrooms *</label>
+                <select 
+                    name="bathrooms" 
+                    value={formData.bathrooms}
+                    onChange={handleInputChange}
+                    className="form-select"
+                >
+                    <option value="">Select</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6+</option>
+                </select>
+                {errors.bathrooms && <p className="text-xs text-red-600 mt-1">{errors.bathrooms[0]}</p>}
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Occupancy Status</label>
+                <select name="occupancy_status" value={formData.occupancy_status} onChange={handleInputChange} className="form-select">
+                    <option value="">Select</option>
+                    <option value="1">Vacant</option>
+                    <option value="2">Occupied</option>
+                </select>
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Ownership Status</label>
+                <select name="ownership_status" value={formData.ownership_status} onChange={handleInputChange} className="form-select">
+                    <option value="">Select</option>
+                    <option value="1">Freehold</option>
+                    <option value="2">Leasehold</option>
+                </select>
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Title (EN) *</label>
+                <input 
+                    type="text" 
+                    name="title_en" 
+                    value={formData.title_en}
+                    onChange={handleInputChange}
+                    className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                    placeholder="Please enter title" 
+                    maxLength={150} 
+                    dir="ltr" 
+                />
+                {errors.title_en && <p className="text-xs text-red-600 mt-1">{errors.title_en[0]}</p>}
+            </div>
+            
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Title (AR)</label>
+                <input 
+                    type="text" 
+                    name="title_ar" 
+                    value={formData.title_ar}
+                    onChange={handleInputChange}
+                    className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                    placeholder="آدخل العنوان هنا" 
+                    maxLength={150} 
+                    dir="rtl" 
+                />
+                {errors.title_ar && <p className="text-xs text-red-600 mt-1">{errors.title_ar[0]}</p>}
+            </div>
+            
+            <div className="form-group lg:col-span-2">
+                <label className="block mb-1 text-xs text-gray-600">Description (EN) *</label>
+                <ReactQuill 
+                    theme="snow" 
+                    value={englishDescription} 
+                    onChange={(value) => {
+                        setEnglishDescription(value);
+                        if (errors.description_en) {
+                            setErrors(prev => {
+                                const newErrors = {...prev};
+                                delete newErrors.description_en;
+                                return newErrors;
+                            });
+                        }
+                    }} 
+                    placeholder="Description will come here" 
+                    modules={quillModules} 
+                    className="mb-10" 
+                />
+                {errors.description_en && <p className="text-xs text-red-600 mt-1">{errors.description_en[0]}</p>}
+            </div>
+            
+            <div className="form-group lg:col-span-2">
+                <label className="block mb-1 text-xs text-gray-600">Description (AR)</label>
+                <ReactQuill 
+                    theme="snow" 
+                    value={arabicDescription} 
+                    onChange={setArabicDescription} 
+                    placeholder="الوصف سيأتي هنا" 
+                    modules={quillModules} 
+                    className="mb-10" 
+                />
+            </div>
+        </div> {/* ✅ Closed properly */}
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Address *</label>
-                    <input 
-                        type="text" 
-                        name="address" 
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="Enter address" 
-                    />
-                    {errors.address && <p className="text-xs text-red-600 mt-1">{errors.address[0]}</p>}
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Unit No. *</label>
-                    <input 
-                        type="text" 
-                        name="unit_number" 
-                        value={formData.unit_number}
-                        onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="Enter unit number" 
-                    />
-                    {errors.unit_number && <p className="text-xs text-red-600 mt-1">{errors.unit_number[0]}</p>}
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Permit Number *</label>
-                    <input type="text" name="permit_number" value={formData.permit_number} onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" placeholder="Enter permit number" />
-                    {errors.permit_number && <p className="text-xs text-red-600 mt-1">{errors.permit_number[0]}</p>}
-                </div>
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Completion Status *</label>
-                    <select name="completion_status" value={formData.completion_status} onChange={handleInputChange} className="form-select">
-                        <option value="">Select status</option>
-                        <option value="1">Ready</option>
-                        <option value="2">Off Plan</option>
-                        <option value="3">Under Construction</option>
-                    </select>
-                    {errors.completion_status && <p className="text-xs text-red-600 mt-1">{errors.completion_status[0]}</p>}
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Price (AED) *</label>
+                <input 
+                    type="text" 
+                    name="price" 
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                    placeholder="Enter price" 
+                />
+                {errors.price && <p className="text-xs text-red-600 mt-1">{errors.price[0]}</p>}
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Reference Number *</label>
-                    <div className="flex gap-2">
-                        <input 
-                            type="text" 
-                            name="reference_number" 
-                            value={formData.reference_number}
-                            onChange={handleInputChange}
-                            className="form-input flex-1 px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                            placeholder="Enter reference" 
-                        />
-                        <button 
-                            type="button" 
-                            className="px-3 py-2 text-xs font-medium border border-gray-300 rounded-sm hover:bg-gray-50 transition-colors whitespace-nowrap bg-secondary text-white" 
-                            onClick={generateReferenceNumber}
-                        >
-                            Generate
-                        </button>
+            
+            {formData.purpose === '1' && ( 
+                <>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs text-gray-600">Rent Frequency</label>
+                        <select name="rent_frequency" value={formData.rent_frequency} onChange={handleInputChange} className="form-select">
+                            <option value="">Select</option>
+                            <option value="1">Yearly</option>
+                            <option value="2">Monthly</option>
+                            <option value="3">Weekly</option>
+                            <option value="4">Daily</option>
+                        </select>
+                        {errors.rent_frequency && <p className="text-xs text-red-600 mt-1">{errors.rent_frequency[0]}</p>}
                     </div>
-                    {errors.reference_number && <p className="text-xs text-red-600 mt-1">{errors.reference_number[0]}</p>}
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Area (Square Feet)</label>
-                    <input 
-                        type="number" 
-                        name="area_sqft" 
-                        value={formData.area_sqft}
-                        onChange={handleInputChange}
-                        min="0" 
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="Enter area" 
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Bedrooms *</label>
-                    <select 
-                        name="bedrooms" 
-                        value={formData.bedrooms}
-                        onChange={handleInputChange}
-                        className="form-select"
-                    >
-                        <option value="">Select</option>
-                        <option value="0">Studio</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6+</option>
-                    </select>
-                    {errors.bedrooms && <p className="text-xs text-red-600 mt-1">{errors.bedrooms[0]}</p>}
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Bathrooms *</label>
-                    <select 
-                        name="bathrooms" 
-                        value={formData.bathrooms}
-                        onChange={handleInputChange}
-                        className="form-select"
-                    >
-                        <option value="">Select</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6+</option>
-                    </select>
-                    {errors.bathrooms && <p className="text-xs text-red-600 mt-1">{errors.bathrooms[0]}</p>}
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Occupancy Status</label>
-                    <select name="occupancy_status" value={formData.occupancy_status}onChange={handleInputChange} className="form-select">
-                        <option value="">Select</option>
-                        <option value="1">Vacant</option>
-                        <option value="2">Occupied</option>
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Ownership Status</label>
-                    <select name="ownership_status" value={formData.ownership_status} onChange={handleInputChange} className="form-select">
-                        <option value="">Select</option>
-                        <option value="1">Freehold</option>
-                        <option value="2">Leasehold</option>
-                    </select>
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Title (EN) *</label>
-                    <input 
-                        type="text" 
-                        name="title_en" 
-                        value={formData.title_en}
-                        onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="Please enter title" 
-                        maxLength={150} 
-                        dir="ltr" 
-                    />
-                    {errors.title_en && <p className="text-xs text-red-600 mt-1">{errors.title_en[0]}</p>}
-                </div>
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Title (AR)</label>
-                    <input 
-                        type="text" 
-                        name="title_ar" 
-                        value={formData.title_ar}
-                        onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="آدخل العنوان هنا" 
-                        maxLength={150} 
-                        dir="rtl" 
-                    />
-                    {errors.title_ar && <p className="text-xs text-red-600 mt-1">{errors.title_ar[0]}</p>}
-                </div>
-                
-                <div className="form-group lg:col-span-2">
-                    <label className="block mb-1 text-xs text-gray-600">Description (EN) *</label>
-                    <ReactQuill 
-                        theme="snow" 
-                        value={englishDescription} 
-                        onChange={(value) => {
-                            setEnglishDescription(value);
-                            if (errors.description_en) {
-                                setErrors(prev => {
-                                    const newErrors = {...prev};
-                                    delete newErrors.description_en;
-                                    return newErrors;
-                                });
-                            }
-                        }} 
-                        placeholder="Description will come here" 
-                        modules={quillModules} 
-                        className="mb-10" 
-                    />
-                    {errors.description_en && <p className="text-xs text-red-600 mt-1">{errors.description_en[0]}</p>}
-                </div>
-                
-                <div className="form-group lg:col-span-2">
-                    <label className="block mb-1 text-xs text-gray-600">Description (AR)</label>
-                    <ReactQuill 
-                        theme="snow" 
-                        value={arabicDescription} 
-                        onChange={setArabicDescription} 
-                        placeholder="الوصف سيأتي هنا" 
-                        modules={quillModules} 
-                        className="mb-10" 
-                    />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Price (AED) *</label>
-                    <input 
-                        type="text" 
-                        name="price" 
-                        value={formData.price}
-                        onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="Enter price" 
-                    />
-                    {errors.price && <p className="text-xs text-red-600 mt-1">{errors.price[0]}</p>}
-                </div>
-                {formData.purpose === '1' && ( 
-                    <>
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Rent Frequency</label>
-                    <select name="rent_frequency" value={formData.rent_frequency} onChange={handleInputChange} className="form-select">
-                        <option value="">Select</option>
-                        <option value="1">Yearly</option>
-                        <option value="2">Monthly</option>
-                        <option value="3">Weekly</option>
-                        <option value="4">Daily</option>
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Min. Contract Period</label>
-                    <input 
-                        type="number" 
-                        name="min_contract_period" 
-                        value={formData.min_contract_period}
-                        onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="Months" 
-                    />
-                </div>
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Notice Period</label>
-                    <input 
-                        type="number" 
-                        name="notice_period" 
-                        value={formData.notice_period}
-                        onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="Months" 
-                    />
-                </div>
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Maintenance Fee</label>
-                    <input 
-                        type="number" 
-                        name="maintenance_fee" 
-                        value={formData.maintenance_fee}
-                        onChange={handleInputChange}
-                        className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
-                        placeholder="AED" 
-                    />
-                </div>
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Paid By</label>
-                    <select name="maintenance_fee_payer" value={formData.maintenance_fee_payer} onChange={handleInputChange} className="form-select">
-                        <option value="">Select</option>
-                        <option value="1">Tenant</option>
-                        <option value="2">Owner</option>
-                    </select>
-                </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs text-gray-600">Min. Contract Period</label>
+                        <input 
+                            type="number" 
+                            name="min_contract_period" 
+                            value={formData.min_contract_period}
+                            onChange={handleInputChange}
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                            placeholder="Months" 
+                        />
+                        {errors.min_contract_period &&  <p className="text-xs text-red-600 mt-1">{errors.min_contract_period[0]}</p>}
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs text-gray-600">Notice Period</label>
+                        <input 
+                            type="number" 
+                            name="notice_period" 
+                            value={formData.notice_period}
+                            onChange={handleInputChange}
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                            placeholder="Months" 
+                        />
+                        {errors.notice_period && <p className="text-xs text-red-600 mt-1">{errors.notice_period[0]}</p>}
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs text-gray-600">Maintenance Fee</label>
+                        <input 
+                            type="number" 
+                            name="maintenance_fee" 
+                            value={formData.maintenance_fee}
+                            onChange={handleInputChange}
+                            className="form-input w-full px-3 py-2 border border-gray-300 rounded-sm text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" 
+                            placeholder="AED" 
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="block mb-1 text-xs text-gray-600">Paid By</label>
+                        <select name="maintenance_fee_payer" value={formData.maintenance_fee_payer} onChange={handleInputChange} className="form-select">
+                            <option value="">Select</option>
+                            <option value="1">Tenant</option>
+                            <option value="2">Owner</option>
+                        </select>
+                    </div>
                 </>
-                )}
-                
-                <div className="form-group">
-                    <label className="block mb-1 text-xs text-gray-600">Listing Owner *</label>
-                    <select name="agent_id"  value={formData.agent_id} onChange={handleAgentChange} className="form-select">
-                        <option value="">Select agent</option>
-                        {users.map((user: any) => (
-                            <option key={user.value} value={user.value}>{user.label}</option>
-                        ))}
-                    </select>
-                    {errors.agent_id && <p className="text-xs text-red-600 mt-1">{errors.agent_id[0]}</p>}
-                </div>
-                
-                {selectedAgentData && (
-                    <div className="lg:col-span-3">
-                        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                            <div className="text-sm text-blue-900 font-medium mb-2">Owner Information</div>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
-                                <div><span className="text-gray-600">Name:</span> <span className="font-medium">{selectedAgentData?.client_user_name || 'N/A'}</span></div>
-                                <div><span className="text-gray-600">Email:</span> <span className="font-medium">{selectedAgentData?.email || 'N/A'}</span></div>
-                                <div><span className="text-gray-600">Phone:</span> <span className="font-medium">{selectedAgentData?.phone || 'N/A'}</span></div>
-                                <div><span className="text-gray-600">Mobile:</span> <span className="font-medium">{selectedAgentData?.mobile || 'N/A'}</span></div>
-                            </div>
+            )}
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Status</label>
+                <select name="status" value={formData.status} onChange={handleInputChange} className="form-select">
+                    <option value="">Select</option>
+                    {statusList.map((option) => (
+                        <option key={option.number} value={option.number}>{option.title}</option>
+                    ))}
+                </select>
+                {errors?.status && <p className="text-danger error">{errors.status[0]}</p>}
+            </div>
+            <div className="form-group">
+                <label className="block mb-1 text-xs text-gray-600">Listing Owner *</label>
+                <select name="agent_id"  value={formData.agent_id} onChange={handleAgentChange} className="form-select">
+                    <option value="">Select agent</option>
+                    {users.map((user: any) => (
+                        <option key={user.value} value={user.value}>{user.label}</option>
+                    ))}
+                </select>
+                {errors.agent_id && <p className="text-xs text-red-600 mt-1">{errors.agent_id[0]}</p>}
+            </div>
+            
+            {selectedAgentData && (
+                <div className="lg:col-span-3">
+                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                        <div className="text-sm text-blue-900 font-medium mb-2">Owner Information</div>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+                            <div><span className="text-gray-600">Name:</span> <span className="font-medium">{selectedAgentData?.client_user_name || 'N/A'}</span></div>
+                            <div><span className="text-gray-600">Email:</span> <span className="font-medium">{selectedAgentData?.email || 'N/A'}</span></div>
+                            <div><span className="text-gray-600">Phone:</span> <span className="font-medium">{selectedAgentData?.phone || 'N/A'}</span></div>
+                            <div><span className="text-gray-600">Mobile:</span> <span className="font-medium">{selectedAgentData?.mobile || 'N/A'}</span></div>
                         </div>
                     </div>
-                )}
-            </div>
-        </div>
-    );
-
+                </div>
+            )}
+        </div> {/* ✅ Closed properly */}
+    </div> /* ✅ Final closing tag */
+);
     const renderStep2 = () => (
         <div className="space-y-4">
             <div>
                 <h5 className="text-base font-semibold mb-2 text-gray-700">Choose Amenities *</h5>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {amenitiesList.map((amenity) => (
+                {fetchedAmenities.map((amenity) => (
                     <div key={amenity.id} onClick={() => handleAmenityToggle(amenity.id)} className={`p-3 rounded-md border cursor-pointer transition-all text-center ${selectedAmenities.includes(amenity.id) ? 'border-green-600 bg-green-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
                         <div className={`w-7 h-7 mx-auto mb-1.5 rounded-full flex items-center justify-center ${selectedAmenities.includes(amenity.id) ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
                             {selectedAmenities.includes(amenity.id) ? (
@@ -915,12 +1407,26 @@ const CreateListing = () => {
     return (
         <form ref={formRef}>
             <div className="panel bg-white rounded-lg shadow-sm">
-                {renderStepIndicator()}
-                <div className="min-h-[450px] py-4">
-                    {currentStep === 1 && renderStep1()}
-                    {currentStep === 2 && renderStep2()}
-                    {currentStep === 3 && renderStep3()}
-                </div>
+                {isLoadingData ? (
+                    <div className="flex items-center justify-center min-h-[450px]">
+                        <div className="text-center">
+                            <svg className="animate-spin h-10 w-10 text-primary mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p className="text-gray-600">Loading listing data...</p>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        {renderStepIndicator()}
+                        <div className="min-h-[450px] py-4">
+                            {currentStep === 1 && renderStep1()}
+                            {currentStep === 2 && renderStep2()}
+                            {currentStep === 3 && renderStep3()}
+                        </div>
+                    </>
+                )}
                 <div className="border-t pt-4 mt-5">
                     <div className="flex justify-between items-center">
                         <button 
@@ -962,7 +1468,7 @@ const CreateListing = () => {
                             <button 
                                 type="button" 
                                 onClick={() => submitStep(3)} 
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isLoadingData}
                                 className="px-6 py-2 text-sm font-medium bg-green-600 text-white border border-green-600 rounded-md hover:bg-green-700 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? (
@@ -971,14 +1477,14 @@ const CreateListing = () => {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Creating...
+                                        {isEditMode ? 'Updating...' : 'Creating...'}
                                     </>
                                 ) : (
                                     <>
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                         </svg>
-                                        Submit Listing
+                                        {isEditMode ? 'Update Listing' : 'Submit Listing'}
                                     </>
                                 )}
                             </button>
