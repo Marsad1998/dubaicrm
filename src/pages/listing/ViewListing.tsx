@@ -277,25 +277,25 @@ const ViewListing = () => {
         setDisable(true);
     };
 
-    const viewListing = async (id: number) => {
-        setDetailModalOpen(true);
-        setDetailData(null);
-        setDetailLoading(true);
-        try {
-            const response = await apiClient.get(`${endpoints.detailApi}/${id}`);
-            if (response.data.status && response.data.data) {
-                setDetailData(response.data.data);
-            } else {
-                toast.error(response.data.message || 'Failed to load listing detail');
-                setDetailModalOpen(false);
-            }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to load listing detail');
-            setDetailModalOpen(false);
-        } finally {
-            setDetailLoading(false);
-        }
-    };
+    // const viewListing = async (id: number) => {
+    //     setDetailModalOpen(true);
+    //     setDetailData(null);
+    //     setDetailLoading(true);
+    //     try {
+    //         const response = await apiClient.get(`${endpoints.detailApi}/${id}`);
+    //         if (response.data.status && response.data.data) {
+    //             setDetailData(response.data.data);
+    //         } else {
+    //             toast.error(response.data.message || 'Failed to load listing detail');
+    //             setDetailModalOpen(false);
+    //         }
+    //     } catch (error: any) {
+    //         toast.error(error.response?.data?.message || 'Failed to load listing detail');
+    //         setDetailModalOpen(false);
+    //     } finally {
+    //         setDetailLoading(false);
+    //     }
+    // };
 
     const editListing = (id: number) => {
         // Navigate to edit page
@@ -354,13 +354,13 @@ const ViewListing = () => {
             sortable: false,
             render: (record: any) => (
                 <div className="flex items-center gap-2">
-                    <button 
+                    {/* <button 
                         type="button" 
                         className="btn btn-sm btn-info"
                         onClick={() => viewListing(record.actions.id)}
                     >
                         <IconEye />
-                    </button>
+                    </button> */}
                     <button 
                         type="button" 
                         className="btn btn-sm btn-primary"
@@ -616,7 +616,7 @@ const ViewListing = () => {
                                     )}
 
                                     {/* Amenities */}
-                                    {detailData.amenities && (Array.isArray(detailData.amenities) ? detailData.amenities : []).length > 0 && (
+                                    {/* {detailData.amenities && (Array.isArray(detailData.amenities) ? detailData.amenities : []).length > 0 && (
                                         <div className="rounded-xl border border-gray-200 overflow-hidden">
                                             <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
                                                 <h5 className="text-sm font-semibold text-gray-700">Amenities</h5>
@@ -627,7 +627,7 @@ const ViewListing = () => {
                                                 ))}
                                             </div>
                                         </div>
-                                    )}
+                                    )} */}
 
                                     {/* Media: images + floor plan & video */}
                                     <div className="rounded-xl border border-gray-200 overflow-hidden">

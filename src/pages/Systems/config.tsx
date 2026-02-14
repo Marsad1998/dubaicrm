@@ -45,8 +45,8 @@ const ConfigSettings = () => {
 
                     if (res.data) {
                         const formattedAgents = res.data.users.map((agent: any) => ({
-                            value: agent.client_user_id,
-                            label: agent.client_user_name,
+                            value: agent.value,
+                            label: agent.label,
                         }));
                         setAgents(formattedAgents);
                     }
