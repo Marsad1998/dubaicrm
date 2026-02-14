@@ -16,7 +16,7 @@ import Select from 'react-select';
 const endpoints = {
     getConfig: `${getBaseUrl()}/config`,
     updateConfig: `${getBaseUrl()}/config/update`,
-    getAgents: `${getBaseUrl()}/listing/get_users`,
+    getAgents: `${getBaseUrl()}/listing/get_combine_data`,
     saveCampaign: `${getBaseUrl()}/campaigns/save`, 
     deleteCampaignAgent: `${getBaseUrl()}/config/delete`, 
 };
@@ -42,8 +42,9 @@ const ConfigSettings = () => {
                 setLoading(true);
                 try {
                     const res = await apiClient.get(endpoints.getAgents);
+
                     if (res.data) {
-                        const formattedAgents = res.data.map((agent: any) => ({
+                        const formattedAgents = res.data.users.map((agent: any) => ({
                             value: agent.client_user_id,
                             label: agent.client_user_name,
                         }));
