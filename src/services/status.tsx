@@ -496,6 +496,9 @@ export const languagesDropdown = [
   { value: 14, label: 'Indonesian' },
   { value: 15, label: 'Persian' },
   { value: 16, label: 'Czech' },
+  { value: 17, label: 'Dari' },
+  { value: 18, label: 'Italian' },
+
 ];
 
 
