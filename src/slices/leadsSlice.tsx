@@ -196,11 +196,11 @@ import apiClient from '../utils/apiClient';
     //     }
     // });
 
-     export const download = createAsyncThunk('download', async (params: { formData?: FormData; cityname?: string }, { rejectWithValue }) => {
+     export const download = createAsyncThunk('download', async (params: { formData?: FormData; cityname?: string; export_type?: string }, { rejectWithValue }) => {
         try {
-            const { formData, cityname } = params;
+            const { formData, cityname, export_type } = params;
             const response = await apiClient.post(endpoints.pdfurl, formData, {
-                params: { cityname }, 
+                params: { cityname, export_type }, 
             });
             return {
                 data: response?.data.data,

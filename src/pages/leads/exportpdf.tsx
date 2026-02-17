@@ -25,6 +25,7 @@ import { DateRangePicker } from 'react-date-range';
 import IconSearch from '../../components/Icon/IconSearch';
 import { setLoading } from '../../slices/dashboardSlice';
 import apiClient from '../../utils/apiClient';
+import { downloadExcel } from 'react-export-table-to-excel';
 
 const ExportPdf = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -383,6 +384,60 @@ const ExportPdf = () => {
       }));
     }, [leads]);  
 
+    const handleDownloadExcel = async () => {
+      try {
+        const formData = new FormData();
+        formData.append('lead_status', selectedStatus ?? '');
+        formData.append('agent_id', selectedAgent?.toString() ?? '');
+
+        if (selectedCampaign.length > 0) {
+          const campaignNames = selectedCampaign
+            .map((id) => campaigns.find((c) => c.value === id)?.label)
+            .filter(Boolean);
+          campaignNames.forEach((campaignName) => {
+            formData.append('campaign_id[]', campaignName as string);
+          });
+        }
+
+        if (selectionRange.startDate && selectionRange.endDate) {
+          formData.append('date_range', JSON.stringify(selectionRange));
+        }
+
+        const response = await dispatch(download({ formData, export_type: 'excel' }) as any);
+        if (response?.payload?.status === 200 || response?.payload?.status === 201) {
+          const leadsData = response?.payload?.data || [];
+
+          if (!Array.isArray(leadsData) || leadsData.length === 0) {
+            toast.error('No leads found for the current filters.');
+            return;
+          }
+
+          const header = ['Lead Title', 'Customer Name', 'Phone', 'Assigned Date', 'Source'];
+          const body = leadsData.map((lead: any) => [
+            lead.lead_title || 'N/A',
+            lead.customer_name || 'N/A',
+            lead.customer_phone || 'N/A',
+            lead.assigned_at ? formatDate(lead.assigned_at) : 'N/A',
+            lead.lead_source || 'N/A',
+          ]);
+
+          downloadExcel({
+            fileName: 'leads',
+            sheet: 'Leads',
+            tablePayload: {
+              header,
+              body,
+            },
+          });
+        } else {
+          toast.error('Failed to export leads to Excel.');
+        }
+      } catch (error: any) {
+        const message = error?.response?.data?.message || error?.message || 'Failed to export leads to Excel.';
+        toast.error(message);
+      }
+    };
+
     const handlePageChange = (page: number) => {
            dispatch(allLeads({ 
                page,
@@ -678,6 +733,19 @@ const ExportPdf = () => {
                             <span className="hidden sm:inline">Download PDF</span>
                             <span className="sm:hidden">PDF</span>
                         </button>
+                        {selectedAgent && (
+                            <button 
+                                onClick={handleDownloadExcel} 
+                                type="button"  
+                                className="btn btn-success btn-sm flex items-center justify-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h16v4H4zM4 10h16v4H4zM4 16h10v4H4z" />
+                                </svg>
+                                <span className="hidden sm:inline">Export Excel</span>
+                                <span className="sm:hidden">Excel</span>
+                            </button>
+                        )}
                         <button 
                             onClick={() => { LeadsSummaryReport(); }} 
                             type="button"  
