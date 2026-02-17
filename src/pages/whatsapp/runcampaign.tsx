@@ -52,7 +52,6 @@ const RunCampaign = () => {
 
   const selectedTemplate = templates.find((t) => t.id === templateId);
 
-  // Load templates
   useEffect(() => {
     (async () => {
       try {
@@ -75,13 +74,13 @@ const RunCampaign = () => {
       return;
     }
     try {
-      setPreviewLoading(true); // 👈 start loading
+      setPreviewLoading(true); 
       const p = await apiClient.get(endpoints.templatePreview(selectedTemplate.sid));
       setPreview(p.data?.preview || selectedTemplate.sample_text || '');
     } catch {
       setPreview(selectedTemplate?.sample_text || '');
     } finally {
-      setPreviewLoading(false); // 👈 stop loading
+      setPreviewLoading(false); 
     }
   })();
 }, [templateId]);
@@ -189,8 +188,6 @@ const RunCampaign = () => {
                 />
               </div>
             </div>
-
-            {/* Send Type & Schedule */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2">Send Type</label>
@@ -232,7 +229,6 @@ const RunCampaign = () => {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-slate-100">
               <p className="text-xs text-slate-500">Ensure your template has approved variables & mappings.</p>
               <div className="flex gap-3">
