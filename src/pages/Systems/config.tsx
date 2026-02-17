@@ -637,7 +637,6 @@ const ConfigSettings = () => {
                                         <div className="md:col-span-3">
                                             <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4">
                                                 <h4 className="text-sm font-semibold text-slate-700 mb-3">Template Preview</h4>
-
                                                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 min-h-[100px]">
                                                     {previewLoading ? (
                                                         <p className="text-sm text-slate-500">Loading preview…</p>
