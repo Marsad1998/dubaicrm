@@ -16,6 +16,8 @@ import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.css';
 import '../dashboard/dashboard.css'; 
 import IconX from '../../components/Icon/IconX';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import '../../../src/assets/css/file-upload-preview.css';
 import { set, setDate } from 'date-fns';
 import IconEye from '../../components/Icon/IconEye';
@@ -58,6 +60,7 @@ const Users = () => {
     const [languages, setLanguages] = useState<any[]>([]);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [userDescription, setUserDescription] = useState('');
 
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,6 +69,16 @@ const Users = () => {
             setPhoto(file);
             setPhotoPreview(URL.createObjectURL(file));
         }
+    };
+
+    const quillModules = {
+        toolbar: [
+            [{ 'header': [1, 2, false] }],
+            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['link', 'image'],
+            ['clean']
+        ]
     };
 
     useEffect(() => {
@@ -133,6 +146,10 @@ const Users = () => {
             if (!languages || languages.length === 0) {
                 clientErrors.client_user_languages = 'Languages is required';
             }
+            const descTrimmed = (userDescription ?? '').replace(/<[^>]*>/g, '').trim();
+            if (!descTrimmed) {
+                clientErrors.client_user_description = 'Description is required';
+            }
             if (Object.keys(clientErrors).length > 0) {
                 setErrors(clientErrors);
                 return;
@@ -140,6 +157,7 @@ const Users = () => {
 
             if (combinedRef.current.userformRef) {
                 const formData = new FormData(combinedRef.current.userformRef);
+                formData.append('client_user_description', userDescription ?? '');
                 if (languages && languages.length > 0) {
                     languages.forEach((lang: any) => { if (lang && lang.value) { formData.append('client_user_languages[]', lang.value); } });
                 }
@@ -168,6 +186,7 @@ const Users = () => {
                     setLanguages([]);
                     setPhoto(null);
                     setPhotoPreview(null);
+                    setUserDescription('');
                     setIsFormOpen(false);
                     setIsEditing(false);
 
@@ -205,6 +224,7 @@ const Users = () => {
     };
 
     const handleEdit = async (user: any) => {
+        console.log(user);
         if (combinedRef.current.userformRef) {
             setIsEditing(true);
             setIsFormOpen(true);
@@ -224,6 +244,7 @@ const Users = () => {
             setDateOfBirthday(user.client_user_dob || null);
             SetJoingDate(user.client_user_joing_date || null);
             setType(user.client_user_type ? Number(user.client_user_type) : null);
+            setUserDescription(user.client_user_description || '');
             const userrole = user.roles && user.roles[0];
             if (userrole) {
                 const selectedRole = {
@@ -246,22 +267,19 @@ const Users = () => {
             }
             setHeadId(headOptions); 
 
-            if (user.client_user_languages) {
-                // Convert comma-separated string to array
+            if (user.client_user_languages != null && user.client_user_languages !== '') {
                 let langsArray: any[] = [];
-
                 if (typeof user.client_user_languages === 'string') {
-                    langsArray = user.client_user_languages.split(',').map((l: any) => l.trim());
+                    langsArray = user.client_user_languages.split(',').map((l: any) => String(l).trim()).filter(Boolean);
                 } else if (Array.isArray(user.client_user_languages)) {
-                    langsArray = user.client_user_languages;
+                    langsArray = user.client_user_languages.map((l: any) => String(l));
+                } else if (typeof user.client_user_languages === 'number') {
+                    langsArray = [String(user.client_user_languages)];
                 }
-
                 const userLanguages = langsArray.map((lang) => {
-                    // Find the option in your languagesDropdown
-                    const option = languagesDropdown.find((o) => o.value === Number(lang) || o.value === lang);
-                    return option || { value: lang, label: String(lang) };
-                });
-
+                    const option = languagesDropdown.find((o) => o.value === Number(lang) || String(o.value) === String(lang));
+                    return option || { value: Number(lang) || lang, label: String(lang) };
+                }).filter(Boolean);
                 setLanguages(userLanguages);
             } else {
                 setLanguages([]);
@@ -330,6 +348,7 @@ const Users = () => {
         setHeadId(null);
         setItems([{ id: 1, file: null, documentType: null }]);
         setIsEditing(false);
+        setUserDescription('');
         setIsFormOpen(true);
     };
     const addItem = () => {
@@ -690,6 +709,30 @@ const Users = () => {
                                                 <span className="text-red-500 text-sm">
                                                     {errors.client_user_languages || errors.languages}
                                                 </span>
+                                            )}
+                                        </div>
+
+                                        <div className="form-group sm:col-span-3 mt-4">
+                                            <label htmlFor="client_user_description">Description *</label>
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={userDescription}
+                                                onChange={(value) => {
+                                                    setUserDescription(value);
+                                                    if (errors.client_user_description) {
+                                                        setErrors((prev) => {
+                                                            const next = { ...prev };
+                                                            delete next.client_user_description;
+                                                            return next;
+                                                        });
+                                                    }
+                                                }}
+                                                placeholder="Agent / user description (e.g. bio, experience)"
+                                                modules={quillModules}
+                                                className="mb-10"
+                                            />
+                                            {errors.client_user_description && (
+                                                <span className="text-red-500 text-sm">{errors.client_user_description}</span>
                                             )}
                                         </div>
                                       </div>
