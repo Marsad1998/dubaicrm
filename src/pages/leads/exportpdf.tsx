@@ -391,8 +391,7 @@ const ExportPdf = () => {
         formData.append('agent_id', selectedAgent?.toString() ?? '');
 
         if (selectedCampaign.length > 0) {
-          const campaignNames = selectedCampaign
-            .map((id) => campaigns.find((c) => c.value === id)?.label)
+          const campaignNames = selectedCampaign.map((id) => campaigns.find((c) => c.value === id)?.label)
             .filter(Boolean);
           campaignNames.forEach((campaignName) => {
             formData.append('campaign_id[]', campaignName as string);
@@ -412,12 +411,12 @@ const ExportPdf = () => {
             return;
           }
 
-          const header = ['Lead Title', 'Customer Name', 'Phone', 'Assigned Date', 'Source'];
+          const header = ['Lead Title', 'Customer Name', 'Phone', 'Email', 'Source'];
           const body = leadsData.map((lead: any) => [
             lead.lead_title || 'N/A',
             lead.customer_name || 'N/A',
             lead.customer_phone || 'N/A',
-            lead.assigned_at ? formatDate(lead.assigned_at) : 'N/A',
+            lead.customer_email || 'N/A',
             lead.lead_source || 'N/A',
           ]);
 
@@ -733,19 +732,19 @@ const ExportPdf = () => {
                             <span className="hidden sm:inline">Download PDF</span>
                             <span className="sm:hidden">PDF</span>
                         </button>
-                        {selectedAgent && (
-                            <button 
-                                onClick={handleDownloadExcel} 
-                                type="button"  
-                                className="btn btn-success btn-sm flex items-center justify-center gap-2"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h16v4H4zM4 10h16v4H4zM4 16h10v4H4z" />
-                                </svg>
-                                <span className="hidden sm:inline">Export Excel</span>
-                                <span className="sm:hidden">Excel</span>
-                            </button>
-                        )}
+                        
+                        <button 
+                            onClick={handleDownloadExcel} 
+                            type="button"  
+                            className="btn btn-success btn-sm flex items-center justify-center gap-2"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h16v4H4zM4 10h16v4H4zM4 16h10v4H4z" />
+                            </svg>
+                            <span className="hidden sm:inline">Export Excel</span>
+                            <span className="sm:hidden">Excel</span>
+                        </button>
+                       
                         <button 
                             onClick={() => { LeadsSummaryReport(); }} 
                             type="button"  
