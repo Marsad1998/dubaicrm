@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import { useDashboardStates } from '../../hooks/useDashboardStates';
 import { DashboardLeadslist, setLoading, updateSingleLead, createLeads, uploadFiles, getFiles, voiceCall, voiceCallLogs } from '../../slices/dashboardSlice';
 import { setPageTitle } from '../../slices/themeConfigSlice';
@@ -13,6 +13,8 @@ import IconSearch from '../../components/Icon/IconSearch';
 import Loader3 from '../../services/loader3';
 import IconBookmark from '../../components/Icon/IconBookmark';
 import IconUser from '../../components/Icon/IconUser';
+import IconCopy from '../../components/Icon/IconCopy';
+import IconChecks from '../../components/Icon/IconChecks';
 import IconPhone from '../../components/Icon/IconPhone';
 import IconArrowLeft from '../../components/Icon/IconArrowLeft';
 import IconFile from '../../components/Icon/IconFile';
@@ -53,11 +55,10 @@ const DashboardBox2 = () => {
      const [aiCallData, setAiCallData] = useState<any[]>([]);
      const [selectedOption, setSelectedOption] = useState<any>(null);
      const [showComments, setShowComments] = useState(false);
+    //  const [copied, setCopied] = useState(false);
+     const [copiedField, setCopiedField] = useState(null);
 
     useEffect(() => {    
-
-        console.log('Dashboard Type:', hrdropdownOption);
-
         dispatch(setPageTitle('Dashboard'));
         if (loginuser?.client_user_id && !combinedRef.current.fetched) {
             dispatch(DashboardLeadslist({search: searchText, dashboardType: dashboardType || 'all'}));
@@ -241,13 +242,21 @@ const DashboardBox2 = () => {
             // dispatch(setLoading(false));
         }
     };
+
+    const handleCopy = (text: any, field:any) => {
+        if (!text) return;
+        navigator.clipboard.writeText(text);
+        setCopiedField(field);
+        setTimeout(() => {
+            setCopiedField(null);
+        }, 2000);
+    };
+
     
     return (
         <div>
             <div className="flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full">
-                <div className={`overlay bg-black/60 z-[5] w-full h-full rounded-md absolute hidden ${isShowMailMenu ? '!block xl:!hidden' : ''}`}
-                onClick={() => setIsShowMailMenu(!isShowMailMenu)}></div>
-
+                <div className={`overlay bg-black/60 z-[5] w-full h-full rounded-md absolute hidden ${isShowMailMenu ? '!block xl:!hidden' : ''}`} onClick={() => setIsShowMailMenu(!isShowMailMenu)}></div>
                 <div className="panel p-0 flex-1 overflow-x-hidden h-full">
                     {!selectedLead && !isEdit && (
                         <div className="flex flex-col h-full">
@@ -439,6 +448,17 @@ const DashboardBox2 = () => {
                                                                     </div>
                                                                 </div>
                                                             </td>
+                                                            <td className="whitespace-nowrap font-medium">
+                                                            {lead?.lead_status == 7 && lead?.meeting_date ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    {/* Badge */}
+                                                                    <span className="px-2 py-0.5 text-xs font-semibold rounded bg-primary/10 text-primary"> Meeting Time</span>
+                                                                    <span> {lead.meeting_date} </span>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-gray-400 text-xs"> — </span>
+                                                            )}
+                                                        </td>
                                                             <td>
                                                                 <div className="flex items-center">
                                                                     {colorsarray.find((data) => data.value == lead?.lead_status) && (
@@ -575,24 +595,35 @@ const DashboardBox2 = () => {
                                                 <li className="flex items-center gap-2 text-dark">
                                                     <IconUser className="shrink-0" />
                                                     {selectedLead?.customer_name || 'Not-Found'}
+                                                     <button onClick={() => handleCopy(selectedLead?.customer_name, 'name')} className="ml-1 text-gray-500 hover:text-black transition">
+                                                        {copiedField === 'name' ? ( <IconChecks className="text-green-500" /> ) : ( <IconCopy /> )}
+                                                    </button>
+
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone /> <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone || 'Not-Found'} </span>
-                                                    <button type="button" className="btn btn-secondary btn-sm ml-2 rounded-sm" disabled={!isInitialized} onClick={() => setShowDialer(true)} >
-                                                        <IconPhone/>
-                                                    </button> 
+                                                     <button onClick={() => handleCopy(selectedLead?.customer_phone, 'phone1')} className="ml-1 text-gray-500 hover:text-black transition">
+                                                        {copiedField === 'phone1' ? ( <IconChecks className="text-green-500" /> ) : ( <IconCopy /> )}
+                                                    </button>
+                                                    <button type="button" className="btn btn-secondary btn-sm ml-2 rounded-sm" disabled={!isInitialized} onClick={() => setShowDialer(true)} > <IconPhone/> </button> 
 
                                                 </li>
                                                 <li className="flex items-center gap-2">
                                                     <IconPhone />
-                                                    <span className="whitespace-nowrap text-secondary" dir="ltr">
-                                                    {selectedLead?.customer_phone2 || 'Not-Found'}
-                                                    </span>
+                                                    <span className="whitespace-nowrap text-secondary" dir="ltr"> {selectedLead?.customer_phone2 || 'Not-Found'} </span>
+                                                    <button
+                                                        onClick={() => handleCopy(selectedLead?.customer_phone2, 'phone2') } className="ml-1 text-gray-500 hover:text-black transition">
+                                                        {copiedField === 'phone2' ? ( <IconChecks className="text-green-500" /> ) : ( <IconCopy /> )}
+                                                    </button>
                                                 </li>
                                                 <li>
                                                     <button className="flex items-center gap-2">
                                                         <IconMail className="w-5 h-5 shrink-0" />
                                                         <span className="text-info truncate">{selectedLead?.customer_email || 'Not-Found'}</span>
+                                                        <button
+                                                        onClick={() => handleCopy(selectedLead?.customer_email, 'email') } className="ml-1 text-gray-500 hover:text-black transition">
+                                                        {copiedField === 'email' ? ( <IconChecks className="text-green-500" /> ) : ( <IconCopy /> )}
+                                                    </button>
                                                     </button>
                                                 </li>
                                                 <div className="h-px border-b border-white-light dark:border-[#1b2e4b]"></div>

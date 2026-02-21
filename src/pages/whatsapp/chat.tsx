@@ -17,7 +17,7 @@ import apiClient from '../../utils/apiClient';
 
 const endpoints = {
   // Chat-related endpoints
-  contacts: `${getBaseUrl()}/whatsapp/chat/contacts`,
+  OutboundInboutApi: `${getBaseUrl()}/whatsapp/chat/outbound_inbout_contact`,
   messages: (phone: string) => `${getBaseUrl()}/whatsapp/chat/messages/${phone}`,
   markRead: (phone: string) => `${getBaseUrl()}/whatsapp/chat/messages/${phone}/read`,
   sendMessage: `${getBaseUrl()}/whatsapp/chat/send-message`,
@@ -58,7 +58,7 @@ const Chat = () => {
 
   useEffect(() => {
     dispatch(setPageTitle('WhatsApp Chat'));
-    loadContacts();
+    LoadOutboundInboudContact();
     setupPusherListener();
   }, [dispatch]);
 
@@ -131,9 +131,9 @@ const Chat = () => {
     });
   };
 
-  const loadContacts = async () => {
+  const LoadOutboundInboudContact = async () => {
     try {
-      const res = await apiClient.get(endpoints.contacts);
+      const res = await apiClient.get(endpoints.OutboundInboutApi);
       const data = res.data;
       if (data?.status) {
         setContacts(data.data as ChatContact[]);
@@ -516,3 +516,6 @@ const Chat = () => {
 };
 
 export default Chat;
+
+
+// 
