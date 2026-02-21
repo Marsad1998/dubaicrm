@@ -381,7 +381,7 @@ const DashboardBox2 = () => {
                                     })}
                                 </div>
                             </div> 
-                          </div>
+                          </div> 
                             <div className="h-px border-b border-white-light dark:border-[#1b2e4b]"></div>
                                 {loading ? (
                                     <Loader3 />
