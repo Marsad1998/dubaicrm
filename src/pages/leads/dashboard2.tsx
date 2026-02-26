@@ -87,7 +87,7 @@ const DashboardBox2 = () => {
             (s: any) => Number(s.value) === Number(id)
         );
     };
-    
+
     const LeadsTabs = async (status: number) => {
         combinedRef.current.ishideshow = true;
         const response = await dispatch(DashboardLeadslist({ page_number : meta.current_page , lead_status : status, dashboardType: dashboardType || 'all', search: searchText  }) as any);
@@ -291,7 +291,7 @@ const DashboardBox2 = () => {
                                         <button type="button" className="xl:hidden hover:text-primary mr-3 p-1" onClick={() => setIsShowMailMenu(!isShowMailMenu)}>
                                             <IconMenu className="w-5 h-5"/>
                                         </button> 
-                                         {/* <div className="gap-1">
+                                         <div className="gap-1">
                                             {combinedRef.current.ishideshow && (
                                                 <div className="relative inline-block">
                                                
@@ -321,7 +321,7 @@ const DashboardBox2 = () => {
                                                 </div>
                                             </div>
                                             )}
-                                        </div>  */}
+                                        </div>  
                                          &nbsp; &nbsp;
                                         <div className="relative flex-1 sm:flex-none">
                                             <input type="text" className="form-input w-full sm:w-[200px] pr-8 rounded-sm" placeholder="Search Lead" value={searchText} onChange={(e) => setSearchText(e.target.value)} />

@@ -53,18 +53,79 @@ const Chat = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [profileTab, setProfileTab] = useState('Media');
 
+  // useEffect(() => {
+  //   dispatch(setPageTitle('WhatsApp Chat'));
+  //   loadContacts();
+
+  //   const channel = echo.channel('whatsapp-messages');
+  //   channel.listenToAll((eventName: string, data: any) => {
+  //     console.log('🔥 EVENT RECEIVED:', eventName);
+  //     console.log('📦 DATA:', data);
+  //   });
+
+  //   return () => {
+  //     console.log('🧹 Cleaning up listener');
+  //     echo.leave('whatsapp-messages');
+  //   };
+  // }, []);
+
+
+
   useEffect(() => {
     dispatch(setPageTitle('WhatsApp Chat'));
     loadContacts();
 
     const channel = echo.channel('whatsapp-messages');
-    channel.listenToAll((eventName: string, data: any) => {
-      console.log('🔥 EVENT RECEIVED:', eventName);
-      console.log('📦 DATA:', data);
+
+    // 🔵 New message event
+    channel.listen('.message.sent', (e: any) => {
+      console.log('NEW MESSAGE EVENT:', e);
+
+      const chat = e.chat;
+
+      if (!chat) return;
+
+      // If inbound → add to chat
+      if (chat.direction === 'inbound') {
+        handleNewMessage({
+          id: chat.id,
+          from: chat.from,
+          body: JSON.parse(chat.payload)?.body ?? '',
+          created_at: chat.created_at,
+          status: chat.status,
+        });
+      }
+
+      // If outbound → update status
+      // if (chat.direction === 'outbound') {
+      //   setMessages(prev =>
+      //     prev.map(msg =>
+      //       msg.sid === chat.sid
+      //         ? { ...msg, status: chat.status }
+      //         : msg
+      //     )
+      //   );
+      // }
     });
 
+    // 🔵 Status update event (if you implemented it)
+    // channel.listen('.message.status.updated', (e: any) => {
+    //   console.log('STATUS UPDATE EVENT:', e);
+
+    //   const chat = e.chat;
+
+    //   if (!chat) return;
+
+    //   setMessages(prev =>
+    //     prev.map(msg =>
+    //       msg.sid === chat.sid
+    //         ? { ...msg, status: chat.status }
+    //         : msg
+    //     )
+    //   );
+    // });
+
     return () => {
-      console.log('🧹 Cleaning up listener');
       echo.leave('whatsapp-messages');
     };
   }, []);
