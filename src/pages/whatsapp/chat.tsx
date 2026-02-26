@@ -76,16 +76,10 @@ const Chat = () => {
     loadContacts();
 
     const channel = echo.channel('whatsapp-messages');
-
-    // 🔵 New message event
     channel.listen('.message.sent', (e: any) => {
-      console.log('NEW MESSAGE EVENT:', e);
-
+      // console.log('NEW MESSAGE EVENT:', e);
       const chat = e.chat;
-
       if (!chat) return;
-
-      // If inbound → add to chat
       if (chat.direction === 'inbound') {
         handleNewMessage({
           id: chat.id,
@@ -96,35 +90,7 @@ const Chat = () => {
         });
       }
 
-      // If outbound → update status
-      // if (chat.direction === 'outbound') {
-      //   setMessages(prev =>
-      //     prev.map(msg =>
-      //       msg.sid === chat.sid
-      //         ? { ...msg, status: chat.status }
-      //         : msg
-      //     )
-      //   );
-      // }
     });
-
-    // 🔵 Status update event (if you implemented it)
-    // channel.listen('.message.status.updated', (e: any) => {
-    //   console.log('STATUS UPDATE EVENT:', e);
-
-    //   const chat = e.chat;
-
-    //   if (!chat) return;
-
-    //   setMessages(prev =>
-    //     prev.map(msg =>
-    //       msg.sid === chat.sid
-    //         ? { ...msg, status: chat.status }
-    //         : msg
-    //     )
-    //   );
-    // });
-
     return () => {
       echo.leave('whatsapp-messages');
     };
