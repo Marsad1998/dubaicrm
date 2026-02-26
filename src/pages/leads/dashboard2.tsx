@@ -87,8 +87,7 @@ const DashboardBox2 = () => {
             (s: any) => Number(s.value) === Number(id)
         );
     };
-
-
+    
     const LeadsTabs = async (status: number) => {
         combinedRef.current.ishideshow = true;
         const response = await dispatch(DashboardLeadslist({ page_number : meta.current_page , lead_status : status, dashboardType: dashboardType || 'all', search: searchText  }) as any);
