@@ -53,28 +53,9 @@ const Chat = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [profileTab, setProfileTab] = useState('Media');
 
-  // useEffect(() => {
-  //   dispatch(setPageTitle('WhatsApp Chat'));
-  //   loadContacts();
-
-  //   const channel = echo.channel('whatsapp-messages');
-  //   channel.listenToAll((eventName: string, data: any) => {
-  //     console.log('🔥 EVENT RECEIVED:', eventName);
-  //     console.log('📦 DATA:', data);
-  //   });
-
-  //   return () => {
-  //     console.log('🧹 Cleaning up listener');
-  //     echo.leave('whatsapp-messages');
-  //   };
-  // }, []);
-
-
-
   useEffect(() => {
     dispatch(setPageTitle('WhatsApp Chat'));
     loadContacts();
-
     const channel = echo.channel('whatsapp-messages');
     channel.listen('.message.sent', (e: any) => {
       // console.log('NEW MESSAGE EVENT:', e);
