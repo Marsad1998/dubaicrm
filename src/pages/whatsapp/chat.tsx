@@ -326,7 +326,7 @@ interface ChatContact {
 interface IncomingMessageData {
   id: number;
   from: string;
-  body: string;
+  payload: string;
   created_at: string;
   status: string;
   template?: { friendly_name?: string };
@@ -365,18 +365,25 @@ const Chat = () => {
   }, [dispatch]);
 
   // Setup WebSocket listener
+
   useEffect(() => {
     const channel = echo.channel('whatsapp-messages');
-    
     channel.listen('.message.sent', (e: { chat: IncomingMessageData }) => {
       const chat = e.chat;
       if (!chat) return;
 
       const phone = cleanPhone(chat.from);
+      let messageBody = '';
+      try {
+        const payload = JSON.parse(chat.payload);
+        messageBody = payload?.body ?? '';
+      } catch (e) {
+        console.error('Failed to parse chat payload:', e);
+      }
       
       // Update contacts list
       updateContactsFromMessage(phone, {
-        body: chat.body,
+        body: messageBody,  // Use the parsed body
         created_at: chat.created_at,
         status: chat.status
       });
@@ -387,7 +394,7 @@ const Chat = () => {
           id: chat.id,
           direction: 'inbound',
           status: chat.status as WhatsAppMessage['status'] || 'received',
-          message: chat.body,
+          message: messageBody,  // Use the parsed body here too
           template_name: chat.template?.friendly_name,
           message_time: chat.created_at,
         };
@@ -401,6 +408,7 @@ const Chat = () => {
       echo.leave('whatsapp-messages');
     };
   }, [selectedContact]);
+ 
 
   // Update contacts when new message arrives
   const updateContactsFromMessage = (
