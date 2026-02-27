@@ -150,13 +150,9 @@ const Chat = () => {
     //   created_at: chat.created_at,
     //   status: chat.status
     // });
-
-    if (chat.direction === 'inbound') {
-      updateContactsFromMessage(phone, {
-        body: messageBody,
-        created_at: chat.created_at,
-        status: chat.status
-      });
+    console.log(chat.direction);
+    if (chat.direction === 'outbound') {
+      updateContactsFromMessage(phone, { body: messageBody, created_at: chat.created_at, status: chat.status });
     }
 
     // Only process if this contact is selected
@@ -177,8 +173,10 @@ const Chat = () => {
         setMessages(prev => [...prev, newMessage]);
         markMessagesAsRead(phone);
         
-      } else if (chat.direction === 'outbound') {
-        
+      }
+     } 
+     
+     if (chat.direction === 'outbound') {   
         console.log('Updating outbound message status:', chat.sid, chat.status);
         
         setMessages(prev => 
@@ -195,7 +193,6 @@ const Chat = () => {
           })
         );
       }
-    }
   });
   return () => {
     echo.leave('whatsapp-messages');
