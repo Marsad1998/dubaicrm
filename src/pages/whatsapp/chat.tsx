@@ -189,18 +189,12 @@ const Chat = () => {
       }
     }
   });
-
   return () => {
     echo.leave('whatsapp-messages');
   };
 }, [selectedContact]);
- 
 
-  // Update contacts when new message arrives
-  const updateContactsFromMessage = (
-    phone: string, 
-    messageData: { body: string; created_at: string; status: string }
-  ) => {
+  const updateContactsFromMessage = (phone: string,  messageData: { body: string; created_at: string; status: string }) => {
     setContacts(prev => {
       const existingContact = prev.find(c => c.phone === phone);
       
