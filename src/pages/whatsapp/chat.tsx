@@ -150,7 +150,6 @@ const Chat = () => {
       created_at: chat.created_at,
       status: chat.status
     });
-
     // Only process if this contact is selected
     if (selectedContact?.phone === phone) {
       
