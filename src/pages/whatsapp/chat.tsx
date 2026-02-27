@@ -145,11 +145,20 @@ const Chat = () => {
     console.log('WebSocket received:', chat.direction, chat.status, chat.sid);
     
     // Update contacts list for both inbound and outbound
-    updateContactsFromMessage(phone, {
-      body: messageBody,
-      created_at: chat.created_at,
-      status: chat.status
-    });
+    // updateContactsFromMessage(phone, {
+    //   body: messageBody,
+    //   created_at: chat.created_at,
+    //   status: chat.status
+    // });
+
+    if (chat.direction === 'inbound') {
+      updateContactsFromMessage(phone, {
+        body: messageBody,
+        created_at: chat.created_at,
+        status: chat.status
+      });
+    }
+
     // Only process if this contact is selected
     if (selectedContact?.phone === phone) {
       
@@ -169,7 +178,7 @@ const Chat = () => {
         markMessagesAsRead(phone);
         
       } else if (chat.direction === 'outbound') {
-        // Handle STATUS UPDATE for existing outbound message
+        
         console.log('Updating outbound message status:', chat.sid, chat.status);
         
         setMessages(prev => 
@@ -230,6 +239,9 @@ const Chat = () => {
     });
   };
 
+
+  
+
   // Load contacts
   const loadContacts = async () => {
     try {
@@ -288,7 +300,7 @@ const Chat = () => {
     if (!newMessage.trim() || !selectedContact || loading) return;
 
     const messageText = newMessage.trim();
-    setNewMessage(''); // Clear input immediately for better UX
+    setNewMessage('');
 
     // Add temporary message
     const tempMessage: WhatsAppMessage = {
