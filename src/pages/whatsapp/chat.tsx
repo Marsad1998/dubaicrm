@@ -193,68 +193,73 @@ const Chat = () => {
     setIsShowChatMenu(false);
   };
 
+
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedContact || loading) return;
+  if (!newMessage.trim() || !selectedContact || loading) return;
 
-    const messageText = newMessage.trim();
-    setNewMessage('');
+  const messageText = newMessage.trim();
+  setNewMessage('');
 
-    // ✅ Temp message with a local tempId to track it
-    const tempId = Date.now();
-    const tempMessage: WhatsAppMessage = {
-      id: tempId,
-      direction: 'outbound',
-      status: 'sent',
+  // Temp message with a temporary SID
+  const tempId = Date.now();
+  const tempMessage: WhatsAppMessage = {
+    id: tempId,
+    direction: 'outbound',
+    status: 'sent',
+    message: messageText,
+    message_time: new Date().toISOString(),
+    sid: `temp_${tempId}`, // Use temporary SID
+  };
+
+  setMessages(prev => [...prev, tempMessage]);
+
+  try {
+    setLoading(true);
+    const templateId = messages[0]?.template_id ? Number(messages[0].template_id) : null;
+
+    const res = await apiClient.post(endpoints.sendMessage, {
+      to: selectedContact.phone,
       message: messageText,
-      message_time: new Date().toISOString(),
-       sid: `temp_${tempId}`, 
-      // sid: null, 
-    };
+      template_id: templateId,
+    });
 
-    setMessages(prev => [...prev, tempMessage]);
+    if (res.data?.status) {
+      // ✅ FIXED: The response structure is res.data.data.sid
+      console.log('Send message response:', res.data); // Debug log
+      const realSid = res.data?.data?.sid; 
+      const realId = res.data?.data?.id ?? tempId;
+      
+      console.log('Message sent with SID:', realSid); // Debug log
 
-    try {
-      setLoading(true);
-      const templateId = messages[0]?.template_id ? Number(messages[0].template_id) : null;
-
-      const res = await apiClient.post(endpoints.sendMessage, {
-        to: selectedContact.phone,
-        message: messageText,
-        template_id: templateId,
-      });
-
-      if (res.data?.status) {
-        const realSid: string | null = res.data?.data?.sid ?? res.data?.sid ?? null;
-        const realId: number = res.data?.data?.id ?? tempId;
-
-        setMessages(prev =>
-          prev.map(msg => msg.id === tempId ? { ...msg, id: realId, sid: realSid, status: 'sent' } : msg )
-        );
-      }
-
-      // if (res.data?.status) {
-      //   const realSid: string | null = res.data?.data?.sid ?? res.data?.sid ?? null;
-      //   const realId: number = res.data?.data?.id ?? tempId;
-
-      //   setMessages(prev =>
-      //     prev.map(msg => msg.id === tempId ? { ...msg, id: realId, sid: realSid, status: 'sent' } : msg )
-      //   );
-      // } else {
-        else { 
-          setMessages(prev =>
-          prev.map(msg => msg.id === tempId ? { ...msg, status: 'failed' } : msg)
-        );
-      }
-    } catch (error) {
-      console.error('Failed to send message:', error);
+      setMessages(prev =>
+        prev.map(msg => 
+          msg.id === tempId 
+            ? { 
+                ...msg, 
+                id: realId, 
+                sid: realSid,  // Now this will have the real SID
+                status: 'sent' 
+              } 
+            : msg
+        )
+      );
+    } else {
       setMessages(prev =>
         prev.map(msg => msg.id === tempId ? { ...msg, status: 'failed' } : msg)
       );
-      alert('Failed to send message. Please try again.');
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error('Failed to send message:', error);
+    setMessages(prev =>
+      prev.map(msg => msg.id === tempId ? { ...msg, status: 'failed' } : msg)
+    );
+    alert('Failed to send message. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+ 
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
