@@ -1,11 +1,296 @@
-import { useState, useEffect, useRef } from 'react';
+// import { useState, useEffect, useRef } from 'react';
+// import { useDispatch } from 'react-redux';
+// import { setPageTitle } from '../../slices/themeConfigSlice';
+// import IconSend from '../../components/Icon/IconSend';
+// import IconMenu from '../../components/Icon/IconMenu';
+// import IconSearch from '../../components/Icon/IconSearch';
+// import IconPhone from '../../components/Icon/IconPhone';
+// import IconVideo from '../../components/Icon/IconVideo';
+// import IconHorizontalDots from '../../components/Icon/IconHorizontalDots';
+// import { getBaseUrl } from '../../components/BaseUrl';
+// import apiClient from '../../utils/apiClient';
+// import echo from '../../lib/echo';
+
+// const endpoints = {
+//   OutboundInboutApi: `${getBaseUrl()}/whatsapp/chat/outbound_inbound_contact`,
+//   messages: (phone: string) => `${getBaseUrl()}/whatsapp/chat/messages/${phone}`,
+//   markRead: (phone: string) => `${getBaseUrl()}/whatsapp/chat/messages/${phone}/read`,
+//   sendMessage: `${getBaseUrl()}/whatsapp/chat/send-message`,
+// };
+
+// interface WhatsAppMessage {
+//   id: number;
+//   direction: 'inbound' | 'outbound';
+//   status: 'sent' | 'delivered' | 'read' | 'failed' | 'received';
+//   message: string;
+//   template_name?: string | null;
+//   template_id?: number | null;
+//   message_time: string;
+//   sid?: string | null;
+// }
+
+// interface ChatContact {
+//   phone: string;
+//   last_message: string;
+//   last_message_time: string;
+//   message_count: number;
+//   unread_count: number;
+//   avatar_color: string;
+// }
+
+// const Chat = () => {
+//   const dispatch = useDispatch();
+//   const [contacts, setContacts] = useState<ChatContact[]>([]);
+//   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
+//   const [messages, setMessages] = useState<WhatsAppMessage[]>([]);
+//   const [newMessage, setNewMessage] = useState('');
+//   const [searchContact, setSearchContact] = useState('');
+//   const [isShowChatMenu, setIsShowChatMenu] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const messagesEndRef = useRef<HTMLDivElement>(null);
+//   const channelRef = useRef<any>({ fetched: false });
+//   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+//   const [showProfile, setShowProfile] = useState(false);
+//   const [profileTab, setProfileTab] = useState('Media');
+
+//   useEffect(() => {
+//     dispatch(setPageTitle('WhatsApp Chat'));
+//     loadContacts();
+//     const channel = echo.channel('whatsapp-messages');
+//     channel.listen('.message.sent', (e: any) => {
+
+//       const chat = e.chat;
+//       if (!chat) return;
+//       if (chat.direction === 'inbound') {
+        
+//         handleNewMessage({
+//           id: chat.id,
+//           from: chat.from,
+//           body: JSON.parse(chat.payload)?.body ?? '',
+//           created_at: chat.created_at,
+//           status: chat.status,
+//         });
+//       }
+
+//     });
+//     return () => {
+//       echo.leave('whatsapp-messages');
+//     };
+//   }, []);
+
+//   const scrollToBottom = () => {
+//     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+//   };
+
+//   const handleNewMessage = (messageData: any) => {
+//     console.log(messageData);
+//     console.log('selectedContact:', selectedContact);
+//     if (selectedContact) {
+//       const cleanPhone = messageData.from.replace('whatsapp:', '');
+//       if (cleanPhone === selectedContact.phone) {
+//         setMessages((prev) => [
+//           ...prev,
+//           {
+//             id: messageData.id,
+//             direction: 'inbound',
+//             status: messageData.status || 'received',
+//             message: messageData.body,
+//             template_name: messageData.template?.friendly_name,
+//             message_time: messageData.created_at,
+//           },
+//         ]);
+//         markMessagesAsRead(selectedContact.phone);
+//       }
+//     }
+//     updateContactsWithNewMessage(messageData);
+//   };
+
+//   const updateContactsWithNewMessage = (messageData: any) => {
+//     setContacts((prev) => {
+//       const cleanPhone = messageData.from.replace('whatsapp:', '');
+//       const existingContact = prev.find((c) => c.phone === cleanPhone);
+
+//       if (existingContact) {
+//         return prev.map((c) => c.phone === cleanPhone ? 
+//           {
+//                 ...c,
+//                 last_message: messageData.body,
+//                 last_message_time: messageData.created_at,
+//                 message_count: c.message_count + 1,
+//                 unread_count: c.unread_count + (selectedContact?.phone === cleanPhone ? 0 : 1),
+//           }
+//             : c
+//         ).sort((a, b) => new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime());
+//       }
+
+//       return [
+//         {
+//           phone: cleanPhone,
+//           last_message: messageData.body,
+//           last_message_time: messageData.created_at,
+//           message_count: 1,
+//           unread_count: 1,
+//           avatar_color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+//         },
+//         ...prev,
+//       ].sort((a, b) => new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime());
+//     });
+//   };
+
+//   const loadContacts = async () => {
+//     try {
+//       setLoading(true);
+//       const res = await apiClient.get(endpoints.OutboundInboutApi);
+//       const data = res.data;
+//       if (data?.status) {
+//         setContacts(data.data as ChatContact[]);
+//       }
+//     } catch (error) {
+//       console.error('Failed to load contacts:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const loadMessages = async (phone: string) => {
+//     console.log('Loading messages for phone:', phone);
+//     try {
+//       setLoading(true);
+//       const res = await apiClient.get(endpoints.messages(phone));
+//       const data = res.data;
+//       if (data?.status) {
+//         setMessages(data.data as WhatsAppMessage[]);
+//         await markMessagesAsRead(phone);
+//       }
+//     } catch (error) {
+//       console.error('Failed to load messages:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const markMessagesAsRead = async (phone: string) => {
+//     try {
+//       await apiClient.post(endpoints.markRead(phone));
+//       setContacts((prev) =>
+//         prev.map((c) => (c.phone === phone ? { ...c, unread_count: 0 } : c))
+//       );
+//     } catch (error) {
+//       console.error('Failed to mark messages as read:', error);
+//     }
+//   };
+
+//   const selectContact = (contact: ChatContact) => {
+//     setSelectedContact(contact);
+//     setShowProfile(false);
+//     loadMessages(contact.phone);
+//     setIsShowChatMenu(false);
+//   };
+
+//   const sendMessage = async () => {
+//     if (!newMessage.trim() || !selectedContact || loading) return;
+
+//     try {
+//       setLoading(true);
+//       let templateId: number | null = null;
+//       const firstMessage = messages[0];
+//       if (firstMessage && firstMessage.template_id && firstMessage.sid) {
+//         templateId = Number(firstMessage.template_id);
+//       }
+
+//       const res = await apiClient.post(endpoints.sendMessage, {
+//         to: selectedContact.phone,
+//         message: newMessage.trim(),
+//         template_id: templateId,
+//       });
+
+//       const result = res.data;
+//       if (result?.status) {
+//         const tempMessage: WhatsAppMessage = {
+//           id: Date.now(),
+//           direction: 'outbound',
+//           status: 'sent',
+//           message: newMessage.trim(),
+//           template_id: templateId,
+//           template_name: firstMessage?.template_name ?? null,
+//           message_time: new Date().toISOString(),
+//         };
+//         setMessages((prev) => [...prev, tempMessage]);
+//         setNewMessage('');
+//       }
+//     } catch (error) {
+//       console.error('Failed to send message:', error);
+//       alert('Failed to send reply. Please try again.');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleKeyPress = (e: React.KeyboardEvent) => {
+//     if (e.key === 'Enter' && !e.shiftKey) {
+//       e.preventDefault();
+//       sendMessage();
+//     }
+//   };
+
+//   const filteredContacts = contacts.filter((c) =>
+//     c.phone.toLowerCase().includes(searchContact.toLowerCase())
+//   );
+
+//   const formatTime = (dateString: string) => {
+//     return new Date(dateString).toLocaleTimeString([], {
+//       hour: '2-digit',
+//       minute: '2-digit',
+//     });
+//   };
+
+//   const formatDate = (dateString: string) => {
+//     const date = new Date(dateString);
+//     const today = new Date();
+//     const yesterday = new Date(today);
+//     yesterday.setDate(yesterday.getDate() - 1);
+
+//     if (date.toDateString() === today.toDateString()) {
+//       return formatTime(dateString);
+//     } else if (date.toDateString() === yesterday.toDateString()) {
+//       return 'Yesterday';
+//     } else {
+//       return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+//     }
+//   };
+
+//   const getInitials = (phone: string) => {
+//     const digits = phone.replace(/\D/g, '');
+//     return digits.slice(-4) || 'WA';
+//   };
+
+//   const getStatusIcon = (status: string) => {
+//     if (status === 'read') return (
+//       <svg className="w-4 h-4" viewBox="0 0 16 11" fill="#53bdeb">
+//         <path d="M11.071.653a.75.75 0 0 1 .025 1.06L4.92 8.33l-3.02-2.7a.75.75 0 0 1 1.003-1.117l1.97 1.76L10.01.678a.75.75 0 0 1 1.061-.025Z"/>
+//         <path d="M14.571.653a.75.75 0 0 1 .025 1.06l-6.8 7.2a.75.75 0 0 1-1.085-.025L5.236 7.01a.75.75 0 1 1 1.028-1.092l1.048 1.285 6.2-6.575a.75.75 0 0 1 1.059.025Z"/>
+//       </svg>
+//     );
+//     if (status === 'delivered') return (
+//       <svg className="w-4 h-4" viewBox="0 0 16 11" fill="#667781">
+//         <path d="M11.071.653a.75.75 0 0 1 .025 1.06L4.92 8.33l-3.02-2.7a.75.75 0 0 1 1.003-1.117l1.97 1.76L10.01.678a.75.75 0 0 1 1.061-.025Z"/>
+//         <path d="M14.571.653a.75.75 0 0 1 .025 1.06l-6.8 7.2a.75.75 0 0 1-1.085-.025L5.236 7.01a.75.75 0 1 1 1.028-1.092l1.048 1.285 6.2-6.575a.75.75 0 0 1 1.059.025Z"/>
+//       </svg>
+//     );
+//     return (
+//       <svg className="w-3.5 h-3.5" viewBox="0 0 12 11" fill="#667781">
+//         <path d="M10.95.47a.75.75 0 0 1 .08 1.057L5.114 8.44 1.22 5.1a.75.75 0 1 1 .97-1.143l2.716 2.309 5.002-5.72A.75.75 0 0 1 10.95.47Z"/>
+//       </svg>
+//     );
+//   };
+
+
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../slices/themeConfigSlice';
 import IconSend from '../../components/Icon/IconSend';
 import IconMenu from '../../components/Icon/IconMenu';
 import IconSearch from '../../components/Icon/IconSearch';
-import IconPhone from '../../components/Icon/IconPhone';
-import IconVideo from '../../components/Icon/IconVideo';
 import IconHorizontalDots from '../../components/Icon/IconHorizontalDots';
 import { getBaseUrl } from '../../components/BaseUrl';
 import apiClient from '../../utils/apiClient';
@@ -38,6 +323,15 @@ interface ChatContact {
   avatar_color: string;
 }
 
+interface IncomingMessageData {
+  id: number;
+  from: string;
+  body: string;
+  created_at: string;
+  status: string;
+  template?: { friendly_name?: string };
+}
+
 const Chat = () => {
   const dispatch = useDispatch();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
@@ -47,100 +341,115 @@ const Chat = () => {
   const [searchContact, setSearchContact] = useState('');
   const [isShowChatMenu, setIsShowChatMenu] = useState(false);
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<any>({ fetched: false });
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [profileTab, setProfileTab] = useState('Media');
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Helper to clean phone number
+  const cleanPhone = (phone: string) => phone.replace('whatsapp:', '');
+
+  // Scroll to bottom
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
+
+  // Load contacts on mount
   useEffect(() => {
     dispatch(setPageTitle('WhatsApp Chat'));
     loadContacts();
+  }, [dispatch]);
+
+  // Setup WebSocket listener
+  useEffect(() => {
     const channel = echo.channel('whatsapp-messages');
-    channel.listen('.message.sent', (e: any) => {
-      // console.log('NEW MESSAGE EVENT:', e);
+    
+    channel.listen('.message.sent', (e: { chat: IncomingMessageData }) => {
       const chat = e.chat;
       if (!chat) return;
-      if (chat.direction === 'inbound') {
-        handleNewMessage({
-          id: chat.id,
-          from: chat.from,
-          body: JSON.parse(chat.payload)?.body ?? '',
-          created_at: chat.created_at,
-          status: chat.status,
-        });
-      }
 
+      const phone = cleanPhone(chat.from);
+      
+      // Update contacts list
+      updateContactsFromMessage(phone, {
+        body: chat.body,
+        created_at: chat.created_at,
+        status: chat.status
+      });
+
+      // If this contact is selected, add message to chat
+      if (selectedContact?.phone === phone) {
+        const newMessage: WhatsAppMessage = {
+          id: chat.id,
+          direction: 'inbound',
+          status: chat.status as WhatsAppMessage['status'] || 'received',
+          message: chat.body,
+          template_name: chat.template?.friendly_name,
+          message_time: chat.created_at,
+        };
+        
+        setMessages(prev => [...prev, newMessage]);
+        markMessagesAsRead(phone);
+      }
     });
+
     return () => {
       echo.leave('whatsapp-messages');
     };
-  }, []);
+  }, [selectedContact]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleNewMessage = (messageData: any) => {
-    if (selectedContact) {
-      const cleanPhone = messageData.from.replace('whatsapp:', '');
-      if (cleanPhone === selectedContact.phone) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: messageData.id,
-            direction: 'inbound',
-            status: messageData.status || 'received',
-            message: messageData.body,
-            template_name: messageData.template?.friendly_name,
-            message_time: messageData.created_at,
-          },
-        ]);
-        markMessagesAsRead(selectedContact.phone);
-      }
-    }
-    updateContactsWithNewMessage(messageData);
-  };
-
-  const updateContactsWithNewMessage = (messageData: any) => {
-    setContacts((prev) => {
-      const cleanPhone = messageData.from.replace('whatsapp:', '');
-      const existingContact = prev.find((c) => c.phone === cleanPhone);
-
+  // Update contacts when new message arrives
+  const updateContactsFromMessage = (
+    phone: string, 
+    messageData: { body: string; created_at: string; status: string }
+  ) => {
+    setContacts(prev => {
+      const existingContact = prev.find(c => c.phone === phone);
+      
       if (existingContact) {
-        return prev.map((c) => c.phone === cleanPhone ? 
-          {
+        // Update existing contact
+        return prev.map(c => 
+          c.phone === phone 
+            ? {
                 ...c,
                 last_message: messageData.body,
                 last_message_time: messageData.created_at,
                 message_count: c.message_count + 1,
-                unread_count: c.unread_count + (selectedContact?.phone === cleanPhone ? 0 : 1),
-          }
+                unread_count: c.unread_count + (selectedContact?.phone === phone ? 0 : 1),
+              }
             : c
-        ).sort((a, b) => new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime());
-      }
-
-      return [
-        {
-          phone: cleanPhone,
+        ).sort((a, b) => 
+          new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
+        );
+      } else {
+        // Add new contact
+        const newContact: ChatContact = {
+          phone,
           last_message: messageData.body,
           last_message_time: messageData.created_at,
           message_count: 1,
           unread_count: 1,
           avatar_color: '#' + Math.floor(Math.random() * 16777215).toString(16),
-        },
-        ...prev,
-      ].sort((a, b) => new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime());
+        };
+        
+        return [newContact, ...prev].sort((a, b) => 
+          new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
+        );
+      }
     });
   };
 
+  // Load contacts
   const loadContacts = async () => {
     try {
       setLoading(true);
       const res = await apiClient.get(endpoints.OutboundInboutApi);
-      const data = res.data;
-      if (data?.status) {
-        setContacts(data.data as ChatContact[]);
+      if (res.data?.status) {
+        setContacts(res.data.data as ChatContact[]);
       }
     } catch (error) {
       console.error('Failed to load contacts:', error);
@@ -149,13 +458,13 @@ const Chat = () => {
     }
   };
 
+  // Load messages for selected contact
   const loadMessages = async (phone: string) => {
     try {
       setLoading(true);
       const res = await apiClient.get(endpoints.messages(phone));
-      const data = res.data;
-      if (data?.status) {
-        setMessages(data.data as WhatsAppMessage[]);
+      if (res.data?.status) {
+        setMessages(res.data.data as WhatsAppMessage[]);
         await markMessagesAsRead(phone);
       }
     } catch (error) {
@@ -165,17 +474,19 @@ const Chat = () => {
     }
   };
 
+  // Mark messages as read
   const markMessagesAsRead = async (phone: string) => {
     try {
       await apiClient.post(endpoints.markRead(phone));
-      setContacts((prev) =>
-        prev.map((c) => (c.phone === phone ? { ...c, unread_count: 0 } : c))
+      setContacts(prev =>
+        prev.map(c => c.phone === phone ? { ...c, unread_count: 0 } : c)
       );
     } catch (error) {
       console.error('Failed to mark messages as read:', error);
     }
   };
 
+  // Select contact
   const selectContact = (contact: ChatContact) => {
     setSelectedContact(contact);
     setShowProfile(false);
@@ -183,45 +494,57 @@ const Chat = () => {
     setIsShowChatMenu(false);
   };
 
+  // Send message
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedContact || loading) return;
 
+    const messageText = newMessage.trim();
+    setNewMessage(''); // Clear input immediately for better UX
+
+    // Add temporary message
+    const tempMessage: WhatsAppMessage = {
+      id: Date.now(),
+      direction: 'outbound',
+      status: 'sent',
+      message: messageText,
+      message_time: new Date().toISOString(),
+    };
+    
+    setMessages(prev => [...prev, tempMessage]);
+
     try {
       setLoading(true);
-      let templateId: number | null = null;
-      const firstMessage = messages[0];
-      if (firstMessage && firstMessage.template_id && firstMessage.sid) {
-        templateId = Number(firstMessage.template_id);
-      }
+      const templateId = messages[0]?.template_id ? Number(messages[0].template_id) : null;
 
       const res = await apiClient.post(endpoints.sendMessage, {
         to: selectedContact.phone,
-        message: newMessage.trim(),
+        message: messageText,
         template_id: templateId,
       });
 
-      const result = res.data;
-      if (result?.status) {
-        const tempMessage: WhatsAppMessage = {
-          id: Date.now(),
-          direction: 'outbound',
-          status: 'sent',
-          message: newMessage.trim(),
-          template_id: templateId,
-          template_name: firstMessage?.template_name ?? null,
-          message_time: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, tempMessage]);
-        setNewMessage('');
+      if (!res.data?.status) {
+        // Update message status to failed if needed
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.id === tempMessage.id ? { ...msg, status: 'failed' } : msg
+          )
+        );
       }
     } catch (error) {
       console.error('Failed to send message:', error);
-      alert('Failed to send reply. Please try again.');
+      // Update message status to failed
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === tempMessage.id ? { ...msg, status: 'failed' } : msg
+        )
+      );
+      alert('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle enter key
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -229,10 +552,12 @@ const Chat = () => {
     }
   };
 
-  const filteredContacts = contacts.filter((c) =>
+  // Filter contacts
+  const filteredContacts = contacts.filter(c =>
     c.phone.toLowerCase().includes(searchContact.toLowerCase())
   );
 
+  // Format time
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString([], {
       hour: '2-digit',
@@ -240,6 +565,7 @@ const Chat = () => {
     });
   };
 
+  // Format date for contact list
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
@@ -255,11 +581,13 @@ const Chat = () => {
     }
   };
 
+  // Get initials from phone
   const getInitials = (phone: string) => {
     const digits = phone.replace(/\D/g, '');
     return digits.slice(-4) || 'WA';
   };
 
+  // Get status icon
   const getStatusIcon = (status: string) => {
     if (status === 'read') return (
       <svg className="w-4 h-4" viewBox="0 0 16 11" fill="#53bdeb">
