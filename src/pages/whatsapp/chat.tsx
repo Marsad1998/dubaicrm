@@ -37,6 +37,8 @@ interface ChatContact {
 }
 
 interface IncomingMessageData {
+  sid: string | null | undefined;
+  direction: string;
   id: number;
   from: string;
   payload: string;
@@ -79,48 +81,119 @@ const Chat = () => {
 
   // Setup WebSocket listener
 
-  useEffect(() => {
-    const channel = echo.channel('whatsapp-messages');
-    channel.listen('.message.sent', (e: { chat: IncomingMessageData }) => {
-      const chat = e.chat;
-      if (!chat) return;
+  // useEffect(() => {
+  //   const channel = echo.channel('whatsapp-messages');
+  //   channel.listen('.message.sent', (e: { chat: IncomingMessageData }) => {
+  //     const chat = e.chat;
+  //     if (!chat) return;
 
-      const phone = cleanPhone(chat.from);
-      let messageBody = '';
-      try {
-        const payload = JSON.parse(chat.payload);
-        messageBody = payload?.body ?? '';
-      } catch (e) {
-        console.error('Failed to parse chat payload:', e);
-      }
+  //     const phone = cleanPhone(chat.from);
+  //     let messageBody = '';
+  //     try {
+  //       const payload = JSON.parse(chat.payload);
+  //       messageBody = payload?.body ?? '';
+  //     } catch (e) {
+  //       console.error('Failed to parse chat payload:', e);
+  //     }
       
-      // Update contacts list
-      updateContactsFromMessage(phone, {
-        body: messageBody,  // Use the parsed body
-        created_at: chat.created_at,
-        status: chat.status
-      });
+  //     // Update contacts list
+  //     updateContactsFromMessage(phone, {
+  //       body: messageBody,  // Use the parsed body
+  //       created_at: chat.created_at,
+  //       status: chat.status
+  //     });
 
-      // If this contact is selected, add message to chat
-      if (selectedContact?.phone === phone) {
+  //     // If this contact is selected, add message to chat
+  //     if (selectedContact?.phone === phone) {
+  //       const newMessage: WhatsAppMessage = {
+  //         id: chat.id,
+  //         direction: 'inbound',
+  //         status: chat.status as WhatsAppMessage['status'] || 'received',
+  //         message: messageBody,  // Use the parsed body here too
+  //         template_name: chat.template?.friendly_name,
+  //         message_time: chat.created_at,
+  //       };
+        
+  //       setMessages(prev => [...prev, newMessage]);
+  //       markMessagesAsRead(phone);
+  //     }
+  //   });
+
+  //   return () => {
+  //     echo.leave('whatsapp-messages');
+  //   };
+  // }, [selectedContact]);
+
+
+
+  useEffect(() => {
+  const channel = echo.channel('whatsapp-messages');
+  
+  channel.listen('.message.sent', (e: { chat: IncomingMessageData }) => {
+    const chat = e.chat;
+    if (!chat) return;
+
+    const phone = cleanPhone(chat.from);
+    let messageBody = '';
+    try {
+      const payload = JSON.parse(chat.payload);
+      messageBody = payload?.body ?? '';
+    } catch (e) {
+      console.error('Failed to parse chat payload:', e);
+    }
+    
+    console.log('WebSocket received:', chat.direction, chat.status, chat.sid);
+    
+    // Update contacts list for both inbound and outbound
+    updateContactsFromMessage(phone, {
+      body: messageBody,
+      created_at: chat.created_at,
+      status: chat.status
+    });
+
+    // Only process if this contact is selected
+    if (selectedContact?.phone === phone) {
+      
+      if (chat.direction === 'inbound') {
+        // Handle NEW inbound message
         const newMessage: WhatsAppMessage = {
           id: chat.id,
           direction: 'inbound',
           status: chat.status as WhatsAppMessage['status'] || 'received',
-          message: messageBody,  // Use the parsed body here too
+          message: messageBody,
           template_name: chat.template?.friendly_name,
           message_time: chat.created_at,
+          sid: chat.sid,
         };
         
         setMessages(prev => [...prev, newMessage]);
         markMessagesAsRead(phone);
+        
+      } else if (chat.direction === 'outbound') {
+        // Handle STATUS UPDATE for existing outbound message
+        console.log('Updating outbound message status:', chat.sid, chat.status);
+        
+        setMessages(prev => 
+          prev.map(msg => {
+            // Match by SID
+            if (msg.sid === chat.sid) {
+              return {
+                ...msg,
+                status: chat.status as WhatsAppMessage['status'],
+                // Keep all other fields the same
+              };
+            }
+            return msg;
+          })
+        );
       }
-    });
+    }
+  });
 
-    return () => {
-      echo.leave('whatsapp-messages');
-    };
-  }, [selectedContact]);
+  return () => {
+    echo.leave('whatsapp-messages');
+  };
+}, [selectedContact]);
  
 
   // Update contacts when new message arrives
@@ -170,7 +243,7 @@ const Chat = () => {
       setLoading(true);
       const res = await apiClient.get(endpoints.OutboundInboutApi);
       if (res.data?.status) {
-          scrollToBottom();
+         
         setContacts(res.data.data as ChatContact[]);
       }
     } catch (error) {
@@ -184,6 +257,7 @@ const Chat = () => {
   const loadMessages = async (phone: string) => {
     try {
       setLoading(true);
+       scrollToBottom();
       const res = await apiClient.get(endpoints.messages(phone));
       if (res.data?.status) {
         setMessages(res.data.data as WhatsAppMessage[]);
@@ -230,6 +304,7 @@ const Chat = () => {
       status: 'sent',
       message: messageText,
       message_time: new Date().toISOString(),
+       sid: null,
     };
     
     setMessages(prev => [...prev, tempMessage]);
