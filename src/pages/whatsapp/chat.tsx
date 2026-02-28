@@ -41,6 +41,7 @@ interface IncomingMessageData {
   direction: string;
   id: number;
   from: string;
+  to: string;
   payload: string;
   created_at: string;
   status: string;
@@ -80,75 +81,7 @@ const Chat = () => {
     loadContacts();
   }, [dispatch]);
 
-  // ✅ WebSocket: runs ONCE, uses ref to get current selectedContact
-  // useEffect(() => {
-  //   const channel = echo.channel('whatsapp-messages');
-
-  //   channel.listen('.message.sent', (e: { chat: IncomingMessageData }) => {
-  //     const chat = e.chat;
-  //     if (!chat) return;
-
-  //     const phone = chat.from.replace('whatsapp:', '');
-  //     let messageBody = '';
-  //     try {
-  //       messageBody = JSON.parse(chat.payload)?.body ?? '';
-  //     } catch {
-  //       // ignore parse errors
-  //     }
-
-  //     const current = selectedContactRef.current;
-
-  //     if (chat.direction === 'inbound') {
-  //       // Update contacts sidebar
-  //       setContacts(prev => {
-  //         const exists = prev.find(c => c.phone === phone);
-  //         const isOpen = current?.phone === phone;
-  //         if (exists) {
-  //           return prev
-  //             .map(c => c.phone === phone
-  //               ? { ...c, last_message: messageBody, last_message_time: chat.created_at, message_count: c.message_count + 1, unread_count: isOpen ? 0 : c.unread_count + 1 }
-  //               : c
-  //             )
-  //             .sort((a, b) => new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime());
-  //         }
-  //         return [
-  //           { phone, last_message: messageBody, last_message_time: chat.created_at, message_count: 1, unread_count: 1, avatar_color: '#' + Math.floor(Math.random() * 16777215).toString(16) },
-  //           ...prev,
-  //         ];
-  //       });
-
-  //       // If this contact is open, append to messages
-  //       if (current?.phone === phone) {
-  //         setMessages(prev => [...prev, {
-  //           id: chat.id,
-  //           direction: 'inbound',
-  //           status: (chat.status as WhatsAppMessage['status']) || 'received',
-  //           message: messageBody,
-  //           template_name: chat.template?.friendly_name ?? null,
-  //           message_time: chat.created_at,
-  //           sid: chat.sid,
-  //         }]);
-  //         markMessagesAsRead(phone);
-  //       }
-
-  //     } else if (chat.direction === 'outbound' && chat.sid) {
-  //       // ✅ Update existing message status by SID (no new message added)
-  //       if (current?.phone === phone) {
-  //         setMessages(prev =>
-  //           prev.map(msg =>
-  //             msg.sid === chat.sid
-  //               ? { ...msg, status: chat.status as WhatsAppMessage['status'] }
-  //               : msg
-  //           )
-  //         );
-  //       }
-  //     }
-  //   });
-
-  //   return () => {
-  //     echo.leave('whatsapp-messages');
-  //   };
-  // }, []); 
+  
 
 
   useEffect(() => {
@@ -165,7 +98,13 @@ const Chat = () => {
       phone: chat.from 
     });
 
-    const phone = chat.from.replace('whatsapp:', '');
+    const phone =
+  chat.direction === 'inbound'
+    ? chat.from.replace('whatsapp:', '')
+    : chat.to?.replace('whatsapp:', '');
+
+    // const phone = chat.from.replace('whatsapp:', '');
+    
     let messageBody = '';
     try {
       messageBody = JSON.parse(chat.payload)?.body ?? '';
@@ -209,26 +148,15 @@ const Chat = () => {
       }
 
     } else if (chat.direction === 'outbound' && chat.sid) {
-      // ✅ Update existing message status by SID (no new message added)
-      if (current?.phone === phone) {
-        console.log('Looking for message with SID:', chat.sid);
-        
-        // Log current messages to debug
-        setMessages(prev => {
-          console.log('Current messages SIDs:', prev.map(m => ({ id: m.id, sid: m.sid, status: m.status })));
-          
-          const updated = prev.map(msg => {
-            if (msg.sid === chat.sid) {
-              console.log('✅ Found matching message, updating status from', msg.status, 'to', chat.status);
-              return { ...msg, status: chat.status as WhatsAppMessage['status'] };
-            }
-            return msg;
-          });
-          
-          console.log('Messages after update:', updated.map(m => ({ id: m.id, sid: m.sid, status: m.status })));
-          return updated;
-        });
-      }
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.sid === chat.sid
+              ? { ...msg, status: chat.status as WhatsAppMessage['status'] }
+              : msg
+          )
+        );
+
+      
     }
   });
 
@@ -313,23 +241,26 @@ const Chat = () => {
     if (res.data?.status) {
       // ✅ FIXED: The response structure is res.data.data.sid
       console.log('Send message response:', res.data); // Debug log
-      const realSid = res.data?.data?.sid; 
+
+      const realSid = res.data?.data?.sid ?? null;
       const realId = res.data?.data?.id ?? tempId;
-      
-      console.log('Message sent with SID:', realSid); // Debug log
+      if (!realSid) {
+        console.error('❌ No SID returned from API');
+      }
 
       setMessages(prev =>
-        prev.map(msg => 
-          msg.id === tempId 
-            ? { 
-                ...msg, 
-                id: realId, 
-                sid: realSid,  // Now this will have the real SID
-                status: 'sent' 
-              } 
+        prev.map(msg =>
+          msg.id === tempId
+            ? {
+                ...msg,
+                id: realId,
+                sid: realSid,
+                status: 'sent'
+              }
             : msg
         )
       );
+
     } else {
       setMessages(prev =>
         prev.map(msg => msg.id === tempId ? { ...msg, status: 'failed' } : msg)
