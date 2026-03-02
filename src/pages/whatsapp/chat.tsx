@@ -61,7 +61,6 @@ const Chat = () => {
   const [profileTab, setProfileTab] = useState('Media');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // ✅ Ref to always have latest selectedContact inside WebSocket closure
   const selectedContactRef = useRef<ChatContact | null>(null);
 
   useEffect(() => {
@@ -81,30 +80,21 @@ const Chat = () => {
     loadContacts();
   }, [dispatch]);
 
-  
-
-
   useEffect(() => {
   const channel = echo.channel('whatsapp-messages');
-
   channel.listen('.message.sent', (e: { chat: IncomingMessageData }) => {
     const chat = e.chat;
     if (!chat) return;
 
-    console.log('WebSocket received:', { 
-      sid: chat.sid, 
-      direction: chat.direction, 
-      status: chat.status,
-      phone: chat.from 
-    });
-
-    const phone =
-  chat.direction === 'inbound'
-    ? chat.from.replace('whatsapp:', '')
-    : chat.to?.replace('whatsapp:', '');
-
+    // console.log('WebSocket received:', { 
+    //   sid: chat.sid, 
+    //   direction: chat.direction, 
+    //   status: chat.status,
+    //   phone: chat.from 
+    // });
+    // 
+    const phone = chat.direction === 'inbound' ? chat.from.replace('whatsapp:', '') : chat.to?.replace('whatsapp:', '');
     // const phone = chat.from.replace('whatsapp:', '');
-    
     let messageBody = '';
     try {
       messageBody = JSON.parse(chat.payload)?.body ?? '';
@@ -133,7 +123,6 @@ const Chat = () => {
         ];
       });
 
-      // If this contact is open, append to messages
       if (current?.phone === phone) {
         setMessages(prev => [...prev, {
           id: chat.id,
@@ -155,8 +144,6 @@ const Chat = () => {
               : msg
           )
         );
-
-      
     }
   });
 
@@ -183,6 +170,12 @@ const Chat = () => {
       const res = await apiClient.get(endpoints.messages(phone));
       if (res.data?.status) {
         setMessages(res.data.data as WhatsAppMessage[]);
+
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+        }, 100);
+
+
         await markMessagesAsRead(phone);
       }
     } catch (error) {
@@ -215,7 +208,6 @@ const Chat = () => {
   const messageText = newMessage.trim();
   setNewMessage('');
 
-  // Temp message with a temporary SID
   const tempId = Date.now();
   const tempMessage: WhatsAppMessage = {
     id: tempId,
@@ -223,7 +215,7 @@ const Chat = () => {
     status: 'sent',
     message: messageText,
     message_time: new Date().toISOString(),
-    sid: `temp_${tempId}`, // Use temporary SID
+    sid: `temp_${tempId}`,
   };
 
   setMessages(prev => [...prev, tempMessage]);
@@ -231,17 +223,13 @@ const Chat = () => {
   try {
     setLoading(true);
     const templateId = messages[0]?.template_id ? Number(messages[0].template_id) : null;
-
     const res = await apiClient.post(endpoints.sendMessage, {
       to: selectedContact.phone,
       message: messageText,
       template_id: templateId,
     });
 
-    if (res.data?.status) {
-      // ✅ FIXED: The response structure is res.data.data.sid
-      console.log('Send message response:', res.data); // Debug log
-
+    if (res.data?.status) {  
       const realSid = res.data?.data?.sid ?? null;
       const realId = res.data?.data?.id ?? tempId;
       if (!realSid) {
@@ -277,7 +265,6 @@ const Chat = () => {
   }
 };
 
- 
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

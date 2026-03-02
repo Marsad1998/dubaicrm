@@ -1,0 +1,1 @@
+import{b as e}from"./index-060daddf.js";const i=()=>e("div",{className:"absolute inset-0 flex justify-center items-center z-10 bg-white bg-opacity-50",children:e("span",{className:"animate-[spin_3s_linear_infinite] border-8 border-r-warning border-l-primary border-t-danger border-b-success rounded-full w-14 h-14 inline-block align-middle m-auto"})});export{i as L};
