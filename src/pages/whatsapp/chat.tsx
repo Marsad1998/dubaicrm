@@ -71,9 +71,9 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+
+  useEffect(() => { setTimeout(() => { scrollToBottom(); }, 100); }, [messages, scrollToBottom]);
+
 
   useEffect(() => {
     dispatch(setPageTitle('WhatsApp Chat'));
@@ -86,13 +86,6 @@ const Chat = () => {
     const chat = e.chat;
     if (!chat) return;
 
-    // console.log('WebSocket received:', { 
-    //   sid: chat.sid, 
-    //   direction: chat.direction, 
-    //   status: chat.status,
-    //   phone: chat.from 
-    // });
-    // 
     const phone = chat.direction === 'inbound' ? chat.from.replace('whatsapp:', '') : chat.to?.replace('whatsapp:', '');
     // const phone = chat.from.replace('whatsapp:', '');
     let messageBody = '';
@@ -173,9 +166,8 @@ const Chat = () => {
 
         setTimeout(() => {
           messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-        }, 100);
-
-
+        }, 200);
+        
         await markMessagesAsRead(phone);
       }
     } catch (error) {
