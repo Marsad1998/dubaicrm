@@ -57,10 +57,12 @@ const Chat = () => {
   const [searchContact, setSearchContact] = useState('');
   const [isShowChatMenu, setIsShowChatMenu] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [profileTab, setProfileTab] = useState('Media');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
   const selectedContactRef = useRef<ChatContact | null>(null);
 
   useEffect(() => {
@@ -68,11 +70,20 @@ const Chat = () => {
   }, [selectedContact]);
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      const el = messagesScrollRef.current;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
+      }
+    });
   }, []);
 
-
-  useEffect(() => { setTimeout(() => { scrollToBottom(); }, 100); }, [messages, scrollToBottom]);
+  useEffect(() => {
+    const t = setTimeout(scrollToBottom, 150);
+    return () => clearTimeout(t);
+  }, [messages, scrollToBottom]);
 
 
   useEffect(() => {
@@ -163,11 +174,9 @@ const Chat = () => {
       const res = await apiClient.get(endpoints.messages(phone));
       if (res.data?.status) {
         setMessages(res.data.data as WhatsAppMessage[]);
-
         setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+          scrollToBottom();
         }, 200);
-        
         await markMessagesAsRead(phone);
       }
     } catch (error) {
@@ -186,16 +195,17 @@ const Chat = () => {
     }
   };
 
-  const selectContact = (contact: ChatContact) => {
+  const selectContact = async (contact: ChatContact) => {
     setSelectedContact(contact);
     setShowProfile(false);
-    loadMessages(contact.phone);
+    await loadMessages(contact.phone);
     setIsShowChatMenu(false);
+    scrollToBottom();
   };
 
 
   const sendMessage = async () => {
-  if (!newMessage.trim() || !selectedContact || loading) return;
+  if (!newMessage.trim() || !selectedContact || sending) return;
 
   const messageText = newMessage.trim();
   setNewMessage('');
@@ -213,7 +223,7 @@ const Chat = () => {
   setMessages(prev => [...prev, tempMessage]);
 
   try {
-    setLoading(true);
+    setSending(true);
     const templateId = messages[0]?.template_id ? Number(messages[0].template_id) : null;
     const res = await apiClient.post(endpoints.sendMessage, {
       to: selectedContact.phone,
@@ -253,7 +263,7 @@ const Chat = () => {
     );
     alert('Failed to send message. Please try again.');
   } finally {
-    setLoading(false);
+    setSending(false);
   }
 };
 
@@ -420,13 +430,14 @@ const Chat = () => {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto px-6 py-4" style={{ background: '#e5ddd5' }}>
+                <div ref={messagesScrollRef} className="flex-1 overflow-y-auto px-6 py-4 min-h-0" style={{ background: '#e5ddd5' }}>
                   {loading ? (
                     <div className="flex justify-center py-8">
                       <div className="animate-spin border-2 border-t-transparent rounded-full w-8 h-8" style={{ borderColor: '#25d366', borderTopColor: 'transparent' }} />
                     </div>
                   ) : (
-                    <div className="space-y-1">
+                    <div className="min-h-full flex flex-col justify-end">
+                      <div className="space-y-1">
                       {messages.map((message, index) => {
                         const showDate = index === 0 || new Date(message.message_time).toDateString() !== new Date(messages[index - 1]?.message_time).toDateString();
                         const showAvatar = index === messages.length - 1 || messages[index + 1]?.direction !== message.direction;
@@ -472,6 +483,7 @@ const Chat = () => {
                         );
                       })}
                       <div ref={messagesEndRef} />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -491,7 +503,7 @@ const Chat = () => {
                     className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-colors disabled:opacity-40"
                     style={{ background: newMessage.trim() ? '#25d366' : '#aebac1' }}
                     onClick={sendMessage}
-                    disabled={!newMessage.trim() || loading}
+                    disabled={!newMessage.trim() || sending}
                   >
                     <IconSend className="w-4 h-4" />
                   </button>
