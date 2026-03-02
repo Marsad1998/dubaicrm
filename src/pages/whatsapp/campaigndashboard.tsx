@@ -14,7 +14,6 @@ import '../dashboard/dashboard.css';
 const endpoints = {
   dashboard: `${getBaseUrl()}/whatsapp/dashboard-report`,
 };
-
 const CampaignDashboard = () => {
   const navigate = useNavigate();
   const toast    = Toast();
