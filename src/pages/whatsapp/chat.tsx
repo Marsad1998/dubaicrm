@@ -12,7 +12,6 @@ import echo from '../../lib/echo';
 const endpoints = {
   OutboundInboutApi: `${getBaseUrl()}/whatsapp/chat/outbound_inbound_contact`,
   messages: (phone: string) => `${getBaseUrl()}/whatsapp/chat/messages/${phone}`,
-  markRead: (phone: string) => `${getBaseUrl()}/whatsapp/chat/messages/${phone}/read`,
   sendMessage: `${getBaseUrl()}/whatsapp/chat/send-message`,
 };
 
@@ -60,10 +59,10 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [profileTab, setProfileTab] = useState('Media');
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
   const selectedContactRef = useRef<ChatContact | null>(null);
+  const didRun = useRef(false);
 
   useEffect(() => {
     selectedContactRef.current = selectedContact;
@@ -87,6 +86,8 @@ const Chat = () => {
 
 
   useEffect(() => {
+    if (didRun.current) return;
+    didRun.current = true;
     dispatch(setPageTitle('WhatsApp Chat'));
     loadContacts();
   }, [dispatch]);
@@ -137,7 +138,6 @@ const Chat = () => {
           message_time: chat.created_at,
           sid: chat.sid,
         }]);
-        markMessagesAsRead(phone);
       }
 
     } else if (chat.direction === 'outbound' && chat.sid) {
@@ -174,24 +174,13 @@ const Chat = () => {
       const res = await apiClient.get(endpoints.messages(phone));
       if (res.data?.status) {
         setMessages(res.data.data as WhatsAppMessage[]);
-        setTimeout(() => {
-          scrollToBottom();
-        }, 200);
-        await markMessagesAsRead(phone);
+        setContacts(prev => prev.map(c => c.phone === phone ? { ...c, unread_count: 0 } : c));   // Reset unread count in sidebar
+        setTimeout(() => { scrollToBottom();}, 200);
       }
     } catch (error) {
       console.error('Failed to load messages:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const markMessagesAsRead = async (phone: string) => {
-    try {
-      await apiClient.post(endpoints.markRead(phone));
-      setContacts(prev => prev.map(c => c.phone === phone ? { ...c, unread_count: 0 } : c));
-    } catch (error) {
-      console.error('Failed to mark messages as read:', error);
     }
   };
 
@@ -292,7 +281,7 @@ const Chat = () => {
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
-  const getInitials = (phone: string) => phone.replace(/\D/g, '').slice(-4) || 'WA';
+  const getInitials = (phone: string) => phone.replace(/\D/g, '').slice(-2) || 'WA';
 
   const getStatusIcon = (status: string) => {
     if (status === 'read') return (
@@ -317,8 +306,6 @@ const Chat = () => {
   return (
     <div>
       <div className={`flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full ${isShowChatMenu ? 'min-h-[999px]' : ''}`}>
-
-        {/* Contacts Sidebar */}
         <div
           className={`flex-none w-[320px] absolute xl:relative z-10 xl:h-full hidden xl:flex flex-col overflow-hidden rounded-md shadow ${isShowChatMenu ? '!flex' : ''}`}
           style={{ background: '#f0f2f5' }}
@@ -345,7 +332,6 @@ const Chat = () => {
           </div>
 
           <div className="h-px w-full" style={{ background: '#e9edef' }} />
-
           <div className="flex-1 overflow-y-auto">
             {loading && contacts.length === 0 ? (
               <div className="text-center py-8">
