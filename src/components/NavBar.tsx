@@ -285,6 +285,35 @@ const NavBar = () => {
         </li>
       )}
 
+      {(permissions.includes('chat-messages')) && (
+        <li className="menu nav-item relative">
+          <button
+            type="button"
+            className={`nav-link ${isVertical && currentMenu === 'chatmessages' ? 'active' : ''}`}
+            onClick={() => isVertical && toggleMenu('chatmessages')}
+          >
+            <div className="flex items-center">
+              <IconMultipleForwardRight className="shrink-0" />
+              <span className="px-1">{t('Messages & Reports')}</span>
+            </div>
+            <div className={`${isVertical && currentMenu !== 'chatmessages' ? 'rtl:rotate-90 -rotate-90' : ''}`}>
+              <IconCaretDown />
+            </div>
+          </button>
+
+          {renderSubMenu(
+            'chatmessages',
+            <>
+              <li>
+                <NavLink to="/pages/whatsapp/chat">{t('WhatsApp Messenger')}</NavLink>
+              </li>
+              <li>
+                <NavLink to="/pages/email/email-report-list">{t('Email Reports')}</NavLink>
+              </li>
+            </>
+          )}
+        </li>
+      )}
 
       {(permissions.includes('manage marketing')) && (
           <li className="menu nav-item relative">
