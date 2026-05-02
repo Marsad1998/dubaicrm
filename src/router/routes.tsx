@@ -50,7 +50,7 @@ const Templates = lazy(() => import('../pages/whatsapp/templates'));
 const RunCampaigns = lazy(() => import('../pages/whatsapp/runcampaign'));
 const CampaignDashboard = lazy(() => import('../pages/whatsapp/campaigndashboard'));
 const Chat = lazy(() => import('../pages/whatsapp/chat'));
-const Dashboard2 = lazy(() => import('../pages/leads/dashboard2'));
+const Dashboard2 = lazy(() => import('../pages/dashboard/dashboard'));
 const CreateCategory = lazy(() => import('../pages/listing/Category'));
 
 const CreateSubCategory = lazy(() => import('../pages/listing/SubCategory'));
